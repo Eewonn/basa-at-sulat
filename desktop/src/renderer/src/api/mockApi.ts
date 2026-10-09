@@ -145,7 +145,7 @@ function buildAssessment(learnerId: string, passage: Passage): Assessment {
   })
 }
 
-const practiceTries = new Map<string, number>()
+const missedThisSession = new Set<string>()
 
 // Evenly spaced word timings: stands in for the aligner until the engine exists.
 function evenTimings(text: string, durationSec: number): BookWord[] {
@@ -249,22 +249,24 @@ export const mockApi: Api = {
     return structuredClone(STATS[learnerId] ?? { stars: 0, streak_days: 0, minutes_read: 0, wcpm_history: [], practicing: [] })
   },
   async practice(learnerId) {
+    missedThisSession.delete(learnerId)
     const latest = [...store.values()].reverse().find((a) => a.learner_id === learnerId)
-    const passage = PASSAGES.find((p) => p.id === latest?.passage_id) ?? PASSAGES[0]
-    const sentences = passage.text.match(/[^.]+\./g) ?? [passage.text]
-    const missed = (latest ?? buildAssessment(learnerId, passage)).words.filter((w) => w.label !== 'matched')
-    return missed.map<PracticeItem>((w) => ({
-      word: clean(w.text),
-      sentence: (sentences.find((s) => s.includes(clean(w.text))) ?? passage.text).trim()
-    }))
+    const sentences = PASSAGES.flatMap((p) => p.text.match(/[^.]+\./g) ?? [p.text]).map((s) => s.trim())
+    const sentenceFor = (word: string) => sentences.find((s) => s.split(/\s+/).some((w) => clean(w) === word)) ?? word
+    // Latest check's missed words; otherwise the words the learner is already practicing.
+    const words = latest
+      ? latest.words.filter((w) => w.label !== 'matched').map((w) => clean(w.text))
+      : STATS[learnerId]?.practicing.length
+        ? STATS[learnerId].practicing
+        : buildAssessment(learnerId, PASSAGES[0]).words.filter((w) => w.label !== 'matched').map((w) => clean(w.text))
+    return words.map<PracticeItem>((word) => ({ word, sentence: sentenceFor(word) }))
   },
-  async checkWord(_audio, word, learnerId) {
-    // Scripted for the mockup: first try misses, second try matches (and earns a star).
+  async checkWord(_audio, _word, learnerId) {
+    // Scripted for the mockup: the first try of a session misses, everything after matches
+    // (so a demo shows both "try again" and a combo streak). Each match earns a star.
     await sleep(900)
-    const key = `${learnerId}:${word}`
-    const tries = (practiceTries.get(key) ?? 0) + 1
-    practiceTries.set(key, tries)
-    const match = tries >= 2
+    const match = missedThisSession.has(learnerId)
+    missedThisSession.add(learnerId)
     if (match && STATS[learnerId]) STATS[learnerId].stars += 1
     return { result: match ? 'match' : 'no_match' }
   },

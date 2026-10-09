@@ -107,7 +107,12 @@ Bright color-block cards, rounded type, a warm sidebar with a blue header and an
   - numbers count up (`components/CountUp.tsx`) and re-animate when they change (e.g. fixing a word on Resulta)
   - the white nav pill slides between items; buttons squish slightly on press; stat-card art wiggles on hover
   - Taw blinks while idle and cheers with a speech bubble when clicked; the profile trend line draws itself; loading placeholders shimmer
-  - kid mode adds the word-card pop, confetti and the flying star on "Tama!"
+  - kid mode (Sanay) adds the most delight:
+    - **sounds** synthesized with Web Audio (`audio/sfx.ts`, no audio files): pop, chime, sparkle, a gentle "boing" for try-again (never a buzzer), combo arpeggio, finish fanfare; never played while the mic records; mute button remembered per laptop
+    - **Taw reacts to the child**: greets them by name, says "Kaya mo 'yan, Lina!" on a retry, its mouth and ears follow the child's voice while recording, and it dances on the finish screen
+    - **stepping-stone path** replaces the progress dots: a small Taw hops stone to stone toward a flag
+    - **combos**: two or more words right on the first try shows "2 sunod-sunod!" with a bigger burst
+    - **finish**: confetti rain, earned stars landing one by one with sparkles, plus the word-card pop and the flying star from before
   - teacher-mode motion stays under about 0.5 s, and everything stops under `prefers-reduced-motion` (numbers show their final value immediately)
 - **Light theme only** for this release.
 - **Language:** all UI text lives in one `strings.ts` with Filipino and English. Default: Filipino with English labels where clearer.
