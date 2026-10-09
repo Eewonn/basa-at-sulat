@@ -83,11 +83,17 @@ Built against `docs/api/assess.example.json`, ahead of the real `/assess`.
   - `override_word(conn, id, i, label)` saves the teacher's label and recomputes the score.
   - `confirm_assessment(conn, id, keep_audio=False)` marks a draft as final.
 - `PATCH /assessments/{id}/words/{i}` lives in `app/routes/assessments.py`, wired into `main.py` with one `include_router` line. Error codes are in `docs/API.md`.
-- `app/levels.py` computes `wcpm` from the final labels. **`level` is always `None` (null in the API) until P1-BE2-2.**
+- `app/levels.py` computes `wcpm` and `level` from the final labels (see below).
 
 **For Backend 1**
 - **P1-BE1-1:** after `ai.score`, call `save_assessment(conn, result, audio_path=...)` and return what it gives back. It ignores any `wcpm`/`level` in the result and computes them itself.
 - **P1-BE1-2 (proposed split for confirm, needs Backend 1's OK):** Backend 2 owns the data side, `confirm_assessment()`. Backend 1 owns the `POST /assessments/{id}/confirm` route and the audio. Call `confirm_assessment()` first and delete the file only if it succeeds: it raises `AssessmentNotFoundError` (404) or `AssessmentConfirmedError` (409). Then clear `audio_path` unless `keep_audio` is set. `confirm_assessment()` doesn't touch the file or `audio_path`.
+
+### Reading level (P1-BE2-2)
+`app/levels.py` computes `level` from accuracy (`matched` ÷ the **passage's** word count) and `wcpm`, using the five CRLA names in `levels.LEVELS`. **It is a fluency-based estimate, not a CRLA result**, because the app asks no comprehension questions. The cutoffs (50%, 80%, 95%, 40 WCPM) are named constants at the top of the file, and **80% and 95% are pending a teacher's review**. Sources and reasoning: `docs/DECISIONS.md`.
+
+- `recompute(final_labels, duration_sec, passage_word_count)` is called only from `app/assessments.py`, so nothing changes for Backend 1.
+- No `CHECK` constraint on `level` yet (it would force a `--reset`). It's noted as a P3 to do in `docs/SCHEMA.md`.
 
 ### Group plans (P0-BE2-3)
 `app/plans.py` turns one group's stats into a draft activity in Filipino. The activity is a template from `prompts/activities-fil.json` filled with the group's missed words. **qwen2.5:7b** in Ollama adds one example sentence (`prompts/sentence-fil.txt`, or `prompts/sentence-small-words-fil.txt` when every missed word is a function word like *ng* or *sa*). The sentence is checked and retried with up to 3 seeds; if it still fails, the plan is the template alone. See `docs/DECISIONS.md` for why, and for the license (Apache 2.0).

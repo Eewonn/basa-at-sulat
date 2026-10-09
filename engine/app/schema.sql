@@ -20,8 +20,9 @@ CREATE TABLE passages (
     created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
--- One Basa check. wcpm and level stay NULL until P1-BE2-2 computes them, and
--- level is free text until the names are checked against DepEd's CRLA profiles.
+-- One Basa check. app.assessments fills wcpm and level on every save and override.
+-- level is one of five CRLA names (app/levels.py) but has no CHECK yet: adding one
+-- needs a --reset, so it waits for the next schema change (see docs/SCHEMA.md).
 CREATE TABLE assessments (
     id            TEXT PRIMARY KEY,
     learner_id    TEXT NOT NULL REFERENCES learners (id),

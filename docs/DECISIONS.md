@@ -2,6 +2,33 @@
 
 Newest first. Each entry: what we decided, and why.
 
+## 2026-10-10: Reading level is a fluency-based estimate that uses CRLA's names
+Every saved check gets a `level` (P1-BE2-2), computed in `engine/app/levels.py` from the final (overridden) labels. It uses the five reading levels on DepEd's CRLA submission form for SY 2026-27, lowest first: **Low Emerging, High Emerging, Developing, Transitioning, At Grade Level**. The same form has a second scale (Full / Moderate / Light Refresher, Grade Ready). That one is for the beginning-of-year letter and sound tasks, so we don't use it, and "At Grade Level" is not "Grade Ready".
+
+**It is an estimate, not a CRLA result.** As far as we could find, CRLA places a child using two things: how much of the passage they read accurately within a time limit, and how many comprehension questions they answer correctly. This app asks no comprehension questions, and comprehension is what separates the upper levels in CRLA. So our level only estimates where a child's *fluency* sits on CRLA's scale. The app, the README and the demo must not present it as an official CRLA profile. A teacher-facing label such as "Estimated level (reading fluency)" is the honest wording.
+
+**The rules.** Accuracy is `matched` words ÷ **the passage's word count**. We don't divide by the words the scorer returned, because the scorer may return a partial list and that would inflate accuracy.
+
+| Level | Rule | Source |
+|---|---|---|
+| Low Emerging | 0 words correct | CRLA: "cannot read a single word accurately" |
+| High Emerging | accuracy under 50% | CRLA: "less than 50% of the passage" |
+| Developing | 50% to under 80% | **ours, pending teacher review** |
+| Transitioning | at least 80%, but under 95% or under 40 WCPM | **ours, pending teacher review** |
+| At Grade Level | at least 95% and at least 40 WCPM | 95%: **ours, pending teacher review**. 40 WCPM: see below |
+
+40 WCPM comes from CRLA's own passages and time limits: 50 words in 1 minute (Grade 1), 95 in 2 (Grade 2), 120 in 3 (Grade 3), which works out to 40 to 50 words per minute to finish in time. 40 is the slowest of those rates. One threshold covers every grade and language for now (option B). Per-grade and per-language thresholds (option C) would need numbers we don't have yet.
+
+**Pending teacher review:** the 80% and 95% cutoffs are our own picks. A teacher on the team should check them against how they would place real Grade 1 to 3 readers. If they change, only the constants at the top of `levels.py` and its tests change.
+
+**Why not WCPM alone (option A):** a fast reader who misreads half the passage would rank too high. In our rules, speed only decides between Transitioning and At Grade Level.
+
+**Gaps.** We couldn't find official numeric cutoffs. They seem to live only in DepEd's CRLA teacher manuals and scoresheets. The scoring details come from unofficial copies of the end-of-year CRLA slides, so they should be checked against an official manual if one turns up. Our passages (25 to 40 words) are also shorter than CRLA's (50 to 120), so percentages move in bigger steps: on a 23-word passage, each word is about 4%. Past results are not recomputed if the thresholds change.
+
+**No `CHECK` on `level` yet.** The five names are fixed, but `schema.sql` doesn't enforce them. There are no migrations, so adding a constraint would make every teammate run `python -m app.init_db --reset` and lose their local data. `levels.py` is the only code that writes `level`, so the risk is low. **To do (P3):** add `CHECK (level IN (...))` together with the next schema change that needs a reset anyway.
+
+**Sources (checked 2026-10-10):** [DepEd BLD CRLA school submission form](https://bld.deped.gov.ph/crla) (level names, SY 2026-27); [CRLA EoSY slides](https://www.slideshare.net/slideshow/comprehensive-rapid-literacy-assessment-crla-eosy-final-1-pptx/276427333) (passage %, time limits, comprehension, passage lengths); [General overview of CRLA](https://www.slideshare.net/slideshow/general-overview-of-crlapptx/258713065) (the beginning-of-year Refresher scale).
+
 ## 2026-10-10: Go: keep the MMS aligner, scoring each word by its weakest letter
 The Phase 0 gate passed (P0-ALL-2). We keep the full plan, Meta's MMS forced aligner, and **don't build the Whisper fallback** (P1-AI-2).
 

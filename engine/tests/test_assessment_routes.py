@@ -35,7 +35,7 @@ def test_override_returns_recomputed_assessment(db_path):
     assert r.status_code == 200
     body = r.json()
     assert body["words"][3]["label"] == "matched"
-    assert (body["wcpm"], body["level"], body["status"]) == (9, None, "draft")
+    assert (body["wcpm"], body["level"], body["status"]) == (9, "High Emerging", "draft")
 
 
 def test_override_is_stored(db_path):
