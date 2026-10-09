@@ -1,8 +1,9 @@
 import { Fragment, useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router'
-import { Cpu, Lock, Pause, RotateCcw, Sparkles } from 'lucide-react'
+import { Cpu, Lock, Pause, RotateCcw} from 'lucide-react'
 import { api } from '@/api'
+import { Art } from '@/components/Art'
 import type { Assessment, Learner, WordLabel } from '@/api/types'
 import { CountUp } from '@/components/CountUp'
 import { Tamaraw } from '@/components/Tamaraw'
@@ -109,7 +110,7 @@ export function ReviewScreen() {
                 onClick={() => navigate(`/practice/${a.learner_id}`)}
                 className="flex animate-pop cursor-pointer items-center justify-center gap-2 rounded-full bg-coral px-4 py-4 text-xl font-black text-white shadow-soft transition hover:brightness-105"
               >
-                <Sparkles className="size-5" aria-hidden /> {t.startPractice(learner?.display_name ?? '')}
+                <Art name="flashcard" size={22} /> {t.startPractice(learner?.display_name ?? '')}
               </button>
             </>
           ) : (

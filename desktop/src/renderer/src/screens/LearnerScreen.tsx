@@ -2,8 +2,9 @@ import type { CSSProperties } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { CountUp } from '@/components/CountUp'
 import { useNavigate, useParams } from 'react-router'
-import { Mic, Sparkles } from 'lucide-react'
+import { Mic} from 'lucide-react'
 import { api } from '@/api'
+import { Art } from '@/components/Art'
 import { Emoji } from '@/components/Emoji'
 import { Sparkline } from '@/components/Sparkline'
 import { Tamaraw } from '@/components/Tamaraw'
@@ -81,7 +82,7 @@ export function LearnerScreen() {
               onClick={() => navigate(`/practice/${learnerId}`)}
               className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-coral px-4 py-3 text-xl font-extrabold text-white hover:brightness-105"
             >
-              <Sparkles className="size-5" aria-hidden /> {t.classPractice}
+              <Art name="flashcard" size={22} /> {t.classPractice}
             </button>
           </div>
         </section>
