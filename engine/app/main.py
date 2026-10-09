@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.assess import router as assess_router
+from app.retention import delete_owed_audio
 from app.routes.assessments import router as assessments_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
@@ -13,6 +14,7 @@ log = logging.getLogger("engine")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    delete_owed_audio()
     # Opt-in: loading the model takes ~10 s and needs torch plus the weights.
     if os.environ.get("BASA_WARM_UP") == "1":
         try:

@@ -27,7 +27,9 @@ def connect(path: Path | str | None = None) -> sqlite3.Connection:
     connection must go through here or cascades and references silently stop
     working.
     """
-    conn = sqlite3.connect(path or get_db_path())
+    # Each caller opens its own connection and never shares it. FastAPI may still open a request's
+    # connection in one worker thread and use it in another, which SQLite refuses by default.
+    conn = sqlite3.connect(path or get_db_path(), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn

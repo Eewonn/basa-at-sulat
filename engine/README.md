@@ -108,3 +108,11 @@ It writes nothing unless every word group gets a model sentence (here, unlike in
 | `OLLAMA_MODEL` | `qwen2.5:7b` |
 | `OLLAMA_URL` | `http://127.0.0.1:11434` |
 | `OLLAMA_TIMEOUT` | `120` seconds |
+
+## Update: audio retention (P1-BE1-2)
+- `/assess` now saves the result with Backend 2's `save_assessment` (so `wcpm` is real; `level` stays `null` until P1-BE2-2) and stores `audio_path` as `audio/<assessment_id>.wav`, relative to `engine/storage/`. If saving fails, the WAV is deleted.
+- `POST /assessments/{id}/confirm` (`app/retention.py`) calls `confirm_assessment`, then `delete_audio`, then sets `audio_path` to `NULL`. `{"keep_audio": true}` keeps the file and the path.
+- If the delete fails, the row is still confirmed and `audio_path` stays set, so `status='confirmed' AND keep_audio=0 AND audio_path IS NOT NULL` lists the deletions still owed. **The engine retries them each time it starts** (`delete_owed_audio()` in `app/retention.py`, called from the startup hook): it deletes the file, clears `audio_path`, and logs any that still fail. It never touches drafts or kept recordings, and it never stops the engine from starting. It runs only at startup, so an engine left running for days won't retry until the next restart.
+- Backend 2 had planned to own the confirm route; her merged docstring assigned it to Backend 1, so it lives here. Her `confirm_assessment` is unchanged.
+- `/assess` uses the same database guard as the assessments routes (`get_conn`): with no database it returns `503` and creates no file, and it uses one connection per request for the lookups and the save.
+- `connect()` opens SQLite with `check_same_thread=False`. FastAPI can open a request's connection in one worker thread and use it in another, and without this, overlapping requests (for example a teacher tapping several words while a query refetches) failed with a 500. Each request still has its own connection, never shared. `tests/test_concurrency.py` sends 100 `PATCH` requests from 16 threads to a real server to keep it fixed.
