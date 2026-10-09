@@ -169,3 +169,8 @@ scripts/start.sh --check              # only report what is ready or missing
 - **Which pair:** the newest confirmed check that has an earlier confirmed check on the same passage, and the newest of those. Checks on different passages are never paired. Order is `confirmed_at`, then `created_at`, then `id`, the same as the practice set's "latest check".
 - **Words** come from the passage text, not from `word_results`, because a check may not cover every word. A word a check has no result for is `null` on that side.
 - No pair gives a `200` with empty lists and nulls. Practice attempts aren't part of the response yet.
+
+## Update: offline proof (P3-BE1-2 preparation)
+- `python scripts/offline_audit.py` fails if the Python in `engine/app`, `ai` or `scripts` contains a URL to anything but this laptop, or imports a network client library (`requests`, `httpx`, `aiohttp`, and so on). The engine's CORS pattern, which admits only local pages, is the one allowed exception. Tests are not audited. It is a tripwire, not a proof.
+- The engine and scripts test suites install `scripts/netguard.py`: any test that opens a connection to something other than this laptop fails with `NetworkBlocked`. It derives from `BaseException`, so a broad `except Exception` cannot hide it. It covers the test process only; tests that start the engine or the launcher as separate processes (`test_cli.py`, `test_launch.py`) are not covered.
+- The real airplane-mode run, its steps and a results table are in `docs/OFFLINE_CHECKLIST.md`. P3-BE1-2 stays unticked until that run passes.

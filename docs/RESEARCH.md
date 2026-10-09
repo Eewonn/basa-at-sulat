@@ -22,7 +22,7 @@ Facts we use in the pitch, with sources. "Our arithmetic" marks numbers we calcu
 - **Bloom (SIL):** talking books in 1,000+ languages with automatic audio splitting, offline playback in Bloom Reader. [Bloom docs](https://docs.bloomlibrary.org/Help/Reference/talking-book-tool-overview/)
 
 ## Technical basis
-- **MMS forced aligner** (`torchaudio.pipelines.MMS_FA`): trained on 23,000 hours across 1,100+ languages, character-level, needs romanized text (uroman), has a `<star>` token for extra speech. License CC-BY-NC-4.0. [PyTorch tutorial](https://docs.pytorch.org/audio/2.8/tutorials/forced_alignment_for_multilingual_data_tutorial.html)
+- **MMS forced aligner** (`torchaudio.pipelines.MMS_FA`): trained on 31,000 hours in 1,130 languages (per torchaudio's `MMS_FA` documentation), 315M parameters, character-level, needs romanized text (we normalise Filipino and English ourselves in `ai/text.py`, no uroman), has a `<star>` token for extra speech. License CC-BY-NC-4.0. [PyTorch tutorial](https://docs.pytorch.org/audio/2.8/tutorials/forced_alignment_for_multilingual_data_tutorial.html)
 - **Comparing a transcript to the passage afterward** works poorly without a word-for-word transcript. Prompting Whisper with the passage helps. [Apple, Smith et al. 2025](https://arxiv.org/html/2505.23627v1)
 - **Children's reading mistakes (Dutch):** the best mistake-detection F1 was about 0.52 (Whisper), and the best recall 0.83 (wav2vec2). [arXiv 2406.07060](https://arxiv.org/pdf/2406.07060)
 
