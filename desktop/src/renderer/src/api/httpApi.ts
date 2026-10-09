@@ -1,4 +1,4 @@
-import type { Api, Assessment } from './types'
+import type { Api, Assessment, Book } from './types'
 
 // Talks to the local engine (docs/API.md). Only ever 127.0.0.1: nothing leaves the laptop.
 export function createHttpApi(port: number): Api {
@@ -37,6 +37,19 @@ export function createHttpApi(port: number): Api {
     practice: async (learnerId) =>
       (await json<{ items: { word: string; sentence: string }[] }>(`/learners/${learnerId}/practice`)).items,
     checkWord: (audio, word, learnerId) =>
-      json('/practice/check', { method: 'POST', body: form({ audio, word, learner_id: learnerId }) })
+      json('/practice/check', { method: 'POST', body: form({ audio, word, learner_id: learnerId }) }),
+    recentChecks: () => json('/assessments/recent'),
+    books: () => json('/books'),
+    book: async (id) => {
+      const b = await json<Book>(`/books/${id}`)
+      return b.has_recording ? { ...b, audio_url: `${base}/books/${id}/audio` } : b
+    },
+    createBook: (book, audio) => json('/books', { method: 'POST', body: form({ ...book, audio }) }),
+    storage: () => json('/storage'),
+    deleteAllAudio: () => json('/audio', { method: 'DELETE' }),
+    addLearner: (name) =>
+      json('/learners', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ display_name: name }) }),
+    renameLearner: (id, name) =>
+      json(`/learners/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ display_name: name }) })
   }
 }

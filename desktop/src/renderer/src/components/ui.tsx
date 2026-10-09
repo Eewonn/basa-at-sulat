@@ -61,7 +61,7 @@ export function StatCard({
 }) {
   const bg = { coral: 'bg-coral', blue: 'bg-blue', teal: 'bg-teal', purple: 'bg-purple' }[color]
   return (
-    <div className={`relative flex flex-col overflow-hidden rounded-card text-white shadow-soft ${bg} ${compact ? 'h-36 p-5' : 'h-52 p-6'}`}>
+    <div className={`relative flex flex-col overflow-hidden rounded-card text-white shadow-soft ${bg} ${compact ? 'min-h-36 p-5' : 'min-h-52 p-6'}`}>
       <p className={`font-extrabold ${compact ? 'pr-16 text-lg leading-snug' : 'text-xl'}`}>{title}</p>
       <p className="mt-1 text-[40px] leading-tight font-black">{value}</p>
       <Emoji name={emoji} size={compact ? 72 : 104} className={`absolute drop-shadow-md ${compact ? 'right-4 bottom-3' : 'right-5 bottom-4'}`} />

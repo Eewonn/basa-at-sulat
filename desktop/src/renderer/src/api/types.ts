@@ -62,6 +62,50 @@ export interface Passage {
   category: Category
 }
 
+export interface RecentCheck {
+  assessment_id: string
+  learner_id: string
+  display_name: string
+  date: string
+  passage_title: string
+  wcpm: number
+}
+
+export interface BookWord {
+  i: number
+  text: string
+  start: number
+  end: number
+}
+
+export interface Book {
+  id: string
+  title: string
+  language: string
+  category: Category
+  text: string
+  reader?: string
+  has_recording: boolean
+  duration_sec?: number
+  words?: BookWord[]
+  audio_url?: string
+}
+
+export interface NewBook {
+  title: string
+  language: string
+  category: Category
+  text: string
+  reader: string
+}
+
+export interface Storage {
+  audio_files: number
+  audio_mb: number
+  db_mb: number
+  data_dir: string
+}
+
 export interface Health {
   ok: boolean
   models: { aligner: string; ollama: string }
@@ -83,4 +127,12 @@ export interface Api {
   learnerStats(learnerId: string): Promise<LearnerStats>
   practice(learnerId: string): Promise<PracticeItem[]>
   checkWord(audio: Blob, word: string, learnerId: string): Promise<{ result: 'match' | 'no_match' }>
+  recentChecks(): Promise<RecentCheck[]>
+  books(): Promise<Book[]>
+  book(id: string): Promise<Book>
+  createBook(book: NewBook, audio: Blob, durationSec: number): Promise<Book>
+  storage(): Promise<Storage>
+  deleteAllAudio(): Promise<{ deleted: number }>
+  addLearner(name: string): Promise<Learner>
+  renameLearner(id: string, name: string): Promise<Learner>
 }

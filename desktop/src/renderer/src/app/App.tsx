@@ -8,7 +8,11 @@ import { CheckScreen } from '@/screens/CheckScreen'
 import { ReviewScreen } from '@/screens/ReviewScreen'
 import { LearnerScreen } from '@/screens/LearnerScreen'
 import { PracticeScreen } from '@/screens/PracticeScreen'
-import { BooksScreen, CheckIndexScreen, SettingsScreen } from '@/screens/OtherScreens'
+import { BasaScreen } from '@/screens/BasaScreen'
+import { BooksScreen } from '@/screens/BooksScreen'
+import { BookEditorScreen } from '@/screens/BookEditorScreen'
+import { BookPlayerScreen } from '@/screens/BookPlayerScreen'
+import { SettingsScreen } from '@/screens/SettingsScreen'
 import { LangContext, type Lang } from '@/strings'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } })
@@ -41,10 +45,12 @@ export function App() {
               <Route element={<AppShell />}>
                 <Route index element={<ClassScreen />} />
                 <Route path="learner/:learnerId" element={<LearnerScreen />} />
-                <Route path="check" element={<CheckIndexScreen />} />
+                <Route path="check" element={<BasaScreen />} />
                 <Route path="check/:learnerId" element={<CheckScreen />} />
                 <Route path="review/:assessmentId" element={<ReviewScreen />} />
                 <Route path="books" element={<BooksScreen />} />
+                <Route path="books/new" element={<BookEditorScreen />} />
+                <Route path="books/:bookId" element={<BookPlayerScreen />} />
                 <Route path="settings" element={<SettingsScreen />} />
               </Route>
               {/* Kid mode: full screen, no sidebar. */}

@@ -33,7 +33,7 @@ export function ClassScreen() {
       </header>
 
       {learners && (
-        <div className="mt-6 grid grid-cols-4 gap-5">
+        <div className="mt-6 grid grid-cols-2 gap-5 xl:grid-cols-4">
           <StatCard compact color="blue" title={t.sumChecked} value={`${checked}/${learners.length}`} emoji="microphone" />
           <StatCard compact color="coral" title={t.sumPractice} value={String(needPractice)} emoji="books" />
           <StatCard compact color="teal" title={t.sumWcpm} value={String(avgWcpm)} emoji="chart" />

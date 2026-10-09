@@ -1,4 +1,4 @@
-import type { Api, Assessment, Learner, LearnerStats, Passage, PracticeItem, Word, WordLabel } from './types'
+import type { Api, Assessment, Book, BookWord, Learner, LearnerStats, Passage, PracticeItem, RecentCheck, Word, WordLabel } from './types'
 
 // Sample data only: synthetic learners, team-written passages (the first two match data/passages/passages.json).
 const PASSAGES: Passage[] = [
@@ -147,6 +147,45 @@ function buildAssessment(learnerId: string, passage: Passage): Assessment {
 
 const practiceTries = new Map<string, number>()
 
+// Evenly spaced word timings: stands in for the aligner until the engine exists.
+function evenTimings(text: string, durationSec: number): BookWord[] {
+  const words = text.split(/\s+/)
+  const step = durationSec / words.length
+  return words.map((w, i) => ({ i, text: w, start: +(i * step).toFixed(2), end: +((i + 0.9) * step).toFixed(2) }))
+}
+
+function sampleBook(id: string, passageId: string, reader?: string): Book {
+  const p = PASSAGES.find((x) => x.id === passageId)!
+  const duration = p.text.split(/\s+/).length * 0.55
+  return {
+    id,
+    title: p.title,
+    language: p.language,
+    category: p.category,
+    text: p.text,
+    reader,
+    has_recording: Boolean(reader),
+    duration_sec: reader ? duration : undefined,
+    words: reader ? evenTimings(p.text, duration) : undefined
+  }
+}
+
+const BOOKS: Book[] = [
+  sampleBook('b_01', 'fil_g2_01', 'Lola Ising'),
+  sampleBook('b_02', 'fil_g2_02', "Ma'am Rose"),
+  sampleBook('b_03', 'eng_g2_01', 'Teacher Mark'),
+  sampleBook('b_04', 'fil_g2_03')
+]
+
+const RECENT: RecentCheck[] = [
+  { assessment_id: 'r_1', learner_id: 'l_01', display_name: 'Lina', date: daysAgo(1), passage_title: 'Ang Palay ni Lina', wcpm: 58 },
+  { assessment_id: 'r_2', learner_id: 'l_02', display_name: 'Paolo', date: daysAgo(1), passage_title: 'Tuwing Linggo', wcpm: 66 },
+  { assessment_id: 'r_3', learner_id: 'l_03', display_name: 'Mika', date: daysAgo(2), passage_title: 'Ang Tamaraw', wcpm: 82 },
+  { assessment_id: 'r_4', learner_id: 'l_04', display_name: 'Josie', date: daysAgo(4), passage_title: 'Bagong Libro', wcpm: 27 },
+  { assessment_id: 'r_5', learner_id: 'l_05', display_name: 'Ramon', date: daysAgo(9), passage_title: "Ben's Red Kite", wcpm: 49 }
+]
+let audioFiles = 7
+
 export const mockApi: Api = {
   mode: 'mock',
   async health() {
@@ -186,6 +225,16 @@ export const mockApi: Api = {
     if (!a) throw new Error('Assessment not found')
     const next = { ...a, status: 'confirmed' as const }
     store.set(id, next)
+    RECENT.unshift({
+      assessment_id: id,
+      learner_id: a.learner_id,
+      display_name: LEARNERS.find((l) => l.id === a.learner_id)?.display_name ?? '',
+      date: daysAgo(0),
+      passage_title: PASSAGES.find((p) => p.id === a.passage_id)?.title ?? '',
+      wcpm: next.wcpm
+    })
+    const learner = LEARNERS.find((l) => l.id === a.learner_id)
+    if (learner) learner.last_check = daysAgo(0)
     const s = STATS[a.learner_id]
     if (s) {
       s.wcpm_history.push({ date: '2026-10-10', wcpm: next.wcpm })
@@ -218,5 +267,55 @@ export const mockApi: Api = {
     const match = tries >= 2
     if (match && STATS[learnerId]) STATS[learnerId].stars += 1
     return { result: match ? 'match' : 'no_match' }
+  },
+  async recentChecks() {
+    await sleep(200)
+    return [...RECENT].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6)
+  },
+  async books() {
+    await sleep(200)
+    return [...BOOKS]
+  },
+  async book(id) {
+    await sleep(120)
+    const b = BOOKS.find((x) => x.id === id)
+    if (!b) throw new Error('Book not found')
+    return b
+  },
+  async createBook(nb, audio, durationSec) {
+    await sleep(1800)
+    const id = `b_${String(BOOKS.length + 1).padStart(2, '0')}`
+    const duration = Math.max(durationSec, 1)
+    const book: Book = { id, ...nb, has_recording: true, duration_sec: duration, words: evenTimings(nb.text, duration), audio_url: URL.createObjectURL(audio) }
+    BOOKS.unshift(book)
+    PASSAGES.push({ id: `book_${id}`, title: nb.title, language: nb.language, grade: 2, category: nb.category, text: nb.text })
+    audioFiles += 1
+    return book
+  },
+  async storage() {
+    await sleep(150)
+    return { audio_files: audioFiles, audio_mb: +(audioFiles * 0.42).toFixed(1), db_mb: 0.3, data_dir: window.basa?.platform === 'win32' ? '%APPDATA%\\Basa' : '~/.config/Basa' }
+  },
+  async deleteAllAudio() {
+    await sleep(400)
+    // Model readings in books are kept: only children's recordings are deleted.
+    const deleted = Math.max(0, audioFiles - BOOKS.filter((b) => b.has_recording).length)
+    audioFiles -= deleted
+    return { deleted }
+  },
+  async addLearner(name) {
+    await sleep(200)
+    const id = `l_${String(LEARNERS.length + 1).padStart(2, '0')}`
+    const l: Learner = { id, display_name: name, grade: 2 }
+    LEARNERS.push(l)
+    STATS[id] = { stars: 0, streak_days: 0, minutes_read: 0, wcpm_history: [], practicing: [] }
+    return l
+  },
+  async renameLearner(id, name) {
+    await sleep(200)
+    const l = LEARNERS.find((x) => x.id === id)
+    if (!l) throw new Error('Learner not found')
+    l.display_name = name
+    return l
   }
 }

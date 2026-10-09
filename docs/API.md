@@ -71,6 +71,10 @@ These support the learner profile and story categories. Until the engine impleme
   - stars = words gotten right in Sanay; streak = consecutive days with a check or practice; minutes = recording time
 - `POST /practice/check` also takes `learner_id`, so a correct word can earn a star
 - `/assess` response includes `timings: {"convert_ms", "align_ms", "score_ms"}` for the "scored in X s on this laptop" line
+- `GET /assessments/recent` → `[{"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}]` (Basa tab)
+- `GET /books` → `[{"id", "title", "language", "category", "text", "reader", "has_recording", "duration_sec"}]`; `GET /books/{id}` adds `words` timings; `POST /books` also takes `category` and `reader`, and its story becomes a passage
+- `GET /storage` → `{"audio_files", "audio_mb", "db_mb", "data_dir"}`; `DELETE /audio` deletes all children's recordings (book readings are kept) → `{"deleted"}`
+- `POST /learners` `{"display_name"}` and `PATCH /learners/{id}` `{"display_name"}` (Settings → Klase)
 
 ## Health
 - `GET /health` → `{"ok": true, "models": {"aligner": "loaded", "ollama": "up"}}`
