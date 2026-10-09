@@ -1,0 +1,90 @@
+import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router'
+import { Mic, Sparkles } from 'lucide-react'
+import { api } from '@/api'
+import { Emoji } from '@/components/Emoji'
+import { Avatar, LevelChip, SampleBadge, StatCard } from '@/components/ui'
+import { useT } from '@/strings'
+
+export function ClassScreen() {
+  const t = useT()
+  const navigate = useNavigate()
+  const { data: learners, isLoading } = useQuery({ queryKey: ['learners'], queryFn: () => api.learners() })
+
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10)
+  const checked = learners?.filter((l) => l.last_check && l.last_check >= weekAgo).length ?? 0
+  const needPractice = learners?.filter((l) => l.needs_practice).length ?? 0
+  const stars = learners?.reduce((sum, l) => sum + (l.stars ?? 0), 0) ?? 0
+  const wcpms = learners?.flatMap((l) => (l.latest_wcpm === undefined ? [] : [l.latest_wcpm])) ?? []
+  const avgWcpm = wcpms.length ? Math.round(wcpms.reduce((a, b) => a + b, 0) / wcpms.length) : 0
+
+  return (
+    <div className="w-full max-w-[1680px] px-10 py-10">
+      <header className="flex items-end justify-between">
+        <div>
+          <p className="text-lg font-extrabold text-coral-ink">{t.greeting(new Date().getHours())}</p>
+          <h1 className="text-[40px] leading-tight font-black text-navy">{t.classTitle}</h1>
+          <p className="mt-1 font-semibold text-body">
+            {t.classSubtitle}
+            {learners && ` · ${t.learnersCount(learners.length)}`}
+          </p>
+        </div>
+        {api.mode === 'mock' && <SampleBadge label={t.sampleData} />}
+      </header>
+
+      {learners && (
+        <div className="mt-6 grid grid-cols-4 gap-5">
+          <StatCard compact color="blue" title={t.sumChecked} value={`${checked}/${learners.length}`} emoji="microphone" />
+          <StatCard compact color="coral" title={t.sumPractice} value={String(needPractice)} emoji="books" />
+          <StatCard compact color="teal" title={t.sumWcpm} value={String(avgWcpm)} emoji="chart" />
+          <StatCard compact color="purple" title={t.sumStars} value={String(stars)} emoji="star" />
+        </div>
+      )}
+
+      <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6">
+        {isLoading && Array.from({ length: 6 }, (_, i) => <div key={i} className="h-60 animate-pulse rounded-card bg-side" />)}
+        {learners?.map((l, i) => (
+          <article key={l.id} className="flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift">
+            <button onClick={() => navigate(`/learner/${l.id}`)} className="flex cursor-pointer items-center gap-4 text-left">
+              <Avatar name={l.display_name} index={i} size={64} />
+              <div className="min-w-0 flex-1">
+                <p className="text-2xl font-black text-navy">{l.display_name}</p>
+                <p className="text-sm font-semibold text-muted">
+                  {l.last_check ? `${t.classLastCheck}: ${l.last_check}` : t.classNeverChecked}
+                </p>
+              </div>
+            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <LevelChip level={l.level} />
+              {l.needs_practice && (
+                <span className="rounded-full bg-coral-soft px-3 py-1 text-sm font-extrabold text-coral-ink">{t.classNeedsPractice}</span>
+              )}
+            </div>
+            <div className="flex gap-4 text-sm font-extrabold text-navy">
+              <span className="flex items-center gap-1.5">
+                <Emoji name="star" size={22} /> {l.stars ?? 0}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Emoji name="fire" size={22} /> {t.days(l.streak_days ?? 0)}
+              </span>
+            </div>
+            <div className="mt-auto flex gap-2">
+              <button
+                onClick={() => navigate(`/check/${l.id}`)}
+                className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-blue px-4 py-3 font-extrabold text-white transition hover:bg-blue-dark"
+              >
+                <Mic className="size-5" aria-hidden /> {t.classCheck}
+              </button>
+              <button
+                onClick={() => navigate(`/practice/${l.id}`)}
+                className="flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-3 font-extrabold text-coral-ink ring-2 ring-coral transition hover:bg-coral-soft"
+              >
+                <Sparkles className="size-5" aria-hidden /> {t.classPractice}
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  )
+}

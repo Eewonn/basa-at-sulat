@@ -2,6 +2,12 @@
 
 Newest first. Each entry: what we decided, and why.
 
+## 2026-10-10: Playful, BOOKR-inspired look with a tamaraw mascot
+The whole app moved from the calm navy and cream look to bright color-block cards, rounded Nunito type and a BOOKR Class-style sidebar, because the app is used next to children and needs to feel friendly in the demo. Gamification is limited to stat cards (stars, days in a row, reading time) and story categories; badges and levels were left out to keep scope small. The mascot is an original tamaraw (a Philippine endemic animal) drawn as SVG; illustrations are Microsoft Fluent Emoji (MIT). The team deck still uses the old palette.
+
+## 2026-10-09: Electron desktop app instead of a localhost web app
+It has to run on Windows and Linux as a local-AI desktop app. Electron ships the same Chromium on both, so microphone recording behaves identically. Tauri's Linux webview (WebKitGTK) silently denies microphone access unless the app adds a custom permission handler. The interface uses Vite + React + TypeScript + Tailwind v4 (Next.js brings a server we don't need). The app starts the Python engine itself on a free local port. Full design: `docs/FRONTEND.md`.
+
 ## 2026-10-09: Product name is still open
 "Basa at Sulat" is the working name. **Pakinig** ("listen") is the leading alternative because it describes what the app does. Other candidates: Sabay, Usbong, Pantig, Tanglaw. Avoid *Basa Pilipinas* (a USAID program), *BIGKAS* (an existing project) and *Tingog* (a party-list). **To do:** check the Play Store, GitHub and Google for conflicts, then decide.
 

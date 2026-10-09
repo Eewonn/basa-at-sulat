@@ -30,7 +30,7 @@ In a reading check **we already know the text**. So we only need to *line up* th
 ## Architecture (planned)
 
 ```
-web/  (Next.js)  ──HTTP──►  engine/  (FastAPI, Python)
+desktop/ (Electron) ──HTTP──► engine/  (FastAPI, Python, started by the app)
  recorder, review,            ├─ ai/      MMS aligner + word scoring (PyTorch, CPU)
  Sanay, Sulat, class view     ├─ SQLite   learners, passages, results, books
                               └─ Ollama   qwen2.5:3b for group plans
@@ -45,7 +45,7 @@ Everything runs on one laptop. No internet after setup.
 | `eval/` | Test recordings (adults, planted mistakes), ground truth, accuracy report | AI engineer |
 | `engine/` | FastAPI service: audio pipeline, `/assess`, Sulat timings, word clips (Backend 1); database, levels, practice sets, plans, reports (Backend 2) | Backend 1 + 2 |
 | `data/passages/` | Sample passages and seed data | Backend 2 |
-| `web/` | Next.js 16 + TypeScript + Tailwind v4 app | Frontend |
+| `desktop/` | Electron + React + TypeScript + Tailwind v4 desktop app (Windows + Linux), see `docs/FRONTEND.md` | Frontend |
 | `docs/` | Plan, tasks, API contract, decisions, research, demo script | Everyone |
 | `scripts/` | Tooling (GitHub issue creation, later: one-command start) | Backend 1 |
 
@@ -79,4 +79,4 @@ python3 scripts/create_issues.py             # creates labels + issues via gh
 Planning is done and Phase 0 (the aligner test) is next. No app code exists yet.
 
 ## Disclosures (to complete before submission)
-Models and tools: Meta MMS forced aligner (**CC-BY-NC-4.0, non-commercial**), Qwen 2.5 3B via Ollama, Whisper (fallback only, if used), PyTorch, FastAPI, Next.js, SQLite. Internet is needed only to download models once. Test audio is recorded by adult team members with planted mistakes. No children's recordings are used.
+Models and tools: Meta MMS forced aligner (**CC-BY-NC-4.0, non-commercial**), Qwen 2.5 3B via Ollama, Whisper (fallback only, if used), PyTorch, FastAPI, Electron, React, SQLite. Internet is needed only to download models once. Test audio is recorded by adult team members with planted mistakes. No children's recordings are used.
