@@ -128,3 +128,9 @@ It writes nothing unless every word group gets a model sentence (here, unlike in
 - Backend 2 had planned to own the confirm route; her merged docstring assigned it to Backend 1, so it lives here. Her `confirm_assessment` is unchanged.
 - `/assess` uses the same database guard as the assessments routes (`get_conn`): with no database it returns `503` and creates no file, and it uses one connection per request for the lookups and the save.
 - `connect()` opens SQLite with `check_same_thread=False`. FastAPI can open a request's connection in one worker thread and use it in another, and without this, overlapping requests (for example a teacher tapping several words while a query refetches) failed with a 500. Each request still has its own connection, never shared. `tests/test_concurrency.py` sends 100 `PATCH` requests from 16 threads to a real server to keep it fixed.
+
+## Update: Sulat books (P2-BE1-1)
+- `POST /books` (`app/books.py`) validates the form, converts the model reading to 16 kHz mono WAV, calls `ai.word_timings(wav, text)`, and saves the book and its word timings. The WAV is kept at `engine/storage/books/<id>.wav` (`books.audio_path` is relative to `engine/storage/`), and the original upload is deleted. A rejected upload keeps nothing.
+- `GET /books/{id}` returns the book with its words, `GET /books/{id}/audio` returns the WAV. Limits: 25 MB of audio, 3,000 words (`MAX_AUDIO_BYTES`, `MAX_WORDS` in `app/books.py`).
+- The `sys.path` insert that lets the engine import the `ai` package now lives in `app/__init__.py`.
+- Tests replace `word_timings`, so they never load the model. Real timing quality is checked by the AI engineer's `eval/timing_check.py`, not here.

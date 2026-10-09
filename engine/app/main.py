@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.assess import router as assess_router
+from app.books import router as books_router
 from app.retention import delete_owed_audio
 from app.routes.assessments import router as assessments_router
 
@@ -29,6 +30,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Basa at Sulat engine", lifespan=lifespan)
 app.include_router(assess_router)
+app.include_router(books_router)
 app.include_router(assessments_router)
 
 
