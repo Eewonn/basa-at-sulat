@@ -420,6 +420,13 @@ def test_rejected_sentence_is_retried_with_the_next_seed(ollama):
     assert (result.sentence, result.tries, result.fallback_reason) == (SENTENCE, 2, None)
 
 
+def test_other_seeds_can_be_given(ollama):
+    ollama.replies = [{"response": "Naglalaro ang bata ng palay sa park."}]
+    result = generate_plan_result(group(), SETTINGS, seeds=(7, 8, 9))
+    assert sent_seeds(ollama) == [7, 8]
+    assert result.sentence == SENTENCE
+
+
 def test_rejected_tries_are_logged(ollama, caplog):
     ollama.replies = [{"response": "Ang palay sa park."}]
     with caplog.at_level(logging.INFO, logger="app.plans"):
@@ -516,7 +523,7 @@ def test_generator_writes_one_file_per_group(ollama, tmp_path):
     inputs = write_inputs(tmp_path / "inputs.json", [
         {"name": "a", "level": "Developing", "learner_count": 2,
          "common_missed_words": ["palay."]},
-        {"level": "Grade Level Ready", "learner_count": 3, "common_missed_words": []},
+        {"level": "At Grade Level", "learner_count": 3, "common_missed_words": []},
     ])
     paths = plan_examples.generate_examples(inputs, tmp_path / "out", SETTINGS)
     assert [path.name for path in paths] == ["example-1.md", "example-2.md"]

@@ -19,7 +19,7 @@ word_timings(audio_path: str, text: str) -> list[dict]   # Sulat: a fluent speak
 check_word(audio_path: str, word: str) -> dict           # Sanay "Say it": {"result": "match"|"no_match", "score"}
 ```
 
-**Status:** `score()` and `word_timings()` are real (MMS forced alignment). `check_word()` is still a stub that returns the contract shape (P2-AI-2). `word_timings()` widens each word's span by 0.10 s before and 0.15 s after, never past the midpoint to its neighbour, so word clips hold the whole word and never overlap; `python eval/timing_check.py <recording ids>` makes listening pages to check them by ear. Thresholds are tuned on 15 Filipino readings of `fil_g2_01` by **one adult reader** (`eval/REPORT.md`: held-out F1 0.76). They still need confirming on fresh recordings that weren't used to tune them.
+**Status:** `score()`, `word_timings()` and `check_word()` are all real (MMS forced alignment). `check_word()` (Sanay "Say it") compares the fit to the word with the model's own best guess, because a lone word isn't pinned by neighbours and Basa's rule passed almost anything; it rejects silence and most wrong words but lets about 4 in 10 near-misses through, and fails with other people talking nearby (`eval/check_word_eval.py`). `word_timings()` widens each word's span by 0.10 s before and 0.15 s after, never past the midpoint to its neighbour, so word clips hold the whole word and never overlap; `python eval/timing_check.py <recording ids>` makes listening pages to check them by ear. Thresholds are tuned on 15 Filipino readings of `fil_g2_01` by **one adult reader** (`eval/REPORT.md`: held-out F1 0.76). They still need confirming on fresh recordings that weren't used to tune them.
 
 Run the tests from `ai/`: `python -m pytest`. The model-backed tests skip if the weights aren't downloaded.
 
@@ -36,7 +36,8 @@ Run the tests from `ai/`: `python -m pytest`. The model-backed tests skip if the
 - **False alarms** on the eval set: `ng` before `mangga` (sounds blend), sentence-final `bukid.` under fan noise, and the word next to a skip or an insert (still the right spot for the teacher). Not special-cased, to avoid tuning to this one set.
 - Words with no aligner letters (digits, dashes) can't be checked and come back `matched`. Keep digits out of passages.
 - Audio too short to hold the text comes back all `skipped`.
-- Speed: about 40 s of processing per minute of audio on an 8-core CPU laptop (after a one-time ~10 s model load), roughly 0.67× real time.
+- Speed: about **16 s of processing per minute of audio** on a Ryzen 5 7520U laptop (4 cores, 8 threads), so a 40-second reading takes about 11 s. `score()` and `word_timings()` use int8 weights and every hardware thread; `check_word()` stays at full precision (0.6 s per word). Both models together use about 3.1 GB of RAM; `ai.warm_up()` takes about 15 s once. `BASA_FULL_PRECISION=1` turns int8 off.
+- `torch.ao.quantization` (the int8 step) is deprecated and removed in torch 2.10; another reason to stay on 2.8.x. If it's missing, scoring falls back to full precision instead of failing.
 - `torchaudio.functional.forced_align` is deprecated and **removed in torchaudio 2.9**, so `requirements.txt` stays on 2.8.x. If we ever need to move, the replacements are the standalone `ctc-forced-aligner` package or our own CTC alignment over the Hugging Face MMS model.
 
 **Fallback (P1-AI-2):** Whisper prompted with the passage, for Filipino and English only.

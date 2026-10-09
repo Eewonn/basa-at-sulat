@@ -23,7 +23,7 @@
    "i": 2,
    "text": "palengke",
    "label": "misread",
-   "score": 0.15,
+   "score": 0.16,
    "start": 1.84,
    "end": 2.26
   },
@@ -47,7 +47,7 @@
    "i": 5,
    "text": "at",
    "label": "matched",
-   "score": 0.97,
+   "score": 1.0,
    "start": 2.9,
    "end": 3.0
   },
@@ -63,7 +63,7 @@
    "i": 7,
    "text": "Dino.",
    "label": "matched",
-   "score": 0.97,
+   "score": 0.99,
    "start": 3.16,
    "end": 3.44
   },
@@ -79,7 +79,7 @@
    "i": 9,
    "text": "sila",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.99,
    "start": 4.41,
    "end": 4.59
   },
@@ -87,7 +87,7 @@
    "i": 10,
    "text": "ng",
    "label": "matched",
-   "score": 0.97,
+   "score": 0.98,
    "start": 4.65,
    "end": 4.77
   },
@@ -95,7 +95,7 @@
    "i": 11,
    "text": "isda,",
    "label": "matched",
-   "score": 0.95,
+   "score": 0.98,
    "start": 4.81,
    "end": 5.09
   },
@@ -103,7 +103,7 @@
    "i": 12,
    "text": "gulay,",
    "label": "matched",
-   "score": 0.97,
+   "score": 0.98,
    "start": 5.27,
    "end": 5.65
   },
@@ -119,7 +119,7 @@
    "i": 14,
    "text": "mga",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.97,
    "start": 5.89,
    "end": 6.07
   },
@@ -127,7 +127,7 @@
    "i": 15,
    "text": "prutas.",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.96,
    "start": 6.15,
    "end": 6.59
   },
@@ -135,7 +135,7 @@
    "i": 16,
    "text": "Mabigat",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.96,
    "start": 7.09,
    "end": 7.49
   },
@@ -143,7 +143,7 @@
    "i": 17,
    "text": "ang",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.96,
    "start": 7.57,
    "end": 7.67
   },
@@ -151,7 +151,7 @@
    "i": 18,
    "text": "bayong,",
    "label": "misread",
-   "score": 0.08,
+   "score": 0.0,
    "start": 7.69,
    "end": 8.01
   },
@@ -175,7 +175,7 @@
    "i": 21,
    "text": "ito",
    "label": "matched",
-   "score": 0.97,
+   "score": 0.99,
    "start": 9.07,
    "end": 9.21
   },
@@ -191,7 +191,7 @@
    "i": 23,
    "text": "Dino.",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.99,
    "start": 9.49,
    "end": 9.77
   },
@@ -199,7 +199,7 @@
    "i": 24,
    "text": "Nakangiti",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.98,
    "start": 10.31,
    "end": 10.81
   },
@@ -207,7 +207,7 @@
    "i": 25,
    "text": "silang",
    "label": "matched",
-   "score": 0.95,
+   "score": 0.96,
    "start": 10.87,
    "end": 11.21
   },
@@ -215,7 +215,7 @@
    "i": 26,
    "text": "umuwi",
    "label": "misread",
-   "score": 0.08,
+   "score": 0.02,
    "start": 11.23,
    "end": 11.51
   },
@@ -233,7 +233,7 @@
    "label": "matched",
    "score": 1.0,
    "start": 11.79,
-   "end": 12.14
+   "end": 12.12
   }
  ],
  "pauses": []

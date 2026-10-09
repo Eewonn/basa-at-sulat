@@ -98,7 +98,7 @@ def render_example(number: int, name: str, group: GroupStats, result: PlanResult
     return (
         f"# Example {number}: {name} group\n\n"
         "## Input\n"
-        f"- Level: {group.level} (provisional: names are checked against CRLA in P1-BE2-2)\n"
+        f"- Level: {group.level}\n"
         f"- Learners: {group.learner_count}\n"
         f"- Missed words: {words}\n"
         f"- Language: {group.language}\n\n"

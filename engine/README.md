@@ -134,3 +134,51 @@ It writes nothing unless every word group gets a model sentence (here, unlike in
 - `GET /books/{id}` returns the book with its words, `GET /books/{id}/audio` returns the WAV. Limits: 25 MB of audio, 3,000 words (`MAX_AUDIO_BYTES`, `MAX_WORDS` in `app/books.py`).
 - The `sys.path` insert that lets the engine import the `ai` package now lives in `app/__init__.py`.
 - Tests replace `word_timings`, so they never load the model. Real timing quality is checked by the AI engineer's `eval/timing_check.py`, not here.
+
+## Update: word clips (P2-BE1-2)
+- `GET /books/{id}/clips/{i}` (`app/books.py`) cuts word `i`'s frames from the stored book WAV with Python's `wave` module and returns a small 16 kHz mono WAV. It is cut on every request and nothing is written to disk, so there are no clips to clean up.
+- It relies on the stored file being the PCM WAV that `POST /books` makes; it would need ffmpeg if we ever stored another format.
+- A zero-length word (digits, dashes) returns `422`; an unknown book, word or missing audio returns `404`. `GET /books/{id}/audio` now shares the same path check (the stored path must stay inside `engine/storage/`).
+- Tests build a recording where each word is a different tone, so they prove that a clip holds only its own word. Real word quality is the AI engineer's `eval/timing_check.py`.
+
+## Update: Sanay practice sets (P2-BE2-1)
+- `GET /learners/{id}/practice` (`app/routes/learners.py`, logic in `app/practice.py`) returns the missed words from the learner's latest **confirmed** check, using the teacher's final labels.
+- **Sentence:** found by the word's index, so a word that appears twice gets the sentence it was missed in. A sentence ends at `.` `!` `?` `…` unless the next word starts in lowercase, which keeps dialogue such as `"Tara na!" sabi niya.` together.
+- **Clip:** passages and books aren't linked, so the clip is the first timed occurrence of the same word in a book of the same language (oldest book first). Words are compared with `ai.text.normalize_word`, the aligner's rule, and words with zero-length timings are skipped. No match means `book_id` and `word_index` are `null`.
+- The set is not capped (up to 18 words in the demo seed). How many a child sees per session is left to frontend; see the P2-BE2-1 entry in `docs/API.md`.
+- Clips play once backend-1's `GET /books/{id}/clips/{i}` (P2-BE1-2) lands; the references don't change.
+
+## Update: one-command offline start (P3-BE1-1)
+Run from the repo root (on Windows use Git Bash or WSL):
+```
+python scripts/download_models.py     # once, with internet: the MMS aligner weights and the Ollama model
+scripts/start.sh                      # every day, no internet needed
+scripts/start.sh --check              # only report what is ready or missing
+```
+- **`start.sh`** runs `scripts/check_setup.py` first. Missing required parts (ffmpeg, npm, Python packages, aligner weights, `desktop/node_modules`) stop the start with a fix command for each. A missing Ollama only warns, because group plans fall back to templates. Then `scripts/launch.py` creates and seeds the database if there isn't one, starts Ollama if it is installed and not running, starts the engine on a free port, runs the desktop app with `BASA_ENGINE_PORT`, and stops what it started when the app closes. It uses `engine/.venv` if present, else `python3`; set `BASA_PYTHON` to choose.
+- **`download_models.py`** skips anything already downloaded; `--check` only reports. The aligner needs `pip install -r engine/requirements.txt -r ai/requirements.txt` first. Ollama must be installed and running to pull its model (`qwen2.5:7b`).
+- **Engine command:** `python -m app [--port N] [--data-dir D]`. `--data-dir D` keeps the database at `D/basa.db` and the audio under `D`. `PORT` still works; `--port` wins.
+- **Settings (all optional):** `BASA_DATA_DIR` (default `engine/storage`), `BASA_APP_CMD` (default `npm --prefix desktop run dev`), `BASA_OLLAMA_URL`, `BASA_WARM_UP` (default `1` here: the aligner loads at startup so the first reading isn't slow).
+- **For the frontend:** the desktop app does not start the engine itself yet (`desktop/src/main/index.ts` only reads `BASA_ENGINE_PORT`), so `start.sh` does. `docs/FRONTEND.md` asks for `python -m engine --port <n> --data-dir <path>` and `POST /shutdown`: the real command is `python -m app` from `engine/` as above, and `/shutdown` is not built (it isn't in `TASKS.md`; `start.sh` stops the engine itself). If the app later gets its own launcher, drop the engine step from `launch.py`.
+- **Tests:** `cd engine && pytest` (includes the command line), `cd scripts && pytest` (download, check, launch; no internet, Ollama, torch or weights needed). The tests use a stub for the app and fake `ollama` scripts. What they cannot prove: real downloads, a real Ollama, the Electron launch and a full offline run. Those are in `docs/OFFLINE_CHECKLIST.md`.
+- **Run everything before a push:** `engine/`, `scripts/`, `ai/` and `eval/` each have their own `pytest.ini`; run `pytest` in each folder. `eval/` needs the AI packages (`soundfile`, `numpy`) to pass.
+- **Browser access (CORS):** the engine allows browser requests only from `http://localhost:<port>` and `http://127.0.0.1:<port>` (`CORSMiddleware` in `app/main.py`, pattern matched against the whole origin), so `npm run dev` pages can call it. Other origins are refused. `tests/test_cors.py` sends the headers a browser would; it cannot run a real browser.
+
+## Update: progress (P2-BE2-2)
+- `GET /learners/{id}/progress` (`app/routes/learners.py`, logic in `app/progress.py`) compares two confirmed checks word by word, using the teacher's final labels, and returns the WCPM change.
+- **Which pair:** the newest confirmed check that has an earlier confirmed check on the same passage, and the newest of those. Checks on different passages are never paired. Order is `confirmed_at`, then `created_at`, then `id`, the same as the practice set's "latest check".
+- **Words** come from the passage text, not from `word_results`, because a check may not cover every word. A word a check has no result for is `null` on that side.
+- No pair gives a `200` with empty lists and nulls. Practice attempts aren't part of the response yet.
+
+## Update: offline proof (P3-BE1-2 preparation)
+- `python scripts/offline_audit.py` fails if the Python in `engine/app`, `ai` or `scripts` contains a URL to anything but this laptop, or imports a network client library (`requests`, `httpx`, `aiohttp`, and so on). The engine's CORS pattern, which admits only local pages, is the one allowed exception. Tests are not audited. It is a tripwire, not a proof.
+- The engine and scripts test suites install `scripts/netguard.py`: any test that opens a connection to something other than this laptop fails with `NetworkBlocked`. It derives from `BaseException`, so a broad `except Exception` cannot hide it. It covers the test process only; tests that start the engine or the launcher as separate processes (`test_cli.py`, `test_launch.py`) are not covered.
+- The real airplane-mode run, its steps and a results table are in `docs/OFFLINE_CHECKLIST.md`. P3-BE1-2 stays unticked until that run passes.
+
+## Update: class view, plans and export (P2-BE2-3)
+- `GET /class` (`app/class_view.py`, `app/routes/class_view.py`) groups learners by the level of their latest confirmed check and adds a draft plan per group from `app/plans.py`. Rules are in `docs/API.md`.
+- A group where only one learner has a Filipino check uses that learner's own missed words (the 2-learner minimum can't be met).
+- **Filipino only.** Only checks on `fil` passages count towards a group's missed words, and Ollama is never called for a group without one (its plan is `null`).
+- **Plan cache** (`app/plan_cache.py`): `storage/plan-cache.json`. The key is the language, `OLLAMA_MODEL`, level, learner count, the missed words in order, and a hash of the prompt files, so editing `prompts/activities-fil.json` or a sentence prompt makes new plans. Only plans with a model sentence are kept. A broken cache file is logged and started over. `GET /class?refresh=1` makes new plans with random seeds (`plans.generate_plan_result(..., seeds=...)`; the default is still `SENTENCE_SEEDS`, so `plan_examples` is unchanged). Deleting `storage/plan-cache.json` also starts over.
+- `GET /class/export.csv`: one row per learner, UTF-8 with a BOM for Excel.
+- `/health` now pings Ollama (`GET /api/tags`, 1 s timeout) for `models.ollama`.

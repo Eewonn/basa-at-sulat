@@ -7,9 +7,9 @@
    "i": 0,
    "text": "Pumunta",
    "label": "matched",
-   "score": 0.72,
+   "score": 0.65,
    "start": 1.08,
-   "end": 1.5
+   "end": 1.48
   },
   {
    "i": 1,
@@ -23,7 +23,7 @@
    "i": 2,
    "text": "palengke",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.99,
    "start": 1.76,
    "end": 2.22
   },
@@ -31,7 +31,7 @@
    "i": 3,
    "text": "si",
    "label": "matched",
-   "score": 0.99,
+   "score": 1.0,
    "start": 2.38,
    "end": 2.48
   },
@@ -39,7 +39,7 @@
    "i": 4,
    "text": "Nanay",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.97,
    "start": 2.56,
    "end": 2.9
   },
@@ -47,7 +47,7 @@
    "i": 5,
    "text": "at",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 3.0,
    "end": 3.08
   },
@@ -56,14 +56,14 @@
    "text": "si",
    "label": "matched",
    "score": 0.99,
-   "start": 3.14,
+   "start": 3.12,
    "end": 3.22
   },
   {
    "i": 7,
    "text": "Dino.",
    "label": "matched",
-   "score": 0.95,
+   "score": 0.97,
    "start": 3.28,
    "end": 3.59
   },
@@ -79,24 +79,24 @@
    "i": 9,
    "text": "sila",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.98,
    "start": 4.85,
-   "end": 5.09
+   "end": 5.55
   },
   {
    "i": 10,
    "text": "ng",
    "label": "matched",
    "score": 0.99,
-   "start": 5.25,
-   "end": 5.41
+   "start": 5.91,
+   "end": 5.97
   },
   {
    "i": 11,
    "text": "isda,",
    "label": "matched",
-   "score": 1.0,
-   "start": 5.67,
+   "score": 0.99,
+   "start": 6.05,
    "end": 6.37
   },
   {
@@ -127,7 +127,7 @@
    "i": 15,
    "text": "prutas.",
    "label": "misread",
-   "score": 0.0,
+   "score": 0.14,
    "start": 7.75,
    "end": 8.19
   },
@@ -135,7 +135,7 @@
    "i": 16,
    "text": "Mabigat",
    "label": "matched",
-   "score": 0.99,
+   "score": 0.96,
    "start": 9.03,
    "end": 9.45
   },
@@ -144,14 +144,14 @@
    "text": "ang",
    "label": "matched",
    "score": 0.98,
-   "start": 9.55,
+   "start": 9.53,
    "end": 9.65
   },
   {
    "i": 18,
    "text": "bayong,",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 9.71,
    "end": 10.05
   },
@@ -168,7 +168,7 @@
    "text": "binuhat",
    "label": "matched",
    "score": 1.0,
-   "start": 10.82,
+   "start": 10.84,
    "end": 11.26
   },
   {
@@ -184,14 +184,14 @@
    "text": "ni",
    "label": "matched",
    "score": 1.0,
-   "start": 11.64,
+   "start": 11.62,
    "end": 11.72
   },
   {
    "i": 23,
    "text": "Dino.",
    "label": "matched",
-   "score": 0.96,
+   "score": 0.98,
    "start": 11.78,
    "end": 12.06
   },
@@ -207,7 +207,7 @@
    "i": 25,
    "text": "silang",
    "label": "matched",
-   "score": 0.99,
+   "score": 0.97,
    "start": 13.52,
    "end": 13.86
   },
@@ -215,7 +215,7 @@
    "i": 26,
    "text": "umuwi",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 13.9,
    "end": 14.2
   },
@@ -232,7 +232,7 @@
    "text": "bahay.",
    "label": "matched",
    "score": 1.0,
-   "start": 14.44,
+   "start": 14.42,
    "end": 14.76
   }
  ],

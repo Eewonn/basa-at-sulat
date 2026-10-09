@@ -1,11 +1,13 @@
 """Sulat books: a story plus a fluent speaker's model reading (P2-BE1-1)."""
 
+import io
 import logging
 import re
 import sqlite3
 import uuid
+import wave
 
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from ai import word_timings
@@ -114,12 +116,49 @@ def get_book(book_id: str, conn=Depends(get_conn)):
     }
 
 
-@router.get("/{book_id}/audio")
-def get_book_audio(book_id: str, conn=Depends(get_conn)):
-    book = _get_book(conn, book_id)
+def _book_wav_path(book):
+    """The book's stored WAV, or a 404 if it is missing or points outside the storage folder."""
     root = storage_dir().resolve()
     path = (root / book["audio_path"]).resolve() if book["audio_path"] else None
     # The stored path must stay inside the storage folder, whatever the database holds.
     if path is None or not path.is_relative_to(root) or not path.is_file():
-        raise HTTPException(404, f"the audio for book '{book_id}' is missing")
-    return FileResponse(path, media_type="audio/wav")
+        raise HTTPException(404, f"the audio for book '{book['id']}' is missing")
+    return path
+
+
+@router.get("/{book_id}/audio")
+def get_book_audio(book_id: str, conn=Depends(get_conn)):
+    book = _get_book(conn, book_id)
+    return FileResponse(_book_wav_path(book), media_type="audio/wav")
+
+
+@router.get("/{book_id}/clips/{i}")
+def get_word_clip(book_id: str, i: int, conn=Depends(get_conn)):
+    """Word `i`'s audio, cut from the stored model reading. Nothing is written to disk."""
+    book = _get_book(conn, book_id)
+    word = conn.execute(
+        "SELECT start_sec, end_sec FROM book_words WHERE book_id = ? AND i = ?", (book_id, i)
+    ).fetchone()
+    if word is None:
+        raise HTTPException(404, f"book '{book_id}' has no word {i}")
+    path = _book_wav_path(book)
+    try:
+        with wave.open(str(path), "rb") as src:
+            rate = src.getframerate()
+            first = round(word["start_sec"] * rate)
+            last = min(round(word["end_sec"] * rate), src.getnframes())  # a word can't run past the file
+            if last <= first:
+                raise HTTPException(422, f"word {i} has no audio in this reading")
+            src.setpos(first)
+            frames = src.readframes(last - first)
+            channels, width = src.getnchannels(), src.getsampwidth()
+    except (wave.Error, EOFError) as err:
+        log.error("could not read the audio of %s: %s", book_id, err)
+        raise HTTPException(404, f"the audio for book '{book_id}' is missing") from err
+    out = io.BytesIO()
+    with wave.open(out, "wb") as dst:
+        dst.setnchannels(channels)
+        dst.setsampwidth(width)
+        dst.setframerate(rate)
+        dst.writeframes(frames)
+    return Response(out.getvalue(), media_type="audio/wav")

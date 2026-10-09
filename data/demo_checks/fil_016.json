@@ -63,7 +63,7 @@
    "i": 7,
    "text": "Puti",
    "label": "matched",
-   "score": 0.92,
+   "score": 0.96,
    "start": 3.86,
    "end": 4.12
   },
@@ -71,7 +71,7 @@
    "i": 8,
    "text": "ang",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.97,
    "start": 4.26,
    "end": 4.36
   },
@@ -95,7 +95,7 @@
    "i": 11,
    "text": "Tuwing",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.94,
    "start": 6.16,
    "end": 6.47
   },
@@ -143,7 +143,7 @@
    "i": 17,
    "text": "Hinahabol",
    "label": "matched",
-   "score": 0.99,
+   "score": 0.98,
    "start": 9.95,
    "end": 10.51
   },
@@ -159,7 +159,7 @@
    "i": 19,
    "text": "aso",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 10.75,
    "end": 11.03
   },
@@ -167,7 +167,7 @@
    "i": 20,
    "text": "ang",
    "label": "matched",
-   "score": 0.99,
+   "score": 0.97,
    "start": 11.11,
    "end": 11.23
   },
@@ -175,7 +175,7 @@
    "i": 21,
    "text": "bola.",
    "label": "matched",
-   "score": 0.71,
+   "score": 0.94,
    "start": 11.29,
    "end": 11.59
   },
@@ -183,7 +183,7 @@
    "i": 22,
    "text": "Pagod",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.96,
    "start": 12.45,
    "end": 12.79
   },
@@ -207,7 +207,7 @@
    "i": 25,
    "text": "pagkatapos,",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 13.35,
    "end": 14.05
   },

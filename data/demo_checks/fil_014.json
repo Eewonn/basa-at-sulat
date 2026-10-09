@@ -55,8 +55,8 @@
    "i": 6,
    "text": "bukid.",
    "label": "matched",
-   "score": 0.45,
-   "start": 3.3,
+   "score": 0.55,
+   "start": 3.28,
    "end": 3.64
   },
   {
@@ -71,23 +71,23 @@
    "i": 8,
    "text": "siya.",
    "label": "matched",
-   "score": 0.98,
+   "score": 1.0,
    "start": 4.7,
-   "end": 4.86
+   "end": 4.84
   },
   {
    "i": 9,
    "text": "Tinulungan",
    "label": "misread",
    "score": 0.0,
-   "start": 4.86,
+   "start": 4.84,
    "end": 5.74
   },
   {
    "i": 10,
    "text": "siya",
    "label": "matched",
-   "score": 0.75,
+   "score": 0.93,
    "start": 5.74,
    "end": 5.88
   },
@@ -103,7 +103,7 @@
    "i": 12,
    "text": "kanyang",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.97,
    "start": 6.24,
    "end": 6.64
   },
@@ -119,7 +119,7 @@
    "i": 14,
    "text": "Pagkatapos,",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.94,
    "start": 7.6,
    "end": 8.32
   },
@@ -127,7 +127,7 @@
    "i": 15,
    "text": "kumain",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.95,
    "start": 8.76,
    "end": 9.2
   },
@@ -135,7 +135,7 @@
    "i": 16,
    "text": "sila",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.98,
    "start": 9.28,
    "end": 9.56
   },
@@ -169,13 +169,13 @@
    "label": "matched",
    "score": 0.98,
    "start": 10.69,
-   "end": 11.13
+   "end": 11.11
   },
   {
    "i": 21,
    "text": "ng",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 11.17,
    "end": 11.33
   },
@@ -185,7 +185,7 @@
    "label": "matched",
    "score": 1.0,
    "start": 11.41,
-   "end": 11.71
+   "end": 11.73
   }
  ],
  "pauses": []
