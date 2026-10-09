@@ -96,15 +96,38 @@ Bright color-block cards, rounded type, a warm sidebar with a blue header and an
 - **Contrast rule (measured):** white text works at any size on blue (5.9:1), coral (4.8:1) and purple (5.5:1). On teal (4.5:1) keep white text bold and at least 20px. Small text goes on tints, using the `-ink` colors.
 - **Banig weave:** `banig` (sidebar header only) and `banig-light` (kid-mode background), never behind text. Kept tonal (one color, low opacity) so screens stay calm; multicolor stripes were tried and dropped as too busy. It's a generic woven-mat lattice, used across the Philippines. We deliberately don't use sacred IP textile motifs (e.g. T'nalak) without community consent.
 - **Filipino phrasing:** a time-based greeting ("Magandang umaga, Guro!"), and varied cheers in Sanay ("Galing!", "Ang husay!", "Kaya mo 'yan!", "Isa pa!"), with English equivalents.
-- **Type:** Nunito (rounded, bundled), weights 700–900 for headings. Scale: 14 / 16 / 20 / 28 / 40 / 56 / 120.
+- **Type:** Nunito (rounded, bundled), weights 700–900 for headings. Scale: 14 / 16 / 20 / 28 / 40 / 56 / 120. **Patrick Hand** (bundled) as marker lettering for kid-mode headings, Taw's speech bubbles, the stamp and the greeting only; passages and reading text always stay Nunito.
+- **Paper grain:** a barely visible noise texture on the page and sidebar (`paper` utility) so screens feel like paper, not glass.
+- **Real classroom details:** the greeting uses the teacher's name and the subtitle the section ("Grade 2 – Sampaguita"), both editable in Settings; dates read like a person says them ("Kahapon", "3 araw ang nakalipas") instead of ISO dates.
 - **Shape:** 20px radius on cards, 14px on tiles, pill buttons, a soft shadow plus a lift on hover.
-- **Illustrations:** Microsoft Fluent Emoji Flat SVGs (MIT), bundled in `assets/emoji/` and credited in Settings.
+- **Illustrations:** our own SVG set (`components/Art.tsx`) in Taw's style: flat shapes, soft highlights, no outlines. Stock emoji were dropped because they made the app look generic. Lucide stays only for small utility glyphs (arrows, check, pause, volume).
+- **Classroom craft (signature elements, used sparingly):**
+  - the teacher's violet **"VG / Very Good!" stamp** (`components/Stamp.tsx`) on the Sanay finish and on Resulta after I-confirm, with a soft stamp sound in kid mode
+  - the Sanay word on a **manila-paper flashcard** with ruled lines, a red margin and ring holes (`flashcard` utility)
+  - the profile's **reading card**: one violet stamp per day read over the last 14 days, replacing a generic streak number
 - **Mascot:** an original tamaraw (`components/Tamaraw.tsx`, pure SVG) with moods idle / happy / listening / encourage / thinking. It appears in the sidebar, the processing screen, Sanay, the Done screen and empty states. Its name lives in `strings.ts` (`mascotName`, currently "Taw").
 - **Gamification:** stat cards (stars collected, days read in a row, time spent reading) on the learner profile, and story categories (Bukid, Pamilya, Hayop, Kalikasan, Paaralan) in the Check flow. No badges and no levels, on purpose.
 - **Accessibility:** status is never shown by color alone (word labels have text and icons); full keyboard use in teacher mode (Space = record, Enter = confirm); `prefers-reduced-motion` respected.
-- **Motion:** word reveal, waveform, mascot bounce, confetti and a flying star on "Tama!". Teacher-mode motion stays short.
+- **Motion (CSS only, no animation library):**
+  - page fade-and-rise on every route change; cards enter one after another (`stagger` utility, `--i` = order)
+  - numbers count up (`components/CountUp.tsx`) and re-animate when they change (e.g. fixing a word on Resulta)
+  - the white nav pill slides between items; buttons squish slightly on press; stat-card art wiggles on hover
+  - Taw blinks while idle and cheers with a speech bubble when clicked; the profile trend line draws itself; loading placeholders shimmer
+  - kid mode (Sanay) adds the most delight:
+    - **sounds** synthesized with Web Audio (`audio/sfx.ts`, no audio files): pop, chime, sparkle, a gentle "boing" for try-again (never a buzzer), combo arpeggio, finish fanfare; never played while the mic records; mute button remembered per laptop
+    - **Taw reacts to the child**: greets them by name, says "Kaya mo 'yan, Lina!" on a retry, its mouth and ears follow the child's voice while recording, and it dances on the finish screen
+    - **stepping-stone path** replaces the progress dots: a small Taw hops stone to stone toward a flag
+    - **combos**: two or more words right on the first try shows "2 sunod-sunod!" with a bigger burst
+    - **finish**: confetti rain, earned stars landing one by one with sparkles, plus the word-card pop and the flying star from before
+  - teacher-mode motion stays under about 0.5 s, and everything stops under `prefers-reduced-motion` (numbers show their final value immediately)
 - **Light theme only** for this release.
 - **Language:** all UI text lives in one `strings.ts` with Filipino and English. Default: Filipino with English labels where clearer.
+
+## 6b. UX helpers added in the craft pass
+- **First run** (`screens/WelcomeScreen.tsx`, route `/welcome`): Taw introduces the app, the teacher enters their name and section, and the microphone is tested with a live meter (with the Windows/Linux fix-it text on failure). Shown until `localStorage.setupDone`; Settings → About can replay it.
+- **Klase:** search, filter chips (Lahat / Kailangan ng practice / Hindi pa na-check) and a **"Susunod na babasa"** button that opens the next learner due a check (never-checked first). The "due" rule lives in `lib/due.ts` and is shared with the Basa tab.
+- **"Bakit na-flag?"** in the Resulta word popover explains each flag in plain words (weak sound match with its %, almost no voice, pause length) and reminds the teacher they make the final call.
+- **Presentation mode** (`Ctrl+Shift+P`): large text, hides "Sample data" badges, and shows a "Presentation" chip in the status pill. For demos only.
 
 ## 7. Component inventory
 - **Layout:** `AppShell`, `Sidebar`, `StatusPill`, `KidModeShell` (with hold-to-exit)

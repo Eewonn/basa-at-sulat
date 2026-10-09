@@ -1,9 +1,12 @@
 import { Fragment, useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router'
-import { Cpu, Lock, Pause, RotateCcw, Sparkles } from 'lucide-react'
+import { Cpu, Lock, Pause, RotateCcw} from 'lucide-react'
 import { api } from '@/api'
+import { Art } from '@/components/Art'
 import type { Assessment, Learner, WordLabel } from '@/api/types'
+import { CountUp } from '@/components/CountUp'
+import { Stamp } from '@/components/Stamp'
 import { Tamaraw } from '@/components/Tamaraw'
 import { WordChip } from '@/components/WordChip'
 import { LevelChip, useToast } from '@/components/ui'
@@ -70,7 +73,7 @@ export function ReviewScreen() {
                     {t.pause} {pause.seconds.toFixed(1)} s
                   </span>
                 )}
-                <WordChip word={w} delayMs={w.i * 40} onFix={(label) => fix.mutate({ i: w.i, label })} />
+                <WordChip word={w} delayMs={w.i * 40} pauseBefore={pause?.seconds} onFix={(label) => fix.mutate({ i: w.i, label })} />
               </Fragment>
             )
           })}
@@ -79,9 +82,12 @@ export function ReviewScreen() {
 
       <aside className="flex w-80 shrink-0 flex-col gap-4 bg-side px-6 py-10">
         <div className="flex flex-col gap-2 rounded-card bg-blue p-6 text-white shadow-soft">
-          <p className="text-[64px] leading-none font-black tabular-nums">{a.wcpm}</p>
+          <p className="text-[64px] leading-none font-black">
+            {a.wcpm === null ? '—' : <CountUp value={a.wcpm} />}
+          </p>
           <p className="text-sm font-bold">{t.wcpmLabel}</p>
           <LevelChip level={a.level} onDark />
+          {a.level && <p className="text-xs leading-snug font-semibold">{t.levelEstNote}</p>}
         </div>
         <p className={`rounded-tile px-4 py-3 font-extrabold ${flagged ? 'bg-coral-soft text-coral-ink' : 'bg-teal-soft text-teal-ink'}`}>
           {flagged ? t.needsCheck(flagged) : t.allClear}
@@ -99,14 +105,15 @@ export function ReviewScreen() {
         <div className="mt-auto flex flex-col gap-2">
           {confirmed ? (
             <>
-              <div className="flex justify-center">
-                <Tamaraw mood="happy" size={110} />
+              <div className="flex items-end justify-center gap-2">
+                <Tamaraw mood="happy" size={90} />
+                <Stamp size={120} />
               </div>
               <button
                 onClick={() => navigate(`/practice/${a.learner_id}`)}
                 className="flex animate-pop cursor-pointer items-center justify-center gap-2 rounded-full bg-coral px-4 py-4 text-xl font-black text-white shadow-soft transition hover:brightness-105"
               >
-                <Sparkles className="size-5" aria-hidden /> {t.startPractice(learner?.display_name ?? '')}
+                <Art name="flashcard" size={22} /> {t.startPractice(learner?.display_name ?? '')}
               </button>
             </>
           ) : (
