@@ -78,3 +78,6 @@ These are adult test readings: fine to display, **not** evidence of accuracy, an
 
 ## Checking word timings by ear (P2-AI-1)
 `python eval/timing_check.py fil_001 fil_016 fil_020` writes one page per recording to `eval/out/timing_check/`. Each plays the reading with every word highlighted as it's spoken, and clicking a word plays only that word's clip. Use clean readings: `word_timings()` is for a fluent speaker's correct reading.
+
+## Checking single words (P2-AI-2)
+`python eval/check_word_eval.py` cuts single-word clips from the eval readings and reports how often `ai.check_word()` matches correct words and rejects swaps, other words and silence, for the tuning and confirmation readings separately. There are no real single-word recordings yet, so these clips carry a little of their neighbours.
