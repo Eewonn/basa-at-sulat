@@ -57,6 +57,15 @@ Errors (body `{"detail": "<what went wrong>"}`):
 | `422` | `label` isn't `matched`, `misread` or `skipped`, or `i` isn't a whole number from 0 |
 | `503` | The engine has no database yet (run `python -m app.seed` in `engine/`) |
 
+### `GET /assessments/{id}/clips/{i}`
+Word `i` as the child read it (`audio/wav`), cut from the check's recording from 0.15 s before the word's `start` to 0.15 s after its `end` (clipped to the recording), so the teacher can hear a flagged word before deciding. Nothing is written to disk.
+
+| Status | When |
+|---|---|
+| `404` | No assessment with that id, or it has no word `i` |
+| `410` | The recording is gone: it is deleted on confirm unless `keep_audio` was set |
+| `422` | The word has no timing (`start`/`end` are `null`), or `i` isn't a whole number from 0 |
+
 ### `POST /assessments/{id}/confirm`
 Marks the assessment final (`status: "confirmed"`) and deletes the child's audio unless the body is `{"keep_audio": true}`. An empty body means `keep_audio: false`. Returns the confirmed assessment.
 
@@ -141,6 +150,9 @@ Until the engine implements these, the app hides what depends on them, or keeps 
   - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up` or `down`. The engine reports `not_loaded` until the aligner is in memory (after the first `/assess`, or at startup with `BASA_WARM_UP=1`). `ollama` is `up` if Ollama answers at `OLLAMA_URL` within 1 s; it doesn't check that the model is pulled.
 
 ## Contract changes
+
+### 2026-10-10 · frontend (hear a word on review)
+- New: `GET /assessments/{id}/clips/{i}` plays one word from the child's recording while it still exists.
 
 ### 2026-10-10 · frontend (real stats)
 - `GET /learners/{id}/stats` is live (it was a proposal), counted from saved checks and Sanay attempts.
