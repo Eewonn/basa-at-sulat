@@ -1,5 +1,6 @@
 import { join } from 'node:path'
 import { app, BrowserWindow, session, shell } from 'electron'
+import { startEngine, stopEngine } from './engine'
 
 const DEV_URL = process.env['ELECTRON_RENDERER_URL']
 
@@ -8,11 +9,7 @@ function isAppUrl(url: string): boolean {
   return DEV_URL ? url.startsWith(DEV_URL) : url.startsWith('file://')
 }
 
-function createWindow(): void {
-  // The engine port comes from the launcher (P0-FE-4). Until the engine exists,
-  // no port means the renderer runs on mock data.
-  const enginePort = process.env['BASA_ENGINE_PORT'] ?? ''
-
+function createWindow(enginePort: string): void {
   const win = new BrowserWindow({
     width: 1366,
     height: 800,
@@ -42,7 +39,10 @@ function createWindow(): void {
   else win.loadFile(join(__dirname, '../renderer/index.html'))
 }
 
-app.whenReady().then(() => {
+// scripts/start.sh already runs an engine and passes its port; otherwise the app starts its own.
+let enginePort: string | null = null
+
+app.whenReady().then(async () => {
   session.defaultSession.setPermissionRequestHandler((_wc, permission, callback, details) => {
     callback(permission === 'media' && isAppUrl(details.requestingUrl))
   })
@@ -50,11 +50,14 @@ app.whenReady().then(() => {
     return permission === 'media' && isAppUrl(requestingOrigin)
   })
 
-  createWindow()
+  enginePort = process.env['BASA_ENGINE_PORT'] ?? String((await startEngine()) ?? '')
+  createWindow(enginePort)
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) createWindow(enginePort ?? '')
   })
 })
+
+app.on('will-quit', stopEngine)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()

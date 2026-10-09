@@ -3,8 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { ToastProvider } from '@/components/ui'
 import { Splash } from '@/components/Splash'
-import { EngineMissing } from '@/components/EngineMissing'
-import { enginePort } from '@/api'
+import { EngineGate } from '@/components/EngineGate'
 import { AppShell } from './AppShell'
 import { ClassScreen } from '@/screens/ClassScreen'
 import { CheckScreen } from '@/screens/CheckScreen'
@@ -58,9 +57,7 @@ export function App() {
     <LangContext.Provider value={{ lang, setLang }}>
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
-          {enginePort === null ? (
-            <EngineMissing />
-          ) : (
+          <EngineGate>
             <MemoryRouter initialEntries={[isSetupDone() ? '/' : '/welcome']}>
               <Routes>
                 <Route element={<AppShell />}>
@@ -79,7 +76,7 @@ export function App() {
                 <Route path="practice/:learnerId" element={<PracticeScreen />} />
               </Routes>
             </MemoryRouter>
-          )}
+          </EngineGate>
           {splash && <Splash onDone={() => setSplash(false)} />}
         </ToastProvider>
       </QueryClientProvider>
