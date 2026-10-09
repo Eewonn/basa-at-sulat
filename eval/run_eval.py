@@ -3,6 +3,7 @@
 From the repo root, with the venv active:
     python eval/run_eval.py                # score every recording, write eval/REPORT.md
     python eval/run_eval.py --reuse        # rebuild the report from the saved predictions (no model run)
+    python eval/run_eval.py --reuse --export-dir data/demo_checks   # also write one score() JSON per recording
 
 Recordings are looked up at eval/recordings/<language>/<recording_id>.wav. Rows in ground_truth.csv
 with no matching file are skipped and listed in the report.
@@ -21,6 +22,7 @@ sys.path.insert(0, str(HERE))
 import metrics  # noqa: E402
 
 MAX_LISTED = 12  # per language, per kind of error shown in the report
+WORD_KEYS = ("i", "text", "label", "score", "start", "end")  # a word in score()'s result (docs/API.md)
 
 
 def load_passages(path) -> dict:
@@ -36,7 +38,8 @@ def audio_seconds(path) -> float:
 def evaluate(recordings: dict, passages: dict, recordings_dir, scorer, log=print):
     """Score every recording that has audio. Returns (predictions, skipped).
 
-    predictions: {recording_id: {"language", "duration_sec", "elapsed_sec", "words": [{"i","text","label","score"}]}}
+    predictions: {recording_id: {"language", "passage_id", "duration_sec", "elapsed_sec",
+                                 "words": [{"i","text","label","score","start","end"}], "pauses": [...]}}
     skipped: [(recording_id, reason)]
     """
     predictions, skipped = {}, []
@@ -53,11 +56,11 @@ def evaluate(recordings: dict, passages: dict, recordings_dir, scorer, log=print
         elapsed = time.perf_counter() - started
         predictions[rec.id] = {
             "language": rec.language,
+            "passage_id": rec.passage_id,
             "duration_sec": audio_seconds(audio),
             "elapsed_sec": elapsed,
-            "words": [
-                {"i": w["i"], "text": w["text"], "label": w["label"], "score": w["score"]} for w in result["words"]
-            ],
+            "words": [{k: w[k] for k in WORD_KEYS if k in w} for w in result["words"]],
+            "pauses": result.get("pauses", []),
         }
         log(f"scored {rec.id} ({predictions[rec.id]['duration_sec']:.1f}s audio in {elapsed:.1f}s)")
     return predictions, skipped
@@ -183,6 +186,36 @@ def build_report(recordings: dict, predictions: dict, skipped: list) -> str:
     return "\n".join(lines)
 
 
+def export_checks(predictions: dict, out_dir) -> list:
+    """Write one JSON per scored recording: recording_id, passage_id, duration_sec and score()'s words and pauses.
+
+    For Backend 2's demo seed data. No audio and no reader initials, only what score() returned. These are
+    test recordings by adults, so they're fine to display but not evidence of accuracy, and adult reading
+    speed puts every check at the top level unless duration_sec is set synthetically.
+    Returns the paths written. Raises ValueError for predictions saved before timings were kept.
+    """
+    out = Path(out_dir)
+    stale = [rid for rid, p in predictions.items()
+             if "pauses" not in p or "passage_id" not in p or any("start" not in w for w in p["words"])]
+    if stale:
+        raise ValueError(f"saved predictions lack word timings or pauses ({', '.join(sorted(stale)[:3])}...): "
+                         "they're from an older run_eval.py, so re-run without --reuse")
+    out.mkdir(parents=True, exist_ok=True)
+    written = []
+    for rid, p in sorted(predictions.items()):
+        check = {
+            "recording_id": rid,
+            "passage_id": p["passage_id"],
+            "duration_sec": round(p["duration_sec"], 2),
+            "words": [{k: w[k] for k in WORD_KEYS} for w in p["words"]],
+            "pauses": p["pauses"],
+        }
+        path = out / f"{rid}.json"
+        path.write_text(json.dumps(check, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        written.append(path)
+    return written
+
+
 def main(argv=None, scorer=None) -> int:
     """CLI entry point. `scorer` replaces ai.score (tests pass a stub so they never load the model)."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -192,6 +225,7 @@ def main(argv=None, scorer=None) -> int:
     ap.add_argument("--predictions", default=HERE / "out" / "predictions.json", help="where scores are saved / reloaded from")
     ap.add_argument("--out", default=HERE / "REPORT.md")
     ap.add_argument("--reuse", action="store_true", help="rebuild the report from saved predictions without running the model")
+    ap.add_argument("--export-dir", help="also write one score() JSON per recording here (demo seed data)")
     args = ap.parse_args(argv)
 
     recordings = metrics.load_ground_truth(args.ground_truth)
@@ -218,6 +252,13 @@ def main(argv=None, scorer=None) -> int:
     report = build_report(recordings, predictions, skipped)
     Path(args.out).write_text(report, encoding="utf-8")
     print(f"wrote {args.out}")
+    if args.export_dir:
+        try:
+            written = export_checks(predictions, args.export_dir)
+        except ValueError as err:
+            print(f"export failed: {err}")
+            return 1
+        print(f"exported {len(written)} check(s) to {args.export_dir}")
     return 0 if predictions else 1
 
 
