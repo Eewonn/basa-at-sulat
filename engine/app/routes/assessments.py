@@ -15,6 +15,7 @@ from app.assessments import (
 )
 from app.db import connect, get_db_path
 from app.retention import AudioDeletionError, confirm_and_delete_audio
+from app.stats import local_day
 
 router = APIRouter(prefix="/assessments", tags=["assessments"])
 
@@ -45,7 +46,7 @@ def recent(conn=Depends(get_conn)) -> list[dict]:
     rows = conn.execute(
         """
         SELECT a.id AS assessment_id, a.learner_id, l.display_name,
-               substr(a.confirmed_at, 1, 10) AS date, p.title AS passage_title, a.wcpm
+               a.confirmed_at, p.title AS passage_title, a.wcpm
         FROM assessments a
         JOIN learners l ON l.id = a.learner_id
         JOIN passages p ON p.id = a.passage_id
@@ -54,7 +55,14 @@ def recent(conn=Depends(get_conn)) -> list[dict]:
         LIMIT 10
         """
     ).fetchall()
-    return [{**dict(r), "wcpm": None if r["wcpm"] is None else int(r["wcpm"])} for r in rows]
+    return [
+        {
+            "assessment_id": r["assessment_id"], "learner_id": r["learner_id"], "display_name": r["display_name"],
+            "date": local_day(r["confirmed_at"]).isoformat(), "passage_title": r["passage_title"],
+            "wcpm": None if r["wcpm"] is None else int(r["wcpm"]),
+        }
+        for r in rows
+    ]
 
 
 @router.patch("/{assessment_id}/words/{i}")

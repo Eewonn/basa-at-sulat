@@ -8,7 +8,7 @@ from app.class_view import _latest_checks
 from app.practice import LearnerNotFoundError, build_practice_set
 from app.progress import build_progress
 from app.routes.assessments import get_conn
-from app.stats import build_stats, reading_days, stars, streak
+from app.stats import build_stats, local_day, reading_days, stars, streak
 
 router = APIRouter(prefix="/learners", tags=["learners"])
 
@@ -27,7 +27,7 @@ def list_learners(conn=Depends(get_conn)) -> list[dict]:
             learner.update(
                 level=check["level"],
                 latest_wcpm=None if check["wcpm"] is None else int(check["wcpm"]),
-                last_check=check["confirmed_at"][:10],  # ISO 8601 UTC, so this is the date
+                last_check=local_day(check["confirmed_at"]).isoformat(),
                 needs_practice=check["missed_count"] > 0,
             )
         out.append(learner)

@@ -11,7 +11,7 @@ from datetime import date, datetime, timedelta
 from app.practice import LearnerNotFoundError, build_practice_set
 
 
-def _local_day(timestamp: str) -> date:
+def local_day(timestamp: str) -> date:
     """The local calendar day of a stored UTC timestamp such as 2026-10-05T01:10:00.000Z."""
     return datetime.fromisoformat(timestamp.replace("Z", "+00:00")).astimezone().date()
 
@@ -34,7 +34,7 @@ def reading_days(conn: sqlite3.Connection, learner_id: str) -> set[date]:
         "UNION ALL SELECT created_at FROM practice_attempts WHERE learner_id = ?",
         (learner_id, learner_id),
     ).fetchall()
-    return {_local_day(r["at"]) for r in rows}
+    return {local_day(r["at"]) for r in rows}
 
 
 def stars(conn: sqlite3.Connection, learner_id: str) -> int:
@@ -58,7 +58,7 @@ def build_stats(conn: sqlite3.Connection, learner_id: str, today: date | None = 
         # Recording time of confirmed checks; Sanay attempts don't store their length.
         "minutes_read": round(sum(c["duration_sec"] for c in checks) / 60),
         "wcpm_history": [
-            {"date": _local_day(c["confirmed_at"]).isoformat(), "wcpm": int(c["wcpm"])}
+            {"date": local_day(c["confirmed_at"]).isoformat(), "wcpm": int(c["wcpm"])}
             for c in checks if c["wcpm"] is not None
         ],
         "practicing": practicing,
@@ -66,4 +66,4 @@ def build_stats(conn: sqlite3.Connection, learner_id: str, today: date | None = 
     }
 
 
-__all__ = ["LearnerNotFoundError", "build_stats", "reading_days", "stars", "streak"]
+__all__ = ["LearnerNotFoundError", "build_stats", "local_day", "reading_days", "stars", "streak"]

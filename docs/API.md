@@ -70,10 +70,10 @@ Marks the assessment final (`status: "confirmed"`) and deletes the child's audio
 A file that is already gone counts as deleted.
 
 ## Learners and passages
-- `GET /assessments/recent` → `[{"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}]`: the 10 most recently confirmed checks, newest first (`date` is `YYYY-MM-DD`, UTC). For the Basa tab.
+- `GET /assessments/recent` → `[{"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}]`: the 10 most recently confirmed checks, newest first (`date` is `YYYY-MM-DD` in the laptop's time zone). For the Basa tab.
 - `GET /learners` → `[{"id", "display_name", "grade", "stars", "streak_days", "level", "latest_wcpm", "last_check", "needs_practice"}]`, by `id` (display names are synthetic or initials only)
   - `stars` and `streak_days` are the same counts as in `/learners/{id}/stats`.
-  - The last four come from the learner's latest **confirmed** check (same "latest" as practice and `/class`): its `level`, its `wcpm`, its date (`YYYY-MM-DD`, UTC) and whether it has any `misread` or `skipped` word. They are left out for a learner with no confirmed check.
+  - The last four come from the learner's latest **confirmed** check (same "latest" as practice and `/class`): its `level`, its `wcpm`, its date (`YYYY-MM-DD`, in the laptop's time zone) and whether it has any `misread` or `skipped` word. They are left out for a learner with no confirmed check.
 - `GET /passages` → `[{"id", "title", "language", "grade", "text"}]`
 
 ## Sulat: books
@@ -146,6 +146,7 @@ Until the engine implements these, the app hides what depends on them, or keeps 
 - `GET /learners/{id}/stats` is live (it was a proposal), counted from saved checks and Sanay attempts.
 - `POST /practice/check` takes `learner_id` and saves the attempt; `404` for an unknown learner.
 - `GET /learners` items include `stars` and `streak_days`.
+- `last_check` in `/learners` and `date` in `/assessments/recent` are now the laptop's local day, not the UTC day (in Manila a check before 8 am showed as the day before).
 
 ### 2026-10-10 · frontend (wiring the app to the engine)
 - `GET /learners` and `GET /passages` are live, ordered by `id`. **Addition:** learners with a confirmed check also carry `level`, `latest_wcpm`, `last_check` and `needs_practice`.
