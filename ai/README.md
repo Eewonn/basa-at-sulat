@@ -23,6 +23,15 @@ check_word(audio_path: str, word: str) -> dict           # Sanay "Say it": {"res
 
 **Fallback (P1-AI-2):** Whisper prompted with the passage, for Filipino and English only.
 
+## Setup
+```bash
+python -m venv .venv
+.venv/Scripts/activate            # Windows (macOS/Linux: source .venv/bin/activate)
+pip install -r ai/requirements.txt
+python ai/smoke_test.py path/to/reading.wav "the passage text it reads"
+```
+The first run downloads the MMS aligner (about 1.2 GB) into `models/torch/` (git-ignored).
+
 ## Rules
 - Weights are downloaded by script into `models/` (git-ignored). Never commit them.
 - Pin versions in `requirements.txt`.
