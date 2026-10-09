@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 import { ArrowLeft, Check, Loader2, Mic, Pause, Play, RotateCcw, Sparkles, Square } from 'lucide-react'
 import { api } from '@/api'
 import type { Book, Category } from '@/api/types'
@@ -29,7 +29,9 @@ export function BookEditorScreen() {
   const [reader, setReader] = useState('')
   const [category, setCategory] = useState<Category>('bukid')
   const [text, setText] = useState('')
-  const [idea, setIdea] = useState('')
+  // From a reading group's "make a book" button: the group's missed words become the AI's idea.
+  const fromGroup = (useLocation().state as { words?: string[] } | null)?.words
+  const [idea, setIdea] = useState(() => (fromGroup ? t.aiIdeaWords(fromGroup) : ''))
   const [elapsed, setElapsed] = useState(0)
   const [book, setBook] = useState<Book | null>(null)
   const [time, setTime] = useState(0)
@@ -55,6 +57,13 @@ export function BookEditorScreen() {
     },
     onError: () => toast(t.aiDraftFailed)
   })
+
+  const drafted = useRef(false)
+  useEffect(() => {
+    if (!fromGroup || drafted.current) return
+    drafted.current = true
+    draft.mutate()
+  }, [fromGroup, draft])
 
   useEffect(() => {
     if (rec.state !== 'recording') return
