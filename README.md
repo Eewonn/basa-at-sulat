@@ -19,7 +19,7 @@ Normal speech recognition has to guess *what* was said, which needs a model trai
 
 In a reading check **we already know the text**. So we only need to *line up* the child's voice with the known words, using Meta's MMS forced aligner. It works letter by letter on any Latin-script text, was trained on 1,100+ languages, and runs on a CPU. Words that line up badly are likely mistakes, and the aligner can't "auto-correct" a child the way Whisper-style recognizers tend to.
 
-> ⚠️ Still unproven: whether "lines up badly" reliably means "misread". Task **P0-AI-1** tests this first, and it gates the rest of the build. See [docs/PLAN.md](docs/PLAN.md).
+> ✅ Tested in Phase 0: on Filipino readings by an adult with planted mistakes, scoring each word by its weakest-fitting letter caught misread and skipped words with **F1 0.74** on fresh passages it was never tuned on (gate: 0.6). Not yet tested on English, regional languages, other voices or children. See [docs/DECISIONS.md](docs/DECISIONS.md) and [eval/CONFIRM_REPORT.md](eval/CONFIRM_REPORT.md).
 
 ## Why it runs locally
 1. **Children's voices** are minors' personal data and shouldn't leave the classroom.
@@ -76,7 +76,7 @@ python3 scripts/create_issues.py             # creates labels + issues via gh
 ```
 
 ## Status
-Planning is done and Phase 0 (the aligner test) is next. No app code exists yet.
+Phase 0 passed: the team chose **go** with the MMS aligner (see [docs/DECISIONS.md](docs/DECISIONS.md)). Phase 1 (record → score → review → confirm) is in progress; progress per task is in [docs/TASKS.md](docs/TASKS.md).
 
 ## Disclosures (to complete before submission)
 Models and tools: Meta MMS forced aligner (**CC-BY-NC-4.0, non-commercial**), Qwen 2.5 7B Instruct via Ollama (Apache 2.0), Whisper (fallback only, if used), PyTorch, FastAPI, Electron, React, SQLite. Internet is needed only to download models once. Test audio is recorded by adult team members with planted mistakes. No children's recordings are used.
