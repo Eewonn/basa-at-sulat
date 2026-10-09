@@ -74,10 +74,22 @@ A file that is already gone counts as deleted.
 - `GET /passages` → `[{"id", "title", "language", "grade", "text"}]`
 
 ## Sulat: books
-- `POST /books`: multipart form with `title`, `language`, `text` and `audio` (the model reading). Returns `{"id", "words": [{"i", "text", "start", "end"}]}`
-- `GET /books/{id}` → the book with word timings
-- `GET /books/{id}/audio` → the full model reading
+- `POST /books`: multipart form with `title`, `language` (2-3 lowercase letters, such as `fil`, `eng`, `ilo`), `text` and `audio` (the model reading). Returns `{"id", "words": [{"i", "text", "start", "end"}]}`. Use a fluent speaker's complete reading of the story, and keep digits and dashes out of it, because words with no letters get zero-length times.
+- `GET /books/{id}` → `{"id", "title", "language", "text", "words": [{"i", "text", "start", "end"}]}`
+- `GET /books/{id}/audio` → the full model reading (`audio/wav`, 16 kHz mono)
 - `GET /books/{id}/clips/{i}` → audio for word `i` only
+
+`POST /books` errors (body `{"detail": "<what went wrong>"}`). A rejected upload keeps nothing: no audio file and no book.
+
+| Status | When |
+|---|---|
+| `400` | The audio can't be read |
+| `413` | The audio is over 25 MB |
+| `422` | A field is missing or blank, `language` isn't a 2-3 letter lowercase code, the story is over 3,000 words, or the audio is too short to hold the story |
+| `500` | Timing or saving failed |
+| `503` | The engine has no database yet, or the scoring model isn't installed |
+
+`GET /books/{id}` and `GET /books/{id}/audio` return `404` for an unknown id.
 
 ## Sanay: practice
 - `GET /learners/{id}/practice` → `{"items": [{"word", "sentence", "book_id", "word_index"}]}`, built from the child's latest confirmed check

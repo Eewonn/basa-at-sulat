@@ -44,7 +44,7 @@ Nobody waits on the result. The AI engineer runs the test while everyone else bu
 
 - [x] **P2-AI-1** · Word timings for a model reading — owner: ai · depends: P1-AI-1 · done when: a fluent speaker's correct reading yields start and end times for every word, checked by ear on 3 recordings
 - [ ] **P2-AI-2** · Single-word check — owner: ai · depends: P1-AI-1 · done when: `ai.check_word(audio_path, word)` returns a match or no-match result for Sanay's "Say it"
-- [ ] **P2-BE1-1** · Sulat alignment endpoint — owner: backend-1 · depends: P2-AI-1 · done when: `POST /books` stores a story, its model reading and word timings
+- [x] **P2-BE1-1** · Sulat alignment endpoint — owner: backend-1 · depends: P2-AI-1 · done when: `POST /books` stores a story, its model reading and word timings
 - [ ] **P2-BE1-2** · Word clips — owner: backend-1 · depends: P2-BE1-1 · done when: `GET /books/{id}/clips/{i}` returns that word's audio cut from the model reading
 - [ ] **P2-BE2-1** · Practice-set builder — owner: backend-2 · depends: P1-BE2-1 · done when: `GET /learners/{id}/practice` returns the child's missed words from their latest check, each with its sentence and clip
 - [ ] **P2-BE2-2** · Progress tracking — owner: backend-2 · depends: P2-BE2-1 · done when: `GET /learners/{id}/progress` compares two checks word by word and returns the change in reading speed

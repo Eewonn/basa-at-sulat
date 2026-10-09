@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.db import connect, init_db
+from app.levels import LEVELS
 from app.main import app
 
 client = TestClient(app)
@@ -194,7 +195,7 @@ def test_assess_missing_fields_is_422(env):
 def test_assess_stores_the_result_and_returns_real_wcpm_and_level(env):
     body = post(make_recording(env, "wav")).json()
     assert isinstance(body["wcpm"], int)
-    assert "level" in body  # null until P1-BE2-2 settles the DepEd level names
+    assert body["level"] in LEVELS
     # Stored: the teacher can override a word of this assessment.
     patched = client.patch(f"/assessments/{body['assessment_id']}/words/3", json={"label": "misread"})
     assert patched.status_code == 200

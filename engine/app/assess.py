@@ -1,7 +1,6 @@
 """POST /assess: recording in, scored words out (P1-BE1-1)."""
 
 import logging
-import sys
 import time
 import uuid
 import wave
@@ -10,14 +9,9 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
 from app.assessments import InvalidAssessmentError, save_assessment
 from app.audio import AudioConversionError, convert_to_wav16k, storage_dir
-from app.db import ENGINE_DIR
 from app.routes.assessments import get_conn
 
-# `ai` is a sibling package at the repo root, not under engine/.
-REPO_ROOT = ENGINE_DIR.parent
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-from ai import score  # noqa: E402
+from ai import score  # the repo root is put on sys.path by app/__init__.py
 
 log = logging.getLogger("engine.assess")
 router = APIRouter()
