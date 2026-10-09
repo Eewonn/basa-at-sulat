@@ -1,0 +1,37 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+out/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Models and audio: never commit weights or recordings
+models/
+*.pt
+*.bin
+*.safetensors
+*.onnx
+eval/recordings/
+engine/storage/
+*.wav
+*.webm
+*.ogg
+*.mp3
+*.m4a
+
+# Local data
+*.sqlite
+*.db
+
+# Scratch
+spike/
+.DS_Store

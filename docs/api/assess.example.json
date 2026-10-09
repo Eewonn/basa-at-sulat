@@ -1,0 +1,19 @@
+{
+  "assessment_id": "a_123",
+  "learner_id": "l_07",
+  "passage_id": "fil_g2_01",
+  "duration_sec": 41.2,
+  "words": [
+    {"i": 0, "text": "Nagtanim", "label": "matched", "score": 0.91, "start": 0.42, "end": 1.10},
+    {"i": 1, "text": "si", "label": "matched", "score": 0.88, "start": 1.15, "end": 1.32},
+    {"i": 2, "text": "Lina", "label": "matched", "score": 0.86, "start": 1.38, "end": 1.80},
+    {"i": 3, "text": "ng", "label": "skipped", "score": 0.08, "start": 3.60, "end": 3.64},
+    {"i": 4, "text": "palay", "label": "misread", "score": 0.31, "start": 3.70, "end": 4.30},
+    {"i": 5, "text": "sa", "label": "matched", "score": 0.90, "start": 4.36, "end": 4.52},
+    {"i": 6, "text": "bukid.", "label": "matched", "score": 0.87, "start": 4.58, "end": 5.10}
+  ],
+  "pauses": [{"before_word": 3, "seconds": 1.8}],
+  "wcpm": 52,
+  "level": "Developing",
+  "status": "draft"
+}
