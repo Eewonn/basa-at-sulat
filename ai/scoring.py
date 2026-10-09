@@ -3,30 +3,44 @@
 score() is real (MMS forced alignment, see aligner.py). word_timings() and check_word() are still STUBS
 that return the docs/API.md shapes so the engine can wire against them (P2-AI-1 and P2-AI-2 replace them).
 """
+import math
 import time
 import wave
 
 from . import aligner, text
 
 # --- thresholds -------------------------------------------------------------
-# UNTUNED starting values, picked by eye on clean synthetic speech. P1-AI-1 tunes them on eval/ recordings.
-# Never tune on demo recordings.
-MISREAD_BELOW = 0.6  # a word whose letters fit the audio worse than this is flagged
-SKIP_BELOW = 0.5  # ...and if it was also squeezed into the fewest frames it could get, it's "skipped"
+# Tuned on eval/: 15 Filipino readings of fil_g2_01 by one adult reader (2026-10-10). Never tune on demo
+# recordings. See eval/README.md for how to re-run the test.
+LOG_RANGE = 4  # word score = 1 + log10(weakest letter's probability) / 4, clipped to 0-1
+FLAG_AT_OR_BELOW = 0.25  # = a letter with under a 1-in-1000 chance. F1 is flat (0.74-0.78) for 0.00-0.35;
+#                          0.25 leans to recall, since the teacher confirms every flag and a miss goes unseen
 SQUEEZED_FRAMES_PER_CHAR = 1.25  # a word cramped to ~1 frame per letter had no real speech of its own
 PAUSE_SEC = 1.0  # a gap between two words at least this long is reported as a hesitation
 
 
-def label_word(mean_prob: float, n_chars: int, frames_per_char: float) -> str:
-    """"matched" | "misread" | "skipped" from how well a word's letters fit the audio.
+def word_score(letter_probs: list) -> float:
+    """0-1 from the word's WEAKEST letter, on a log scale (1.0 = every letter clearly there).
+
+    Not the average: a near-miss swap (palay -> "pala", lolo -> "lola") gets every letter right but one,
+    so the average stays high while that one letter's probability collapses. On the eval set, scoring
+    the weakest letter raised held-out F1 from 0.55 to about 0.76. The log scale spreads out the tiny
+    probabilities where the decision happens (1e-2 -> 0.5, 1e-3 -> 0.25, 1e-4 and below -> 0).
+    """
+    weakest = max(min(letter_probs), 1e-12)
+    return max(0.0, min(1.0, 1 + math.log10(weakest) / LOG_RANGE))
+
+
+def label_word(score: float, n_chars: int, frames_per_char: float) -> str:
+    """"matched" | "misread" | "skipped" from the word score and how much time the word got.
 
     A skipped word still has to be placed somewhere (the aligner needs a frame for every letter), so it
-    ends up squeezed between its neighbours with no probability behind it. One-letter words are always
-    one frame per letter, so they can't show the squeeze and are only ever "matched" or "misread".
+    ends up squeezed between its neighbours. One-letter words are always one frame per letter, so they
+    can't show the squeeze and are only ever "matched" or "misread".
     """
-    if mean_prob >= MISREAD_BELOW:
+    if score > FLAG_AT_OR_BELOW:
         return "matched"
-    if n_chars >= 2 and frames_per_char <= SQUEEZED_FRAMES_PER_CHAR and mean_prob < SKIP_BELOW:
+    if n_chars >= 2 and frames_per_char <= SQUEEZED_FRAMES_PER_CHAR:
         return "skipped"
     return "misread"
 
@@ -38,7 +52,7 @@ def score(audio_path: str, passage_text: str) -> dict:
              "pauses": [{"before_word", "seconds"}],
              "timings": {"align_ms", "score_ms"}}
     `i` and `text` follow docs/API.md: the passage split on whitespace, punctuation attached.
-    `score` is 0-1, how well the word's letters fit the audio (higher is better). `start`/`end` are seconds.
+    `score` is 0-1 from the word's weakest letter (higher is better; see word_score). `start`/`end` are seconds.
     `timings`: align_ms = reading the audio, running the model and aligning (nearly all the time, and it
     includes the ~10 s model load if warm_up() wasn't called); score_ms = turning that into labels and pauses.
 
@@ -81,13 +95,13 @@ def score(audio_path: str, passage_text: str) -> dict:
             rows.append({"i": i, "text": word, "label": "matched", "score": 1.0, "start": prev_end, "end": prev_end})
             continue
         n = len(normalised[i])
-        mean_prob = sum(a.token_scores) / len(a.token_scores)
+        ws = word_score(a.token_scores)
         frames_per_char = (a.end_frame - a.start_frame) / n
         start, end = round(a.start_frame * result.frame_sec, 2), round(a.end_frame * result.frame_sec, 2)
         if i > 0 and start - prev_end >= PAUSE_SEC:
             pauses.append({"before_word": i, "seconds": round(start - prev_end, 2)})
-        rows.append({"i": i, "text": word, "label": label_word(mean_prob, n, frames_per_char),
-                     "score": round(mean_prob, 2), "start": start, "end": end})
+        rows.append({"i": i, "text": word, "label": label_word(ws, n, frames_per_char),
+                     "score": round(ws, 2), "start": start, "end": end})
         prev_end = end
     return {"words": rows, "pauses": pauses, "timings": timings()}
 
