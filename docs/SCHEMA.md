@@ -55,8 +55,8 @@ P0-BE2-1 lists six tables. These choices go further. Please read them if your co
 - **When inserting from `/assess`:** set `final_label = ai_label`.
 - The API's `label` field is `final_label`.
 
-### 4. `wcpm` and `level` can be empty, and `level` is free text
-Both columns allow `NULL`. Since P1-BE2-1, `app.assessments` fills `wcpm` whenever a check is saved or a word is overridden (see `app/levels.py`), so in practice only `level` is `NULL`, and it stays that way until P1-BE2-2 computes it. `level` is not restricted to a fixed list yet, because the names still have to be checked against DepEd's current CRLA profiles. Once they are, we can add a `CHECK`.
+### 4. `wcpm` and `level` can be empty, and `level` is not constrained yet
+Both columns allow `NULL`, but `app.assessments` fills both whenever a check is saved or a word is overridden (see `app/levels.py`), so a saved check always has them. Since P1-BE2-2, `level` is one of five CRLA names (`levels.LEVELS`). **There is no `CHECK` for this yet:** adding one needs every teammate to run `--reset`, because there are no migrations. `levels.py` is the only writer, so the risk is low. **To do (P3):** add `CHECK (level IN ('Low Emerging', 'High Emerging', 'Developing', 'Transitioning', 'At Grade Level'))` with the next schema change that needs a reset anyway. See `docs/DECISIONS.md`.
 
 ### 5. Assessment status rules
 - `status` is `draft` (the default) or `confirmed`.

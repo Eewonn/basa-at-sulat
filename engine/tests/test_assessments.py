@@ -63,9 +63,10 @@ def count(conn, table):
 
 def test_save_returns_the_contract_shape(saved):
     expected = copy.deepcopy(EXAMPLE)
-    # Recomputed from the labels: 5 matched words in 41.2 s, and no level yet.
+    # Recomputed from the labels: 5 matched words in 41.2 s, and 5 of the
+    # passage's 23 words (22%) is High Emerging.
     expected["wcpm"] = 7
-    expected["level"] = None
+    expected["level"] = "High Emerging"
     assert saved == expected
 
 
@@ -80,7 +81,7 @@ def test_save_ignores_the_callers_wcpm_and_level(conn, result):
     result["wcpm"] = 999
     result["level"] = "Grade Level Ready"
     saved = save_assessment(conn, result)
-    assert (saved["wcpm"], saved["level"]) == (7, None)
+    assert (saved["wcpm"], saved["level"]) == (7, "High Emerging")
 
 
 def test_save_stores_audio_path_and_starts_as_draft(conn, result):
@@ -248,8 +249,27 @@ def test_override_changes_label_and_recomputes(conn, saved):
     updated = override_word(conn, "a_123", 3, "matched")
     assert updated["words"][3]["label"] == "matched"
     # 6 matched words in 41.2 s is 8.74 per minute.
-    assert (updated["wcpm"], updated["level"]) == (9, None)
+    assert (updated["wcpm"], updated["level"]) == (9, "High Emerging")
     assert get_assessment(conn, "a_123") == updated
+
+
+def test_override_can_move_the_level_up(conn, result):
+    # A full reading of the 23-word passage with 18 matched (78%) is Developing.
+    # One override makes it 19 (83%), which is Transitioning.
+    passage = conn.execute("SELECT text FROM passages WHERE id = 'fil_g2_01'").fetchone()
+    passage_words = passage["text"].split()
+    result["words"] = [
+        {"i": i, "text": text, "label": "matched" if i < 18 else "misread",
+         "score": 0.9, "start": None, "end": None}
+        for i, text in enumerate(passage_words)
+    ]
+    result["pauses"] = []
+    result["duration_sec"] = 20.0
+    assert save_assessment(conn, result)["level"] == "Developing"
+
+    updated = override_word(conn, "a_123", 18, "matched")
+    assert updated["level"] == "Transitioning"
+    assert get_assessment(conn, "a_123")["level"] == "Transitioning"
 
 
 def test_override_keeps_the_ai_label_and_records_when(conn, saved):

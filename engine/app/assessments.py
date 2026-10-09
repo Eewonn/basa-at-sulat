@@ -101,8 +101,11 @@ def _check_pauses(pauses, passage_word_count: int) -> None:
             )
 
 
-def _check_result(conn: sqlite3.Connection, result) -> None:
-    """Reject anything that would store a broken or misaligned check."""
+def _check_result(conn: sqlite3.Connection, result) -> int:
+    """Reject anything that would store a broken or misaligned check.
+
+    Returns the passage's word count, which the reading level needs.
+    """
     if not isinstance(result, dict):
         raise InvalidAssessmentError("the result must be an object")
     missing = [field for field in REQUIRED_FIELDS if field not in result]
@@ -128,6 +131,7 @@ def _check_result(conn: sqlite3.Connection, result) -> None:
     passage_words = passage["text"].split()
     _check_words(result["words"], passage_words)
     _check_pauses(result.get("pauses", []), len(passage_words))
+    return len(passage_words)
 
 
 # --- Reading and writing ---------------------------------------------------
@@ -188,10 +192,12 @@ def save_assessment(conn: sqlite3.Connection, result: dict,
     failure partway leaves nothing behind. final_label starts equal to the AI's
     label. Any wcpm or level in `result` is ignored and recomputed.
     """
-    _check_result(conn, result)
+    passage_word_count = _check_result(conn, result)
 
     words = result["words"]
-    wcpm, level = recompute((word["label"] for word in words), result["duration_sec"])
+    wcpm, level = recompute(
+        (word["label"] for word in words), result["duration_sec"], passage_word_count
+    )
 
     try:
         with conn:  # commits on success, rolls back if any insert fails
@@ -268,9 +274,11 @@ def override_word(conn: sqlite3.Connection, assessment_id: str, i: int,
             (label, overridden_at, assessment_id, i),
         )
 
-        duration_sec = conn.execute(
-            "SELECT duration_sec FROM assessments WHERE id = ?", (assessment_id,)
-        ).fetchone()["duration_sec"]
+        check = conn.execute(
+            "SELECT a.duration_sec, p.text FROM assessments a "
+            "JOIN passages p ON p.id = a.passage_id WHERE a.id = ?",
+            (assessment_id,),
+        ).fetchone()
         labels = [
             row["final_label"]
             for row in conn.execute(
@@ -278,7 +286,8 @@ def override_word(conn: sqlite3.Connection, assessment_id: str, i: int,
                 (assessment_id,),
             )
         ]
-        wcpm, level = recompute(labels, duration_sec)
+        # Split the same way _check_result does, so the count matches the word indices.
+        wcpm, level = recompute(labels, check["duration_sec"], len(check["text"].split()))
         conn.execute(
             "UPDATE assessments SET wcpm = ?, level = ? WHERE id = ?",
             (wcpm, level, assessment_id),

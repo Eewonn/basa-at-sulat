@@ -14,7 +14,7 @@ Hesitations aren't a word label: they're reported in `pauses` (`before_word` ind
 
 `score` is 0–1 (higher means a better match). `start`/`end` are seconds into the recording, and can be `null` when the scorer found no timing for a word (for example, a skipped one).
 
-`wcpm` (words correct per minute) is a whole number: `matched` words ÷ the recording's minutes, computed by the engine from the final labels, so it follows teacher overrides. **`level` is `null` until P1-BE2-2** checks the level names against DepEd's current CRLA profiles, so clients must handle a missing level.
+`wcpm` (words correct per minute) is a whole number: `matched` words ÷ the recording's minutes, computed by the engine from the final labels, so it follows teacher overrides. `level` is one of `Low Emerging`, `High Emerging`, `Developing`, `Transitioning`, `At Grade Level` (lowest first), computed from accuracy and `wcpm` and also following overrides. **It is an estimate from reading fluency, not an official CRLA profile**, because the app asks no comprehension questions. Label it that way in the UI (for example "Estimated level"). See `docs/DECISIONS.md` for the rules. Clients should still handle `null` for both fields: `/assess` returns `null` until it saves its result (P1-BE1-1).
 
 ## Basa: checks
 
@@ -41,7 +41,7 @@ Returns:
 }
 ```
 
-`timings` is the processing time on this laptop, for the "scored in X s" line. Until `ai.score` reports alignment and scoring separately, `align_ms` covers the whole `ai.score` call and `score_ms` is `0`. `wcpm` and `level` are `null` until Backend 2 computes them (P1-BE2-2).
+`timings` is the processing time on this laptop, for the "scored in X s" line. Until `ai.score` reports alignment and scoring separately, `align_ms` covers the whole `ai.score` call and `score_ms` is `0`. `wcpm` and `level` are `null` until `/assess` saves its result through Backend 2's store, which computes both.
 
 Errors: `400` if the audio can't be read, `404` for an unknown `passage_id` or `learner_id`, `422` if a field is missing, `503` if the scoring model isn't installed on this engine, `500` if scoring fails. Scoring can take a while (about 0.6× the recording length on CPU, plus ~10 s for the first call unless the engine was started with `BASA_WARM_UP=1`), so the app should wait and show a progress state.
 
@@ -92,6 +92,11 @@ These support the learner profile and story categories. Until the engine impleme
   - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up`, `down` or `unknown`. The engine reports `not_loaded` until the aligner is in memory (after the first `/assess`, or at startup with `BASA_WARM_UP=1`), and `unknown` for Ollama until it is wired in.
 
 ## Contract changes
+
+### 2026-10-10 · backend-2 (P1-BE2-2)
+- `level` is now computed for every saved check. It is one of `Low Emerging`, `High Emerging`, `Developing`, `Transitioning`, `At Grade Level`. It is a **fluency-based estimate** using CRLA's names, not an official CRLA result (see `docs/DECISIONS.md`).
+- An override can change `level` as well as `wcpm`.
+- **Frontend:** show it as an estimate, map the five names to colors, and keep handling `null` (from `/assess` until it saves).
 
 ### 2026-10-10 · backend-2 (P1-BE2-1)
 - `PATCH /assessments/{id}/words/{i}` now lists its error responses (404, 409, 422, 503).
