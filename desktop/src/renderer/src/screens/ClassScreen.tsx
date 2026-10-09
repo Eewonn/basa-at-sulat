@@ -2,11 +2,12 @@ import { useState, type CSSProperties } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { CountUp } from '@/components/CountUp'
 import { useNavigate } from 'react-router'
-import { ArrowRight, Download, Mic, RefreshCw, Search } from 'lucide-react'
+import { ArrowRight, BookPlus, Download, Mic, RefreshCw, Search } from 'lucide-react'
 import { api } from '@/api'
 import type { Learner } from '@/api/types'
 import { Art } from '@/components/Art'
 import { Emoji } from '@/components/Emoji'
+import { PlanView } from '@/components/PlanView'
 import { Avatar, LevelChip, StatCard } from '@/components/ui'
 import { isDue, nextDue, weekAgo } from '@/lib/due'
 import { daysSince, useT } from '@/strings'
@@ -157,6 +158,7 @@ export function ClassScreen() {
 // The first load can take ~25 s (the plan's example sentence comes from the local model), later loads are cached.
 function Groups({ learners }: { learners: Learner[] }) {
   const t = useT()
+  const navigate = useNavigate()
   const qc = useQueryClient()
   const { data: groups, isLoading, isError } = useQuery({ queryKey: ['class'], queryFn: () => api.classGroups(), retry: false })
   // A new example sentence means running the model again, so this is as slow as a first load.
@@ -208,10 +210,18 @@ function Groups({ learners }: { learners: Learner[] }) {
             {g.draft_plan ? (
               <details className="group rounded-tile bg-banig-soft p-3">
                 <summary className="cursor-pointer font-extrabold text-navy">{t.groupPlan}</summary>
-                <p className="mt-2 font-semibold whitespace-pre-line text-navy select-text">{g.draft_plan}</p>
+                <PlanView plan={g.draft_plan} />
               </details>
             ) : (
               <p className="text-sm font-semibold text-muted">{t.groupNoPlan}</p>
+            )}
+            {g.common_missed_words.length > 0 && (
+              <button
+                onClick={() => navigate('/books/new', { state: { words: g.common_missed_words } })}
+                className="flex cursor-pointer items-center justify-center gap-2 rounded-full bg-purple px-5 py-3 font-black text-white shadow-soft transition hover:-translate-y-0.5"
+              >
+                <BookPlus className="size-5" aria-hidden /> {t.groupMakeBook}
+              </button>
             )}
           </article>
         ))}

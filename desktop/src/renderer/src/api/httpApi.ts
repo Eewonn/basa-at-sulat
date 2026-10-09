@@ -94,6 +94,7 @@ export function createHttpApi(port: number): Api {
         body: JSON.stringify({ label })
       }),
     confirm: (id) => json<Assessment>(`/assessments/${id}/confirm`, { method: 'POST' }),
+    wordClipUrl: (assessmentId, i) => `${base}/assessments/${assessmentId}/clips/${i}`,
     learnerStats: (learnerId) => json(`/learners/${learnerId}/stats`),
     practice: async (learnerId) => (await json<{ items: PracticeItem[] }>(`/learners/${learnerId}/practice`)).items,
     clipUrl: (bookId, wordIndex) => `${base}/books/${bookId}/clips/${wordIndex}`,
@@ -107,10 +108,22 @@ export function createHttpApi(port: number): Api {
       // The engine replies with only {id, words}; the rest of the book is what the teacher just entered.
       const created = await json<{ id: string; words: BookWord[] }>('/books', {
         method: 'POST',
-        body: form({ title: book.title, language: languageCode(book.language), text: book.text, audio })
+        body: form({ title: book.title, language: languageCode(book.language), text: book.text, audio, category: book.category })
       })
       saveLocal('basa.bookMeta', { ...bookMeta(), [created.id]: { category: book.category, reader: book.reader, duration_sec: durationSec } })
       return withAudio({ ...book, ...created, duration_sec: durationSec })
+    },
+    draftStory: (topic, language, idea) =>
+      json('/books/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, language: languageCode(language), idea })
+      }),
+    deleteBook: async (id) => {
+      const res = await fetch(`${base}/books/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error(`${res.status} ${await res.text()}`)
+      const { [id]: _, ...rest } = bookMeta()
+      saveLocal('basa.bookMeta', rest)
     },
     classGroups: async (refresh) => (await json<{ groups: ClassGroup[] }>(`/class${refresh ? '?refresh=1' : ''}`)).groups,
     exportCsv: async () => {

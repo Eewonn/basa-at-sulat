@@ -62,7 +62,7 @@ export interface Passage {
   language: string
   grade: number
   text: string
-  category?: Category // proposed; the engine doesn't store one yet
+  category?: Category | null
 }
 
 export interface RecentCheck {
@@ -167,6 +167,7 @@ export interface Api {
   assess(audio: Blob, learnerId: string, passageId: string): Promise<Assessment>
   overrideWord(id: string, i: number, label: WordLabel): Promise<Assessment>
   confirm(id: string): Promise<Assessment>
+  wordClipUrl(assessmentId: string, i: number): string // the child's reading of one word, while the recording exists
   learnerStats(learnerId: string): Promise<LearnerStats>
   practice(learnerId: string): Promise<PracticeItem[]>
   clipUrl(bookId: string, wordIndex: number): string
@@ -176,6 +177,8 @@ export interface Api {
   books(): Promise<Book[]>
   book(id: string): Promise<Book>
   createBook(book: NewBook, audio: Blob, durationSec: number): Promise<Book>
+  deleteBook(id: string): Promise<void>
+  draftStory(topic: Category, language: string, idea: string): Promise<{ title: string; text: string }> // drafted by the local model
   classGroups(refresh?: boolean): Promise<ClassGroup[]>
   exportCsv(): Promise<Blob> // GET /class/export.csv
   storage(): Promise<Storage | null> // null until the engine reports it

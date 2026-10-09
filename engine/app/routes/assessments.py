@@ -1,11 +1,13 @@
 """Assessment endpoints (P1-BE2-1). Contract: docs/API.md."""
 
 import sqlite3
+import wave
 from collections.abc import Iterator
 from contextlib import closing
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi.responses import Response
 from pydantic import BaseModel, StrictBool
 
 from app.assessments import (
@@ -13,6 +15,7 @@ from app.assessments import (
     AssessmentNotFoundError,
     override_word,
 )
+from app.audio import cut_wav, stored_wav
 from app.db import connect, get_db_path
 from app.retention import AudioDeletionError, confirm_and_delete_audio
 from app.stats import local_day
@@ -63,6 +66,36 @@ def recent(conn=Depends(get_conn)) -> list[dict]:
         }
         for r in rows
     ]
+
+
+# Clips start a little early and end a little late, so the teacher hears the whole word.
+CLIP_PAD_SEC = 0.15
+
+
+@router.get("/{assessment_id}/clips/{i}")
+def word_clip(assessment_id: str, i: int = Path(ge=0), conn=Depends(get_conn)) -> Response:
+    """Word `i` as the child read it, cut from the check's recording, so the teacher can hear a flag before deciding.
+
+    Only while the recording exists: it is deleted on confirm unless the teacher kept it.
+    """
+    row = conn.execute("SELECT audio_path FROM assessments WHERE id = ?", (assessment_id,)).fetchone()
+    if row is None:
+        raise HTTPException(404, f"no assessment '{assessment_id}'")
+    word = conn.execute(
+        "SELECT start_sec, end_sec FROM word_results WHERE assessment_id = ? AND i = ?", (assessment_id, i)
+    ).fetchone()
+    if word is None:
+        raise HTTPException(404, f"assessment '{assessment_id}' has no word {i}")
+    if word["start_sec"] is None or word["end_sec"] is None:
+        raise HTTPException(422, f"word {i} has no timing, so there is nothing to play")
+    path = stored_wav(row["audio_path"])
+    if path is None:
+        raise HTTPException(410, "the recording was deleted when the check was confirmed")
+    try:
+        clip = cut_wav(path, word["start_sec"] - CLIP_PAD_SEC, word["end_sec"] + CLIP_PAD_SEC)
+    except (ValueError, wave.Error, EOFError):
+        raise HTTPException(410, "the recording can't be read") from None
+    return Response(clip, media_type="audio/wav")
 
 
 @router.patch("/{assessment_id}/words/{i}")

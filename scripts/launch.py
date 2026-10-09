@@ -48,7 +48,7 @@ def is_listening(host: str, port: int) -> bool:
 
 
 def prepare_database(data_dir: Path) -> bool:
-    """Create and seed a fresh database. An existing one is never touched."""
+    """Create a fresh database with the sample class and its demo checks. An existing one is never touched."""
     db_path = data_dir / "basa.db"
     if db_path.exists():
         return True
@@ -57,9 +57,9 @@ def prepare_database(data_dir: Path) -> bool:
     except OSError as err:
         say(f"Could not set up the data folder {data_dir}: {err}")
         return False
-    for module in ("app.init_db", "app.seed"):
+    for module, *extra in (("app.init_db",), ("app.seed", "--demo")):
         result = subprocess.run(
-            [sys.executable, "-m", module, "--path", str(db_path)], cwd=ENGINE_DIR, capture_output=True, text=True
+            [sys.executable, "-m", module, "--path", str(db_path), *extra], cwd=ENGINE_DIR, capture_output=True, text=True
         )
         if result.returncode != 0:
             say(f"Could not create the database ({module}): {(result.stderr or result.stdout).strip()}")

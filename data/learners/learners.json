@@ -1,12 +1,12 @@
 [
-  { "id": "l_01", "display_name": "A.R.", "grade": 1 },
-  { "id": "l_02", "display_name": "B.T.", "grade": 1 },
-  { "id": "l_03", "display_name": "C.M.", "grade": 1 },
-  { "id": "l_04", "display_name": "D.S.", "grade": 2 },
-  { "id": "l_05", "display_name": "E.V.", "grade": 2 },
-  { "id": "l_06", "display_name": "F.L.", "grade": 2 },
-  { "id": "l_07", "display_name": "G.P.", "grade": 2 },
-  { "id": "l_08", "display_name": "H.D.", "grade": 3 },
-  { "id": "l_09", "display_name": "J.C.", "grade": 3 },
-  { "id": "l_10", "display_name": "K.N.", "grade": 3 }
+  {"id": "l_01", "display_name": "Lina", "grade": 1},
+  {"id": "l_02", "display_name": "Paolo", "grade": 1},
+  {"id": "l_03", "display_name": "Mika", "grade": 1},
+  {"id": "l_04", "display_name": "Josie", "grade": 2},
+  {"id": "l_05", "display_name": "Ramon", "grade": 2},
+  {"id": "l_06", "display_name": "Ana", "grade": 2},
+  {"id": "l_07", "display_name": "Dino", "grade": 2},
+  {"id": "l_08", "display_name": "Bea", "grade": 3},
+  {"id": "l_09", "display_name": "Carlo", "grade": 3},
+  {"id": "l_10", "display_name": "Tess", "grade": 3}
 ]

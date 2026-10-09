@@ -2,7 +2,7 @@
 
 Run from engine/: python -m app.seed [--path PATH] [--reset] [--demo]
 
---demo also loads the demo Basa checks (see app/demo_seed.py).
+--demo also loads the demo Basa checks and Sanay practice (see app/demo_seed.py).
 
 Re-running is safe: rows are inserted or updated from the JSON files. The one
 exception is a passage whose text changed while assessments already point at
@@ -20,8 +20,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from app.assessments import AssessmentError
-from app.db import ENGINE_DIR, connect, get_db_path, init_db
-from app.demo_seed import DemoSeedError, load_demo_checks, prepare_demo_checks
+from app.db import ENGINE_DIR, connect, get_db_path, init_db, upgrade_db
+from app.demo_seed import DemoSeedError, load_demo_checks, load_demo_practice, prepare_demo_checks
 
 DATA_DIR = ENGINE_DIR.parent / "data"
 DEFAULT_LEARNERS_PATH = DATA_DIR / "learners" / "learners.json"
@@ -35,6 +35,9 @@ LANGUAGE_PATTERN = re.compile(r"[a-z]{2,3}")
 
 LEARNER_FIELDS = ("id", "display_name", "grade")
 PASSAGE_FIELDS = ("id", "title", "language", "grade", "text")
+# Optional on a passage; the app shows each topic's picture and filters by it.
+CATEGORIES = ("bukid", "pamilya", "hayop", "kalikasan", "paaralan")
+PASSAGE_COLUMNS = (*PASSAGE_FIELDS, "category")
 
 
 class SeedError(Exception):
@@ -123,7 +126,7 @@ def validate_learners(entries: list[dict], path: Path) -> list[tuple]:
 
 
 def validate_passages(entries: list[dict], path: Path) -> list[tuple]:
-    """Return passage rows in PASSAGE_FIELDS order, or raise SeedError."""
+    """Return passage rows in PASSAGE_COLUMNS order, or raise SeedError."""
     _check_entries(entries, PASSAGE_FIELDS, path)
     rows = []
     for entry in entries:
@@ -131,12 +134,16 @@ def validate_passages(entries: list[dict], path: Path) -> list[tuple]:
         language = _check_text(entry, "language", where)
         if not LANGUAGE_PATTERN.fullmatch(language):
             raise SeedError(f"{where}: 'language' must be a 2-3 letter lowercase code")
+        category = entry.get("category")
+        if category is not None and category not in CATEGORIES:
+            raise SeedError(f"{where}: 'category' must be one of {', '.join(CATEGORIES)}")
         rows.append((
             entry["id"],
             _check_text(entry, "title", where),
             language,
             _check_grade(entry, where),
             _check_text(entry, "text", where),
+            category,
         ))
     return rows
 
@@ -194,7 +201,7 @@ def apply_seed(conn: sqlite3.Connection, learners: list[tuple],
                passages: list[tuple]) -> SeedResult:
     """Write validated rows in one transaction: everything lands or nothing does."""
     existing_learners = _existing_rows(conn, "learners", LEARNER_FIELDS)
-    existing_passages = _existing_rows(conn, "passages", PASSAGE_FIELDS)
+    existing_passages = _existing_rows(conn, "passages", PASSAGE_COLUMNS)
 
     conflicts = _find_text_conflicts(conn, passages, existing_passages)
     if conflicts:
@@ -210,7 +217,7 @@ def apply_seed(conn: sqlite3.Connection, learners: list[tuple],
             conn, "learners", LEARNER_FIELDS, learners, existing_learners
         )
         result.passages_added, result.passages_updated = _upsert(
-            conn, "passages", PASSAGE_FIELDS, passages, existing_passages
+            conn, "passages", PASSAGE_COLUMNS, passages, existing_passages
         )
     return result
 
@@ -231,6 +238,7 @@ def seed_db(path: Path | str | None = None, reset: bool = False,
         init_db(db_path, reset=reset)
 
     with closing(connect(db_path)) as conn:
+        upgrade_db(conn)
         return apply_seed(conn, learners, passages)
 
 
@@ -274,6 +282,10 @@ def main(argv: list[str] | None = None) -> int:
             db_path = Path(args.path) if args.path else get_db_path()
             with closing(connect(db_path)) as conn:
                 demo = load_demo_checks(conn, demo_checks)
+                streaks = json.loads(DEFAULT_DEMO_CONFIG_PATH.read_text(encoding="utf-8")).get("practice_streaks", {})
+                practice_added = load_demo_practice(
+                    conn, {k: v for k, v in streaks.items() if not k.startswith("_")}
+                )
     except (SeedError, DemoSeedError, AssessmentError) as err:
         print(f"Error: {err}", file=sys.stderr)
         return 1
@@ -290,6 +302,7 @@ def main(argv: list[str] | None = None) -> int:
             f"Demo checks: {demo.loaded} loaded (synthetic, see data/demo_seed.json), "
             f"{demo.replaced} old ones replaced, {demo.practice_removed} demo practice attempts removed."
         )
+        print(f"Demo Sanay practice: {practice_added} attempts added (synthetic).")
         for mismatch in demo.level_mismatches:
             # Usually means levels.py cutoffs changed; update expected_level in the config.
             print(f"Warning: {mismatch}", file=sys.stderr)

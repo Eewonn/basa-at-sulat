@@ -4,6 +4,7 @@
     "title": "Ang Palay ni Lina",
     "language": "fil",
     "grade": 2,
+    "category": "bukid",
     "text": "Nagtanim si Lina ng palay sa bukid. Masaya siya. Tinulungan siya ng kanyang lolo. Pagkatapos, kumain sila ng mangga sa ilalim ng puno."
   },
   {
@@ -11,6 +12,7 @@
     "title": "Ben's Red Kite",
     "language": "eng",
     "grade": 2,
+    "category": "kalikasan",
     "text": "Ben has a red kite. He runs to the hill with his sister. The wind is strong, and the kite flies high. They laugh and wave at the birds."
   },
   {
@@ -18,6 +20,7 @@
     "title": "Ang Aso ni Mila",
     "language": "fil",
     "grade": 2,
+    "category": "hayop",
     "text": "Si Mila ay may maliit na aso. Puti ang balahibo nito. Tuwing umaga, naglalaro sila sa bakuran. Hinahabol ng aso ang bola. Pagod na sila pagkatapos, kaya umiinom sila ng tubig.",
     "credit": "Drafted by Claude (AI) and checked by a native Filipino-speaking teammate (KM). Used for the aligner confirmation test."
   },
@@ -26,7 +29,80 @@
     "title": "Sa Palengke",
     "language": "fil",
     "grade": 2,
+    "category": "pamilya",
     "text": "Pumunta sa palengke si Nanay at si Dino. Bumili sila ng isda, gulay, at mga prutas. Mabigat ang bayong, kaya binuhat ito ni Dino. Nakangiti silang umuwi sa bahay.",
     "credit": "Drafted by Claude (AI) and checked by a native Filipino-speaking teammate (KM). Used for the aligner confirmation test."
+  },
+  {
+    "id": "fil_g2_04",
+    "title": "Ang Kalabaw ni Lolo",
+    "language": "fil",
+    "grade": 2,
+    "category": "bukid",
+    "text": "May kalabaw si Lolo. Malaki at mabait ito. Tuwing umaga, hinihila nito ang araro sa bukid. Sa hapon, naliligo ang kalabaw sa ilog.",
+    "credit": "Drafted by Claude (AI); needs a check by a native speaker."
+  },
+  {
+    "id": "fil_g2_05",
+    "title": "Anihan",
+    "language": "fil",
+    "grade": 2,
+    "category": "bukid",
+    "text": "Dilaw na ang palay sa bukid. Panahon na ng anihan. Tumulong ang buong baryo. Masaya silang kumain ng kanin pagkatapos.",
+    "credit": "Drafted by Claude (AI); needs a check by a native speaker."
+  },
+  {
+    "id": "fil_g2_06",
+    "title": "Kaarawan ni Bunso",
+    "language": "fil",
+    "grade": 2,
+    "category": "pamilya",
+    "text": "Kaarawan ni Bunso ngayon. Nagluto si Nanay ng pansit. Bumili si Tatay ng maliit na keyk. Kumanta kaming lahat para kay Bunso.",
+    "credit": "Drafted by Claude (AI); needs a check by a native speaker."
+  },
+  {
+    "id": "fil_g2_07",
+    "title": "Ang Pusa sa Bubong",
+    "language": "fil",
+    "grade": 2,
+    "category": "hayop",
+    "text": "May pusa sa bubong. Itim ang balahibo nito. Ayaw nitong bumaba dahil may aso sa ibaba. Tinawag ito ni Ana, at tumalon ito sa kanyang kandungan.",
+    "credit": "Drafted by Claude (AI); needs a check by a native speaker."
+  },
+  {
+    "id": "fil_g2_08",
+    "title": "Ang Manok ni Tatay",
+    "language": "fil",
+    "grade": 2,
+    "category": "hayop",
+    "text": "Maagang tumilaok ang manok ni Tatay. Gising na ang lahat. Pinakain ni Tatay ang manok ng mais. Nangitlog ito ng dalawa.",
+    "credit": "Drafted by Claude (AI); needs a check by a native speaker."
+  },
+  {
+    "id": "fil_g2_09",
+    "title": "Ulan sa Hapon",
+    "language": "fil",
+    "grade": 2,
+    "category": "kalikasan",
+    "text": "Biglang dumilim ang langit. Umihip ang malakas na hangin. Bumuhos ang ulan sa hapon. Pagkatapos ng ulan, may bahaghari sa langit.",
+    "credit": "Drafted by Claude (AI); needs a check by a native speaker."
+  },
+  {
+    "id": "fil_g2_10",
+    "title": "Unang Araw sa Paaralan",
+    "language": "fil",
+    "grade": 2,
+    "category": "paaralan",
+    "text": "Unang araw ni Paolo sa paaralan. Kinakabahan siya. Ngumiti ang guro at binati siya. May bago siyang kaibigan sa klase.",
+    "credit": "Drafted by Claude (AI); needs a check by a native speaker."
+  },
+  {
+    "id": "eng_g2_02",
+    "title": "Lunch at School",
+    "language": "eng",
+    "grade": 2,
+    "category": "paaralan",
+    "text": "It is time for lunch. Mia opens her box. She has rice, egg, and a banana. She shares her banana with her friend Leo.",
+    "credit": "Drafted by Claude (AI); needs a check by a native speaker."
   }
 ]

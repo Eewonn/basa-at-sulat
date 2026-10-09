@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router'
-import { ArrowLeft, Mic, Pause, Play, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Mic, Pause, Play, RotateCcw, Trash2 } from 'lucide-react'
 import { api } from '@/api'
 import { Emoji } from '@/components/Emoji'
 import { KaraokeText } from '@/components/KaraokeText'
+import { useToast } from '@/components/ui'
 import { useT } from '@/strings'
 import { CATEGORY_EMOJI } from './CheckScreen'
 import { COVER } from './BooksScreen'
@@ -18,6 +19,20 @@ export function BookPlayerScreen() {
   const [playing, setPlaying] = useState(false)
   const [time, setTime] = useState(0)
   const audio = useRef<HTMLAudioElement>(null)
+  const toast = useToast()
+  const qc = useQueryClient()
+  const [armed, setArmed] = useState(false)
+  const remove = useMutation({
+    mutationFn: () => api.deleteBook(bookId),
+    onSuccess: () => {
+      qc.removeQueries({ queryKey: ['book', bookId] })
+      qc.invalidateQueries({ queryKey: ['books'] })
+      qc.invalidateQueries({ queryKey: ['passages'] })
+      toast(t.deletedBook)
+      navigate('/books')
+    },
+    onError: () => toast(t.deleteBookFailed)
+  })
 
   // The highlight follows the real model reading's playback position.
   useEffect(() => {
@@ -92,6 +107,16 @@ export function BookPlayerScreen() {
           <Mic className="size-5" aria-hidden /> {t.useInBasa}
         </button>
         {!book.audio_url && <span className="rounded-full bg-sun-soft px-3 py-1 text-sm font-extrabold text-[#6b4f00]">{t.noRecording}</span>}
+        <button
+          onClick={() => (armed ? remove.mutate() : setArmed(true))}
+          onBlur={() => setArmed(false)}
+          disabled={remove.isPending}
+          className={`ml-auto flex cursor-pointer items-center gap-2 rounded-full px-6 py-4 text-lg font-extrabold transition ${
+            armed ? 'bg-coral text-white' : 'text-coral-ink ring-2 ring-coral hover:bg-coral-soft'
+          }`}
+        >
+          <Trash2 className="size-5" aria-hidden /> {armed ? t.deleteConfirm : t.deleteBook}
+        </button>
       </div>
     </div>
   )

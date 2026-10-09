@@ -52,13 +52,13 @@ function freePort(): Promise<number> {
   })
 }
 
-// A fresh laptop gets a new, seeded database. An existing one is never touched.
+// A fresh laptop gets a new database with the sample class and its demo checks. An existing one is never touched.
 function prepareDatabase(python: string, dir: string, dataDir: string): boolean {
   const db = join(dataDir, 'basa.db')
   if (existsSync(db)) return true
   mkdirSync(dataDir, { recursive: true })
-  for (const module of ['app.init_db', 'app.seed']) {
-    const result = spawnSync(python, ['-m', module, '--path', db], { cwd: dir, encoding: 'utf8' })
+  for (const [module, ...extra] of [['app.init_db'], ['app.seed', '--demo']]) {
+    const result = spawnSync(python, ['-m', module, '--path', db, ...extra], { cwd: dir, encoding: 'utf8' })
     if (result.status !== 0) {
       console.error(`[engine] could not create the database (${module}):`, result.error?.message ?? result.stderr)
       return false

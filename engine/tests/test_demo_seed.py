@@ -9,6 +9,7 @@ from app import seed as seed_cli
 from app.assessments import save_assessment
 from app.db import connect
 from app.demo_seed import (
+    load_demo_practice,
     DemoSeedError,
     load_demo_checks,
     prepare_demo_checks,
@@ -327,3 +328,23 @@ def test_real_demo_config_loads_every_check_at_its_expected_level(conn):
     assert levels == {
         "Low Emerging", "High Emerging", "Developing", "Transitioning", "At Grade Level"
     }
+
+
+def test_demo_practice_gives_stars_and_a_streak_ending_today(conn, prepare):
+    from datetime import date
+
+    from app.stats import build_stats
+
+    load_demo_checks(conn, prepare(entry(id="demo_a", learner_id="l_01")))
+    added = load_demo_practice(conn, {"l_01": 3, "l_02": 2})  # l_02 has no demo check: skipped
+    stats = build_stats(conn, "l_01", today=date.today())
+    assert added == 9
+    assert stats["streak_days"] == 3
+    assert stats["stars"] == 8  # the first try of the first day was wrong
+    assert conn.execute("SELECT COUNT(*) FROM practice_attempts WHERE learner_id = 'l_02'").fetchone()[0] == 0
+
+
+def test_repo_demo_config_has_practice_for_every_seeded_learner():
+    config = json.loads(DEFAULT_DEMO_CONFIG_PATH.read_text(encoding="utf-8"))
+    learners = json.loads((DATA_DIR / "learners" / "learners.json").read_text(encoding="utf-8"))
+    assert {l["id"] for l in learners} <= set(config["practice_streaks"])

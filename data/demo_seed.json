@@ -1,5 +1,10 @@
 {
   "about": "Demo Basa checks for python -m app.seed --demo (see engine/app/demo_seed.py and docs/SCHEMA.md, 'Demo checks'). Each check starts from a real score() result in data/demo_checks/ (adult readers, tuning recordings), slowed to a child's pace with target_wcpm or duration_sec. Checks with 'relabel' have words changed BY HAND to reach the lower levels: they are synthetic, not model output. Display only, never accuracy evidence.",
+  "practice_streaks": {
+    "_about": "Days in a row, ending on the day the seed runs, that each learner did Sanay. Synthetic: gives stars and streaks something to show.",
+    "l_01": 3, "l_02": 5, "l_03": 7, "l_04": 1, "l_05": 2,
+    "l_06": 4, "l_07": 6, "l_08": 2, "l_09": 9, "l_10": 12
+  },
   "checks": [
     {
       "id": "demo_l01_a", "source": "fil_015", "learner_id": "l_01", "checked_at": "2026-10-05T01:10:00Z",

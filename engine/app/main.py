@@ -1,12 +1,13 @@
 import logging
 import os
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, closing
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.assess import router as assess_router
 from app.books import router as books_router
+from app.db import connect, get_db_path, upgrade_db
 from app.plans import ollama_status
 from app.retention import delete_owed_audio
 from app.routes.assessments import router as assessments_router
@@ -21,6 +22,9 @@ log = logging.getLogger("engine")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if get_db_path().exists():
+        with closing(connect()) as conn:
+            upgrade_db(conn)
     delete_owed_audio()
     # Opt-in: loading the model takes ~10 s and needs torch plus the weights.
     if os.environ.get("BASA_WARM_UP") == "1":
@@ -42,7 +46,7 @@ app = FastAPI(title="Basa at Sulat engine", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
-    allow_methods=["GET", "POST", "PATCH"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["content-type"],
 )
 app.include_router(assess_router)

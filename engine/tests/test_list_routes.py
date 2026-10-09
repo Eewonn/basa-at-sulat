@@ -55,7 +55,7 @@ def test_learners_lists_the_seeded_class():
     r = client.get("/learners")
     assert r.status_code == 200
     rows = r.json()
-    assert rows[0] == {"id": "l_01", "display_name": "A.R.", "grade": 1, "stars": 0, "streak_days": 0}
+    assert rows[0] == {"id": "l_01", "display_name": "Lina", "grade": 1, "stars": 0, "streak_days": 0}
     assert [x["id"] for x in rows] == sorted(x["id"] for x in rows)
 
 
@@ -71,7 +71,7 @@ def test_learners_summarise_the_latest_confirmed_check(env):
     assert rows["l_01"]["level"] is not None
     assert rows["l_02"]["needs_practice"] is True
     # Drafts don't count, and a learner with no confirmed check has no summary fields.
-    assert rows["l_03"] == {"id": "l_03", "display_name": "C.M.", "grade": 1, "stars": 0, "streak_days": 0}
+    assert rows["l_03"] == {"id": "l_03", "display_name": "Mika", "grade": 1, "stars": 0, "streak_days": 0}
 
 
 def test_recent_lists_confirmed_checks_newest_first(env):
@@ -81,7 +81,7 @@ def test_recent_lists_confirmed_checks_newest_first(env):
     save_check(env, "a_3", "l_03", confirm=False)
     rows = client.get("/assessments/recent").json()
     assert [r["assessment_id"] for r in rows] == ["a_2", "a_1"]
-    assert rows[0]["display_name"] == "B.T." and rows[0]["date"] == "2026-10-03"
+    assert rows[0]["display_name"] == "Paolo" and rows[0]["date"] == "2026-10-03"
     assert set(rows[0]) == {"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}
 
 
@@ -90,7 +90,7 @@ def test_passages_lists_the_seeded_texts():
     assert r.status_code == 200
     rows = r.json()
     assert {"fil_g2_01", "eng_g2_01"} <= {p["id"] for p in rows}
-    assert set(rows[0]) == {"id", "title", "language", "grade", "text"}
+    assert set(rows[0]) == {"id", "title", "language", "grade", "text", "category"}
 
 
 def test_books_is_empty_then_lists_newest_first(monkeypatch, tmp_path):

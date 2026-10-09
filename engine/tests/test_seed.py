@@ -125,6 +125,29 @@ def test_extra_fields_are_ignored(db_path, files):
     assert seed_db(db_path, **files).passages_added == 1
 
 
+def test_category_is_saved_and_updated(db_path, files):
+    write_json(files["passages_path"], [{**PASSAGES[0], "category": "bukid"}])
+    seed_db(db_path, **files)
+    write_json(files["passages_path"], [{**PASSAGES[0], "category": "pamilya"}])
+    assert seed_db(db_path, **files).passages_updated == 1
+    with closing(connect(db_path)) as conn:
+        assert conn.execute("SELECT category FROM passages").fetchone()[0] == "pamilya"
+
+
+def test_seed_adds_category_to_an_older_database(db_path, files):
+    with closing(connect(db_path)) as conn:
+        conn.executescript(
+            "CREATE TABLE learners (id TEXT PRIMARY KEY, display_name TEXT, grade INTEGER);"
+            "CREATE TABLE passages (id TEXT PRIMARY KEY, title TEXT, language TEXT, grade INTEGER, text TEXT);"
+            "CREATE TABLE assessments (id TEXT PRIMARY KEY, passage_id TEXT);"
+            "CREATE TABLE books (id TEXT PRIMARY KEY, title TEXT, language TEXT, text TEXT);"
+        )
+    write_json(files["passages_path"], [{**PASSAGES[0], "category": "bukid"}])
+    seed_db(db_path, **files)
+    with closing(connect(db_path)) as conn:
+        assert conn.execute("SELECT category FROM passages").fetchone()[0] == "bukid"
+
+
 def test_regional_language_code_accepted(db_path, files):
     write_json(files["passages_path"], [{**PASSAGES[0], "id": "ilo_g2_01", "language": "ilo"}])
     assert seed_db(db_path, **files).passages_added == 1
@@ -199,6 +222,7 @@ def test_bad_learner_rejected(db_path, files, bad_entry, message):
     ({"language": "Filipino"}, "language"),
     ({"language": "FIL"}, "language"),
     ({"grade": -1}, "grade"),
+    ({"category": "dagat"}, "category"),
 ])
 def test_bad_passage_rejected(db_path, files, change, message):
     write_json(files["passages_path"], [{**PASSAGES[0], **change}])

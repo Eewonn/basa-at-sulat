@@ -28,7 +28,7 @@ python -m pytest                  # runs the tests
 | Table | Key | What it holds |
 |---|---|---|
 | `learners` | `id` | Synthetic names or initials only, plus the grade |
-| `passages` | `id` | Basa reading passages (same shape as `data/passages/passages.json`) |
+| `passages` | `id` | Basa reading passages (same shape as `data/passages/passages.json`), with an optional `category` topic. Older databases get the column on the next engine start or seed |
 | `assessments` | `id` | One Basa check: learner, passage, duration, `wcpm`, `level`, `status`, audio path |
 | `word_results` | `(assessment_id, i)` | Per-word AI label, teacher's final label, score, timings |
 | `pauses` | `(assessment_id, before_word)` | Hesitations before a word |
@@ -87,7 +87,7 @@ Bad data fails at insert time with `sqlite3.IntegrityError` instead of breaking 
 
 | File | What it holds |
 |---|---|
-| [`data/learners/learners.json`](../data/learners/learners.json) | 10 synthetic learners, `l_01`–`l_10`, **initials only**, grades 1–3 |
+| [`data/learners/learners.json`](../data/learners/learners.json) | 10 synthetic learners, `l_01`–`l_10`, **made-up first names**, grades 1–3 |
 | [`data/passages/passages.json`](../data/passages/passages.json) | Basa passages (see [its README](../data/passages/README.md)) |
 
 ### How a run works
@@ -118,6 +118,8 @@ python -m app.seed --demo
 ```
 
 This loads 14 confirmed Basa checks for the 10 synthetic learners, so the level, class and progress screens have something to show. Every level appears at least once. Learners `l_03`, `l_07`, `l_09` and `l_10` have an earlier and a later check (2026-09-07 → 2026-10-05) for progress.
+
+It also adds synthetic Sanay attempts so stars and streaks have data: `practice_streaks` in `data/demo_seed.json` says how many days in a row, ending on the day the seed runs, each learner practised (up to 3 words a day from their latest demo check). They point at `demo_` checks, so a re-run replaces them. Streaks are counted from the seed day, so they fade if the database is kept for weeks; re-run `--demo` to refresh them.
 
 **Where the data comes from.** Each check starts as a real `score()` result from the AI engineer's tuning recordings (`data/demo_checks/`, one JSON per recording, from PR #16). There's no audio and no reader names. `demo_seed.json` maps each recording to a learner and changes it:
 - **Slowed down.** The readers were adults (80–155 WCPM), so `target_wcpm` (or `duration_sec`) sets a child's pace. Word `start`/`end` and pause lengths are scaled by the same factor, so they still fit the recording.

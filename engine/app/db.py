@@ -35,6 +35,21 @@ def connect(path: Path | str | None = None) -> sqlite3.Connection:
     return conn
 
 
+def upgrade_db(conn: sqlite3.Connection) -> None:
+    """Bring an older database up to date: new columns, and a passage for every book. Safe to run on every start."""
+    columns = {row["name"] for row in conn.execute("PRAGMA table_info(passages)")}
+    if columns and "category" not in columns:
+        conn.execute("ALTER TABLE passages ADD COLUMN category TEXT")
+        conn.commit()
+    # Books made before every book was also a Basa passage.
+    if columns:
+        with conn:
+            conn.execute(
+                "INSERT INTO passages (id, title, language, grade, text) "
+                "SELECT id, title, language, 2, text FROM books WHERE id NOT IN (SELECT id FROM passages)"
+            )
+
+
 def init_db(path: Path | str | None = None, reset: bool = False) -> Path:
     """Create a fresh database from schema.sql and return its path.
 

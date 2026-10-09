@@ -1,6 +1,8 @@
+import io
 import logging
 import os
 import subprocess
+import wave
 from pathlib import Path
 
 from app.db import ENGINE_DIR
@@ -48,3 +50,35 @@ def delete_audio(audio_path: str) -> None:
         target.unlink()
     except FileNotFoundError:
         log.info("audio already gone: %s", audio_path)
+
+
+def stored_wav(audio_path: str | None) -> Path | None:
+    """The stored WAV for a relative `audio_path`, or None if it is missing or points outside storage_dir()."""
+    root = storage_dir().resolve()
+    path = (root / audio_path).resolve() if audio_path else None
+    if path is None or not path.is_relative_to(root) or not path.is_file():
+        return None
+    return path
+
+
+def cut_wav(path: Path, start: float, end: float) -> bytes:
+    """A WAV holding only [start, end] seconds of `path`, cut in memory (nothing is written to disk).
+
+    The end is clipped to the recording. Raises ValueError if nothing is left, wave.Error/EOFError if unreadable.
+    """
+    with wave.open(str(path), "rb") as src:
+        rate = src.getframerate()
+        first = max(0, round(start * rate))
+        last = min(round(end * rate), src.getnframes())
+        if last <= first:
+            raise ValueError("no audio in that span")
+        src.setpos(first)
+        frames = src.readframes(last - first)
+        channels, width = src.getnchannels(), src.getsampwidth()
+    out = io.BytesIO()
+    with wave.open(out, "wb") as dst:
+        dst.setnchannels(channels)
+        dst.setsampwidth(width)
+        dst.setframerate(rate)
+        dst.writeframes(frames)
+    return out.getvalue()

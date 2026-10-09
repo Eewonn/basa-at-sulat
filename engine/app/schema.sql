@@ -17,7 +17,9 @@ CREATE TABLE passages (
     language    TEXT NOT NULL,
     grade       INTEGER NOT NULL CHECK (grade BETWEEN 1 AND 12),
     text        TEXT NOT NULL CHECK (length(trim(text)) > 0),
-    created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+    created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+    -- Topic for the picture and filter (app.seed.CATEGORIES). Older databases get it from app.db.upgrade_db.
+    category    TEXT
 );
 
 -- One Basa check. app.assessments fills wcpm and level on every save and override.

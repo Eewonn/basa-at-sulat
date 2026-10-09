@@ -1,5 +1,6 @@
 import * as Popover from '@radix-ui/react-popover'
-import { Check, CircleDashed, TriangleAlert } from 'lucide-react'
+import { useState } from 'react'
+import { Check, CircleDashed, TriangleAlert, Volume2 } from 'lucide-react'
 import type { Word, WordLabel } from '@/api/types'
 import { useT } from '@/strings'
 
@@ -10,9 +11,32 @@ const STYLE: Record<WordLabel, string> = {
 }
 
 // One word of the passage. Flagged words always show their label as text, not just color.
-export function WordChip({ word, delayMs, onFix, pauseBefore }: { word: Word; delayMs: number; onFix: (label: WordLabel) => void; pauseBefore?: number }) {
+// clipUrl is the child's own reading of this word, so the teacher can hear a flag before fixing it.
+export function WordChip({
+  word,
+  delayMs,
+  onFix,
+  pauseBefore,
+  clipUrl
+}: {
+  word: Word
+  delayMs: number
+  onFix: (label: WordLabel) => void
+  pauseBefore?: number
+  clipUrl?: string
+}) {
   const t = useT()
   const labelText = { matched: t.labelMatched, misread: t.labelMisread, skipped: t.labelSkipped }
+  const [playing, setPlaying] = useState(false)
+  const hear = () => {
+    if (!clipUrl) return
+    const audio = new Audio(clipUrl)
+    const done = () => setPlaying(false)
+    audio.onended = done
+    audio.onerror = done
+    setPlaying(true)
+    audio.play().catch(done)
+  }
 
   return (
     <Popover.Root>
@@ -33,7 +57,18 @@ export function WordChip({ word, delayMs, onFix, pauseBefore }: { word: Word; de
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content sideOffset={8} className="z-50 w-64 rounded-tile bg-white p-3 shadow-lift">
-          <p className="text-2xl font-black text-navy">{word.text}</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-2xl font-black text-navy">{word.text}</p>
+            {clipUrl && (
+              <button
+                onClick={hear}
+                disabled={playing}
+                className="flex cursor-pointer items-center gap-1.5 rounded-full bg-blue px-3 py-1.5 text-sm font-extrabold text-white transition hover:bg-blue-dark disabled:opacity-60"
+              >
+                <Volume2 className={`size-4 ${playing ? 'animate-pulse' : ''}`} aria-hidden /> {t.hearWord}
+              </button>
+            )}
+          </div>
           {(word.label !== 'matched' || pauseBefore) && (
             <div className="mt-3 rounded-lg bg-sun-soft px-3 py-2 text-sm text-navy">
               <p className="font-extrabold">{t.whyTitle}</p>

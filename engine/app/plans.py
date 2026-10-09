@@ -257,13 +257,15 @@ def build_sentence_prompt(words: list[str], language: str) -> str:
     return template.substitute(words=", ".join(words))
 
 
-def _post_generate(prompt: str, settings: OllamaSettings, seed: int) -> dict:
-    """POST to Ollama's /api/generate and return the decoded JSON reply."""
+def _post_generate(prompt: str, settings: OllamaSettings, seed: int,
+                   options: dict = GENERATION_OPTIONS, format: str | None = None) -> dict:
+    """POST to Ollama's /api/generate and return the decoded JSON reply. format="json" asks for a JSON response."""
     payload = json.dumps({
         "model": settings.model,
         "prompt": prompt,
         "stream": False,
-        "options": {**GENERATION_OPTIONS, "seed": seed},
+        "options": {**options, "seed": seed},
+        **({"format": format} if format else {}),
     }).encode("utf-8")
     request = urllib.request.Request(
         f"{settings.url}/api/generate",

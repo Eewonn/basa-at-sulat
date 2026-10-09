@@ -27,7 +27,7 @@ engine/
 
 ## Rules
 - Runs on `localhost:8000`. The web app calls it directly, and nothing calls out to the internet.
-- Learner names are synthetic or initials only.
+- Learner names are synthetic (made-up first names) or initials.
 - A child's audio is deleted when the teacher confirms, unless keep-audio is set.
 
 ## Status and handoff (Backend 1)
@@ -96,7 +96,7 @@ Built against `docs/api/assess.example.json`, ahead of the real `/assess`.
 - No `CHECK` constraint on `level` yet (it would force a `--reset`). It's noted as a P3 to do in `docs/SCHEMA.md`.
 
 ### Demo checks (P1-BE2-3)
-`python -m app.seed --demo` loads 14 confirmed demo checks (ids `demo_…`) covering every level, plus before-and-after pairs for progress. Some are hand-edited and synthetic. See "Demo checks" in `docs/SCHEMA.md`. The score() results in `data/demo_checks/` came from the AI engineer (#16).
+`python -m app.seed --demo` loads 14 confirmed demo checks (ids `demo_…`) covering every level, plus before-and-after pairs for progress, and synthetic Sanay attempts so stars and streaks show (`practice_streaks`). Some are hand-edited and synthetic. See "Demo checks" in `docs/SCHEMA.md`. The score() results in `data/demo_checks/` came from the AI engineer (#16).
 
 - `validate_result(conn, result)` in `app/assessments.py` runs `save_assessment`'s checks without saving.
 - **For the AI engineer (P3-AI-1):** leave out `demo_` checks.
@@ -155,7 +155,7 @@ python scripts/download_models.py     # once, with internet: the MMS aligner wei
 scripts/start.sh                      # every day, no internet needed
 scripts/start.sh --check              # only report what is ready or missing
 ```
-- **`start.sh`** runs `scripts/check_setup.py` first. Missing required parts (ffmpeg, npm, Python packages, aligner weights, `desktop/node_modules`) stop the start with a fix command for each. A missing Ollama only warns, because group plans fall back to templates. Then `scripts/launch.py` creates and seeds the database if there isn't one, starts Ollama if it is installed and not running, starts the engine on a free port, runs the desktop app with `BASA_ENGINE_PORT`, and stops what it started when the app closes. It uses `engine/.venv` if present, else `python3`; set `BASA_PYTHON` to choose.
+- **`start.sh`** runs `scripts/check_setup.py` first. Missing required parts (ffmpeg, npm, Python packages, aligner weights, `desktop/node_modules`) stop the start with a fix command for each. A missing Ollama only warns, because group plans fall back to templates. Then `scripts/launch.py` creates and seeds the database (with the demo checks) if there isn't one, starts Ollama if it is installed and not running, starts the engine on a free port, runs the desktop app with `BASA_ENGINE_PORT`, and stops what it started when the app closes. It uses `engine/.venv` if present, else `python3`; set `BASA_PYTHON` to choose.
 - **`download_models.py`** skips anything already downloaded; `--check` only reports. The aligner needs `pip install -r engine/requirements.txt -r ai/requirements.txt` first. Ollama must be installed and running to pull its model (`qwen2.5:7b`).
 - **Engine command:** `python -m app [--port N] [--data-dir D]`. `--data-dir D` keeps the database at `D/basa.db` and the audio under `D`. `PORT` still works; `--port` wins.
 - **Settings (all optional):** `BASA_DATA_DIR` (default `engine/storage`), `BASA_APP_CMD` (default `npm --prefix desktop run dev`), `BASA_OLLAMA_URL`, `BASA_WARM_UP` (default `1` here: the aligner loads at startup so the first reading isn't slow).

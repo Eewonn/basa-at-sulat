@@ -57,6 +57,15 @@ Errors (body `{"detail": "<what went wrong>"}`):
 | `422` | `label` isn't `matched`, `misread` or `skipped`, or `i` isn't a whole number from 0 |
 | `503` | The engine has no database yet (run `python -m app.seed` in `engine/`) |
 
+### `GET /assessments/{id}/clips/{i}`
+Word `i` as the child read it (`audio/wav`), cut from the check's recording from 0.15 s before the word's `start` to 0.15 s after its `end` (clipped to the recording), so the teacher can hear a flagged word before deciding. Nothing is written to disk.
+
+| Status | When |
+|---|---|
+| `404` | No assessment with that id, or it has no word `i` |
+| `410` | The recording is gone: it is deleted on confirm unless `keep_audio` was set |
+| `422` | The word has no timing (`start`/`end` are `null`), or `i` isn't a whole number from 0 |
+
 ### `POST /assessments/{id}/confirm`
 Marks the assessment final (`status: "confirmed"`) and deletes the child's audio unless the body is `{"keep_audio": true}`. An empty body means `keep_audio: false`. Returns the confirmed assessment.
 
@@ -74,14 +83,16 @@ A file that is already gone counts as deleted.
 - `GET /learners` → `[{"id", "display_name", "grade", "stars", "streak_days", "level", "latest_wcpm", "last_check", "needs_practice"}]`, by `id` (display names are synthetic or initials only)
   - `stars` and `streak_days` are the same counts as in `/learners/{id}/stats`.
   - The last four come from the learner's latest **confirmed** check (same "latest" as practice and `/class`): its `level`, its `wcpm`, its date (`YYYY-MM-DD`, in the laptop's time zone) and whether it has any `misread` or `skipped` word. They are left out for a learner with no confirmed check.
-- `GET /passages` → `[{"id", "title", "language", "grade", "text"}]`
+- `GET /passages` → `[{"id", "title", "language", "grade", "text", "category"}]`; `category` is one of `bukid`, `pamilya`, `hayop`, `kalikasan`, `paaralan`, or null
 
 ## Sulat: books
 - `GET /books` → `[{"id", "title", "language", "text"}]`, newest first, without word timings (`GET /books/{id}` has them). Every book has its model reading, because `POST /books` requires it.
-- `POST /books`: multipart form with `title`, `language` (2-3 lowercase letters, such as `fil`, `eng`, `ilo`), `text` and `audio` (the model reading). Returns `{"id", "words": [{"i", "text", "start", "end"}]}`. Use a fluent speaker's complete reading of the story, and keep digits and dashes out of it, because words with no letters get zero-length times.
+- `POST /books`: multipart form with `title`, `language` (2-3 lowercase letters, such as `fil`, `eng`, `ilo`), `text`, `audio` (the model reading) and optional `category` (a passage topic). The book is also saved as a Basa passage with the same id (grade 2), so a child can be checked on it; older books get theirs on the next engine start. Returns `{"id", "words": [{"i", "text", "start", "end"}]}`. Use a fluent speaker's complete reading of the story, and keep digits and dashes out of it, because words with no letters get zero-length times.
 - `GET /books/{id}` → `{"id", "title", "language", "text", "words": [{"i", "text", "start", "end"}]}`
 - `GET /books/{id}/audio` → the full model reading (`audio/wav`, 16 kHz mono)
 - `GET /books/{id}/clips/{i}` → audio for word `i` only (`audio/wav`, 16 kHz mono), cut from the model reading between that word's `start` and `end`
+- `DELETE /books/{id}` → 204. Removes the book, its word timings, its model reading and its Basa passage (the passage stays if a check was read from it). Sanay attempts that used one of its clips are kept, with `book_id`/`word_index` set to null. 404 if there is no such book.
+- `POST /books/draft`: JSON `{"topic", "language", "idea"?}` → `{"title", "text"}`. `topic` is a passage category, `language` is `fil` or `eng`. The local model (qwen2.5:7b in Ollama, prompts `engine/prompts/story-*.txt`) drafts a short grade-2 story; a reply that isn't JSON, is over 80 words or has digits is retried once with another seed. Nothing is saved. 422 for a bad topic or language, 503 if Ollama is down or both tries fail. The draft is for the teacher to edit: Filipino drafts from the 7B model are often unnatural.
 
 `POST /books` errors (body `{"detail": "<what went wrong>"}`). A rejected upload keeps nothing: no audio file and no book.
 
@@ -141,6 +152,9 @@ Until the engine implements these, the app hides what depends on them, or keeps 
   - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up` or `down`. The engine reports `not_loaded` until the aligner is in memory (after the first `/assess`, or at startup with `BASA_WARM_UP=1`). `ollama` is `up` if Ollama answers at `OLLAMA_URL` within 1 s; it doesn't check that the model is pulled.
 
 ## Contract changes
+
+### 2026-10-10 · frontend (hear a word on review)
+- New: `GET /assessments/{id}/clips/{i}` plays one word from the child's recording while it still exists.
 
 ### 2026-10-10 · frontend (real stats)
 - `GET /learners/{id}/stats` is live (it was a proposal), counted from saved checks and Sanay attempts.
