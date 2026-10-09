@@ -1,4 +1,4 @@
-import type { Api, Assessment, Book, BookWord, ClassSettings, Learner, LearnerStats, Level, Passage, PracticeItem, RecentCheck, Word, WordLabel } from './types'
+import type { Api, Assessment, Book, BookWord, ClassGroup, ClassSettings, Learner, LearnerStats, Level, Passage, PracticeItem, RecentCheck, Word, WordLabel } from './types'
 
 // Sample data only: synthetic learners, team-written passages (the first two match data/passages/passages.json).
 const PASSAGES: Passage[] = [
@@ -339,6 +339,24 @@ export const mockApi: Api = {
     audioFiles += 1
     return book
   },
+  async classGroups() {
+    await sleep(900)
+    const order: Level[] = ['Low Emerging', 'High Emerging', 'Developing', 'Transitioning', 'At Grade Level']
+    return order.flatMap((level): ClassGroup[] => {
+      const members = LEARNERS.filter((l) => l.level === level)
+      if (!members.length) return []
+      const words = [...new Set(members.flatMap((l) => STATS[l.id]?.practicing ?? []))].slice(0, 5)
+      const draft_plan = [
+        `Mga salitang pagsasanayan: ${words.length ? words.join(', ') : 'wala, basahin ang bagong kuwento'}`,
+        '',
+        '1. Basahin nang malakas ang bawat salita; uulitin ng mga bata.',
+        '2. Hanapin ang salita sa kuwento at bilugan ito.',
+        '3. Halimbawang pangungusap: "Nagtanim si Lina ng palay sa bukid."'
+      ].join('\n')
+      return [{ level, learner_ids: members.map((l) => l.id), common_missed_words: words, draft_plan }]
+    })
+  },
+  exportCsv: null,
   async storage() {
     await sleep(150)
     return { audio_files: audioFiles, audio_mb: +(audioFiles * 0.42).toFixed(1), db_mb: 0.3, data_dir: window.basa?.platform === 'win32' ? '%APPDATA%\\Basa' : '~/.config/Basa' }

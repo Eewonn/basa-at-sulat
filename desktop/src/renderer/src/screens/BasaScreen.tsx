@@ -91,7 +91,7 @@ export function BasaScreen() {
                   </p>
                 </div>
                 <span className="rounded-full bg-blue-soft px-3 py-1 text-sm font-black text-blue-dark tabular-nums">
-                  {r.wcpm} {t.wpm}
+                  {r.wcpm ?? '—'} {t.wpm}
                 </span>
               </li>
             ))}

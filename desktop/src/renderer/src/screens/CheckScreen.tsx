@@ -113,6 +113,8 @@ export function CheckScreen() {
       {!passage && (
         <>
           <h1 className="mt-3 text-[40px] leading-tight font-black text-navy">{t.pickStory}</h1>
+          {passages?.some((p) => p.category) && (
+          <>
           <h2 className="mt-6 text-xl font-extrabold text-navy">{t.categoriesTitle}</h2>
           <div className="mt-3 flex items-start gap-5">
             {(Object.keys(CATEGORY_EMOJI) as Category[]).map((c, i) => (
@@ -127,6 +129,8 @@ export function CheckScreen() {
               {t.showAll}
             </button>
           </div>
+          </>
+          )}
           <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(440px,1fr))] gap-5">
             {shown?.map((p, i) => (
               <button
@@ -136,7 +140,7 @@ export function CheckScreen() {
                 className="stagger flex cursor-pointer gap-4 rounded-card bg-white p-5 text-left shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift"
               >
                 <span className="grid size-16 shrink-0 place-items-center rounded-tile bg-blue-soft">
-                  <Emoji name={CATEGORY_EMOJI[p.category]} size={40} />
+                  <Emoji name={p.category ? CATEGORY_EMOJI[p.category] : 'books'} size={40} />
                 </span>
                 <div className="min-w-0">
                   <div className="flex gap-2 text-xs font-extrabold tracking-wider text-muted uppercase">

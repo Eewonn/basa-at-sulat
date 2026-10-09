@@ -1,4 +1,4 @@
-import type { Api, Assessment, Book, BookWord, PracticeItem } from './types'
+import type { Api, Assessment, Book, BookWord, Category, ClassGroup, ClassSettings, LearnerStats, PracticeItem, Progress } from './types'
 
 // The engine stores ISO 639 codes (fil, eng, ilo…), but the book editor takes the language's name.
 const LANGUAGE_CODES: Record<string, string> = {
@@ -19,18 +19,72 @@ function languageCode(name: string): string {
   return LANGUAGE_CODES[key] ?? key
 }
 
+// A FastAPI app answers an unknown route with exactly this; a real 404 (unknown learner, book…) says what's missing.
+class RouteMissing extends Error {}
+
+// What the engine doesn't store yet (docs/API.md "Proposed by frontend") is kept on this laptop until it does.
+function local<T>(key: string, fallback: T): T {
+  try {
+    const v = localStorage.getItem(key)
+    return v ? { ...fallback, ...JSON.parse(v) } : fallback
+  } catch {
+    return fallback
+  }
+}
+function saveLocal(key: string, value: unknown): void {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+  } catch {
+    // Private storage can refuse writes; the setting just won't survive a restart.
+  }
+}
+type BookMeta = { category?: Category; reader?: string; duration_sec?: number }
+const bookMeta = () => local<Record<string, BookMeta>>('basa.bookMeta', {})
+
 // Talks to the local engine (docs/API.md). Only ever 127.0.0.1: nothing leaves the laptop.
 export function createHttpApi(port: number): Api {
   const base = `http://127.0.0.1:${port}`
 
   // Every engine book has its model reading (POST /books requires the audio), so it always has audio to play.
-  const withAudio = <T extends { id: string }>(b: T) => ({ ...b, has_recording: true, audio_url: `${base}/books/${b.id}/audio` })
+  // The category, reader and length the teacher entered are kept locally, since the engine doesn't store them yet.
+  const withAudio = <T extends { id: string }>(b: T) => ({ ...bookMeta()[b.id], ...b, has_recording: true, audio_url: `${base}/books/${b.id}/audio` })
 
   async function json<T>(path: string, init?: RequestInit): Promise<T> {
     const res = await fetch(base + path, init)
-    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`)
+    if (!res.ok) {
+      const body = await res.text()
+      if (res.status === 404 && body === '{"detail":"Not Found"}') throw new RouteMissing(path)
+      throw new Error(`${res.status} ${body}`)
+    }
     return res.json() as Promise<T>
   }
+
+  // For proposed routes: use the engine once it has the route, until then the fallback.
+  async function orElse<T>(call: Promise<T>, fallback: () => T | Promise<T>): Promise<T> {
+    try {
+      return await call
+    } catch (e) {
+      if (e instanceof RouteMissing) return fallback()
+      throw e
+    }
+  }
+
+  // Until /learners/{id}/stats exists: what practice and progress already say. Stars and streaks need it.
+  async function statsFromLive(learnerId: string): Promise<LearnerStats> {
+    const [items, progress] = await Promise.all([api.practice(learnerId), api.progress(learnerId)])
+    const checks = progress.checks.filter((c) => c.wcpm !== null)
+    return {
+      stars: 0,
+      streak_days: 0,
+      minutes_read: 0,
+      wcpm_history: checks.map((c) => ({ date: c.confirmed_at.slice(0, 10), wcpm: c.wcpm! })),
+      practicing: items.map((x) => x.word),
+      days_read: progress.checks.map((c) => c.confirmed_at.slice(0, 10))
+    }
+  }
+
+  const CLASS_KEY = 'basa.classSettings'
+  const noClassSettings: ClassSettings = { teacher_name: '', section: '', grade: 0 }
 
   function form(fields: Record<string, string | Blob>): FormData {
     const f = new FormData()
@@ -38,7 +92,7 @@ export function createHttpApi(port: number): Api {
     return f
   }
 
-  return {
+  const api: Api = {
     mode: 'engine',
     health: () => json('/health'),
     learners: () => json('/learners'),
@@ -55,14 +109,14 @@ export function createHttpApi(port: number): Api {
         body: JSON.stringify({ label })
       }),
     confirm: (id) => json<Assessment>(`/assessments/${id}/confirm`, { method: 'POST' }),
-    learnerStats: (learnerId) => json(`/learners/${learnerId}/stats`),
+    learnerStats: (learnerId) => orElse(json(`/learners/${learnerId}/stats`), () => statsFromLive(learnerId)),
     practice: async (learnerId) => (await json<{ items: PracticeItem[] }>(`/learners/${learnerId}/practice`)).items,
     clipUrl: (bookId, wordIndex) => `${base}/books/${bookId}/clips/${wordIndex}`,
-    progress: (learnerId) => json(`/learners/${learnerId}/progress`),
+    progress: (learnerId) => json<Progress>(`/learners/${learnerId}/progress`),
     checkWord: (audio, word, learnerId) =>
       json('/practice/check', { method: 'POST', body: form({ audio, word, learner_id: learnerId }) }),
     recentChecks: () => json('/assessments/recent'),
-    books: () => json('/books'),
+    books: async () => (await json<Book[]>('/books')).map(withAudio),
     book: async (id) => withAudio(await json<Book>(`/books/${id}`)),
     createBook: async (book, audio, durationSec) => {
       // The engine replies with only {id, words}; the rest of the book is what the teacher just entered.
@@ -70,16 +124,28 @@ export function createHttpApi(port: number): Api {
         method: 'POST',
         body: form({ title: book.title, language: languageCode(book.language), text: book.text, audio })
       })
+      saveLocal('basa.bookMeta', { ...bookMeta(), [created.id]: { category: book.category, reader: book.reader, duration_sec: durationSec } })
       return withAudio({ ...book, ...created, duration_sec: durationSec })
     },
-    storage: () => json('/storage'),
+    classGroups: async (refresh) => (await json<{ groups: ClassGroup[] }>(`/class${refresh ? '?refresh=1' : ''}`)).groups,
+    exportCsv: async () => {
+      const res = await fetch(`${base}/class/export.csv`)
+      if (!res.ok) throw new Error(`${res.status} ${await res.text()}`)
+      return res.blob()
+    },
+    storage: () => orElse(json('/storage'), () => null),
     deleteAllAudio: () => json('/audio', { method: 'DELETE' }),
     addLearner: (name) =>
       json('/learners', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ display_name: name }) }),
-    classSettings: () => json('/class/settings'),
+    classSettings: () => orElse(json('/class/settings'), () => local(CLASS_KEY, noClassSettings)),
     saveClassSettings: (settings) =>
-      json('/class/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) }),
+      orElse(json('/class/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) }), () => {
+        const next = { ...local(CLASS_KEY, noClassSettings), ...settings }
+        saveLocal(CLASS_KEY, next)
+        return next
+      }),
     renameLearner: (id, name) =>
       json(`/learners/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ display_name: name }) })
   }
+  return api
 }

@@ -69,19 +69,23 @@ export function SettingsScreen() {
       qc.invalidateQueries({ queryKey: ['storage'] })
     }
   })
+  // Adding and renaming learners are proposed routes the engine doesn't have yet.
+  const later = () => toast(t.engineLater)
   const add = useMutation({
     mutationFn: (name: string) => api.addLearner(name),
     onSuccess: () => {
       setNewName('')
       qc.invalidateQueries({ queryKey: ['learners'] })
-    }
+    },
+    onError: later
   })
   const rename = useMutation({
     mutationFn: ({ id, name }: { id: string; name: string }) => api.renameLearner(id, name),
     onSuccess: () => {
       setEditing(null)
       qc.invalidateQueries({ queryKey: ['learners'] })
-    }
+    },
+    onError: later
   })
 
   return (
@@ -107,6 +111,7 @@ export function SettingsScreen() {
         </Card>
 
         <Card index={2} title={t.secPrivacy} icon={<Shield className="size-5 text-teal-ink" aria-hidden />}>
+          {storage === null && <p className="font-semibold text-muted">{t.engineLater}</p>}
           {storage && (
             <div className="space-y-3">
               <p className="text-lg font-extrabold text-navy">{t.audioStored(storage.audio_files, storage.audio_mb)}</p>
@@ -140,14 +145,14 @@ export function SettingsScreen() {
               <input
                 aria-label={t.teacherName}
                 placeholder={t.teacherName}
-                className="rounded-tile bg-white px-4 py-2.5 font-bold text-navy ring-2 ring-line outline-none focus:ring-blue"
+                className="min-w-0 rounded-tile bg-white px-4 py-2.5 font-bold text-navy ring-2 ring-line outline-none focus:ring-blue"
                 value={teacher ?? cls.teacher_name}
                 onChange={(e) => setTeacher(e.target.value)}
               />
               <input
                 aria-label={t.sectionName}
                 placeholder={t.sectionName}
-                className="rounded-tile bg-white px-4 py-2.5 font-bold text-navy ring-2 ring-line outline-none focus:ring-blue"
+                className="min-w-0 rounded-tile bg-white px-4 py-2.5 font-bold text-navy ring-2 ring-line outline-none focus:ring-blue"
                 value={section ?? cls.section}
                 onChange={(e) => setSection(e.target.value)}
               />

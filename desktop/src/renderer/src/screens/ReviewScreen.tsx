@@ -39,6 +39,7 @@ export function ReviewScreen() {
       setConfirmed(true)
       qc.invalidateQueries({ queryKey: ['stats', next.learner_id] })
       qc.invalidateQueries({ queryKey: ['progress', next.learner_id] })
+      for (const key of ['learners', 'recent', 'class', 'practice']) qc.invalidateQueries({ queryKey: [key] })
       toast(t.savedToast)
     }
   })
