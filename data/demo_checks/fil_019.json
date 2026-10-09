@@ -17,7 +17,7 @@
    "label": "matched",
    "score": 1.0,
    "start": 1.36,
-   "end": 1.66
+   "end": 1.64
   },
   {
    "i": 2,
@@ -31,7 +31,7 @@
    "i": 3,
    "text": "may",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.98,
    "start": 1.94,
    "end": 2.08
   },
@@ -48,7 +48,7 @@
    "text": "na",
    "label": "matched",
    "score": 1.0,
-   "start": 2.62,
+   "start": 2.64,
    "end": 2.7
   },
   {
@@ -63,7 +63,7 @@
    "i": 7,
    "text": "Puti",
    "label": "matched",
-   "score": 0.96,
+   "score": 0.98,
    "start": 3.84,
    "end": 4.1
   },
@@ -71,7 +71,7 @@
    "i": 8,
    "text": "ang",
    "label": "matched",
-   "score": 0.99,
+   "score": 0.98,
    "start": 4.22,
    "end": 4.32
   },
@@ -81,14 +81,14 @@
    "label": "matched",
    "score": 1.0,
    "start": 4.36,
-   "end": 4.94
+   "end": 4.92
   },
   {
    "i": 10,
    "text": "nito.",
    "label": "misread",
    "score": 0.0,
-   "start": 4.94,
+   "start": 4.98,
    "end": 5.44
   },
   {
@@ -103,7 +103,7 @@
    "i": 12,
    "text": "umaga,",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.99,
    "start": 5.8,
    "end": 6.18
   },
@@ -111,7 +111,7 @@
    "i": 13,
    "text": "naglalaro",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 6.98,
    "end": 7.52
   },
@@ -120,7 +120,7 @@
    "text": "sila",
    "label": "matched",
    "score": 1.0,
-   "start": 7.62,
+   "start": 7.6,
    "end": 7.84
   },
   {
@@ -143,7 +143,7 @@
    "i": 17,
    "text": "Hinahabol",
    "label": "matched",
-   "score": 0.99,
+   "score": 0.97,
    "start": 9.64,
    "end": 10.26
   },
@@ -167,7 +167,7 @@
    "i": 20,
    "text": "ang",
    "label": "matched",
-   "score": 0.98,
+   "score": 1.0,
    "start": 10.92,
    "end": 11.02
   },
@@ -175,15 +175,15 @@
    "i": 21,
    "text": "bola.",
    "label": "matched",
-   "score": 0.45,
-   "start": 11.06,
+   "score": 0.51,
+   "start": 11.08,
    "end": 11.34
   },
   {
    "i": 22,
    "text": "Pagod",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.97,
    "start": 12.4,
    "end": 12.7
   },
@@ -193,7 +193,7 @@
    "label": "matched",
    "score": 1.0,
    "start": 12.74,
-   "end": 12.82
+   "end": 12.8
   },
   {
    "i": 24,
@@ -207,7 +207,7 @@
    "i": 25,
    "text": "pagkatapos,",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 13.22,
    "end": 13.92
   },
@@ -223,9 +223,9 @@
    "i": 27,
    "text": "umiinom",
    "label": "matched",
-   "score": 0.94,
+   "score": 0.96,
    "start": 14.91,
-   "end": 15.39
+   "end": 15.37
   },
   {
    "i": 28,

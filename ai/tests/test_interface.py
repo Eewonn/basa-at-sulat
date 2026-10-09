@@ -89,5 +89,7 @@ def test_warm_up_loads_the_model_once():
     assert not ai.model_loaded()
     ai.warm_up()
     assert ai.model_loaded()
-    ai.warm_up()  # second call is free: same cached model
-    assert aligner._load.cache_info().misses == 1
+    loads = aligner._load.cache_info().misses  # the int8 scoring model and the full one for check_word
+    assert loads == (2 if aligner.QUANTIZE else 1)
+    ai.warm_up()  # second call is free: same cached models
+    assert aligner._load.cache_info().misses == loads

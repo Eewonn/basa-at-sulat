@@ -36,7 +36,8 @@ Run the tests from `ai/`: `python -m pytest`. The model-backed tests skip if the
 - **False alarms** on the eval set: `ng` before `mangga` (sounds blend), sentence-final `bukid.` under fan noise, and the word next to a skip or an insert (still the right spot for the teacher). Not special-cased, to avoid tuning to this one set.
 - Words with no aligner letters (digits, dashes) can't be checked and come back `matched`. Keep digits out of passages.
 - Audio too short to hold the text comes back all `skipped`.
-- Speed: about 40 s of processing per minute of audio on an 8-core CPU laptop (after a one-time ~10 s model load), roughly 0.67× real time.
+- Speed: about **16 s of processing per minute of audio** on a Ryzen 5 7520U laptop (4 cores, 8 threads), so a 40-second reading takes about 11 s. `score()` and `word_timings()` use int8 weights and every hardware thread; `check_word()` stays at full precision (0.6 s per word). Both models together use about 3.1 GB of RAM; `ai.warm_up()` takes about 15 s once. `BASA_FULL_PRECISION=1` turns int8 off.
+- `torch.ao.quantization` (the int8 step) is deprecated and removed in torch 2.10; another reason to stay on 2.8.x. If it's missing, scoring falls back to full precision instead of failing.
 - `torchaudio.functional.forced_align` is deprecated and **removed in torchaudio 2.9**, so `requirements.txt` stays on 2.8.x. If we ever need to move, the replacements are the standalone `ctc-forced-aligner` package or our own CTC alignment over the Hugging Face MMS model.
 
 **Fallback (P1-AI-2):** Whisper prompted with the passage, for Filipino and English only.

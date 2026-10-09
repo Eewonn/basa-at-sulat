@@ -7,7 +7,7 @@
    "i": 0,
    "text": "Nagtanim",
    "label": "matched",
-   "score": 0.64,
+   "score": 0.65,
    "start": 1.22,
    "end": 1.74
   },
@@ -31,7 +31,7 @@
    "i": 3,
    "text": "ng",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 2.68,
    "end": 2.82
   },
@@ -39,7 +39,7 @@
    "i": 4,
    "text": "palay",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 2.9,
    "end": 3.22
   },
@@ -55,15 +55,15 @@
    "i": 6,
    "text": "bukid.",
    "label": "matched",
-   "score": 0.59,
-   "start": 3.44,
+   "score": 0.51,
+   "start": 3.42,
    "end": 3.76
   },
   {
    "i": 7,
    "text": "Masaya",
    "label": "matched",
-   "score": 0.97,
+   "score": 0.96,
    "start": 4.41,
    "end": 4.75
   },
@@ -71,7 +71,7 @@
    "i": 8,
    "text": "siya.",
    "label": "matched",
-   "score": 0.98,
+   "score": 1.0,
    "start": 4.83,
    "end": 4.97
   },
@@ -79,23 +79,23 @@
    "i": 9,
    "text": "Tinulungan",
    "label": "matched",
-   "score": 0.9,
-   "start": 5.77,
+   "score": 0.91,
+   "start": 5.79,
    "end": 6.45
   },
   {
    "i": 10,
    "text": "siya",
    "label": "matched",
-   "score": 1.0,
-   "start": 6.51,
+   "score": 0.99,
+   "start": 6.49,
    "end": 6.63
   },
   {
    "i": 11,
    "text": "ng",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.97,
    "start": 6.73,
    "end": 6.85
   },
@@ -103,23 +103,23 @@
    "i": 12,
    "text": "kanyang",
    "label": "matched",
-   "score": 0.96,
+   "score": 0.97,
    "start": 6.87,
-   "end": 7.29
+   "end": 7.27
   },
   {
    "i": 13,
    "text": "lolo.",
    "label": "matched",
-   "score": 0.45,
+   "score": 0.5,
    "start": 7.35,
-   "end": 7.57
+   "end": 7.69
   },
   {
    "i": 14,
    "text": "Pagkatapos,",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.96,
    "start": 8.39,
    "end": 9.11
   },
@@ -127,7 +127,7 @@
    "i": 15,
    "text": "kumain",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.96,
    "start": 9.55,
    "end": 9.95
   },
@@ -143,7 +143,7 @@
    "i": 17,
    "text": "ng",
    "label": "matched",
-   "score": 0.48,
+   "score": 0.42,
    "start": 10.27,
    "end": 10.35
   },
@@ -151,8 +151,8 @@
    "i": 18,
    "text": "mangga",
    "label": "matched",
-   "score": 0.82,
-   "start": 10.41,
+   "score": 0.76,
+   "start": 10.39,
    "end": 10.71
   },
   {
@@ -167,7 +167,7 @@
    "i": 20,
    "text": "ilalim",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.95,
    "start": 10.99,
    "end": 11.39
   },
@@ -175,9 +175,9 @@
    "i": 21,
    "text": "ng",
    "label": "matched",
-   "score": 0.99,
+   "score": 0.97,
    "start": 11.43,
-   "end": 11.55
+   "end": 11.57
   },
   {
    "i": 22,
