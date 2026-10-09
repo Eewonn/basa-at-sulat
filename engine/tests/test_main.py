@@ -65,10 +65,16 @@ def post(path, **form):
         return client.post("/assess", data=form or FORM, files={"audio": (path.name, f)})
 
 
-def test_health():
+def test_health(monkeypatch):
+    monkeypatch.setattr("app.main.ollama_status", lambda: "down")
     r = client.get("/health")
     assert r.status_code == 200
-    assert r.json() == {"ok": True, "models": {"aligner": "not_loaded", "ollama": "unknown"}}
+    assert r.json() == {"ok": True, "models": {"aligner": "not_loaded", "ollama": "down"}}
+
+
+def test_health_reports_ollama_up(monkeypatch):
+    monkeypatch.setattr("app.main.ollama_status", lambda: "up")
+    assert client.get("/health").json()["models"]["ollama"] == "up"
 
 
 def test_health_reports_a_loaded_aligner(monkeypatch):

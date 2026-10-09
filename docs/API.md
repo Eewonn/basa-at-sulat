@@ -106,8 +106,17 @@ A file that is already gone counts as deleted.
   - With no same-passage pair (fewer than two confirmed checks, or checks on different passages): `200` with `{"checks": [], "words": [], "wcpm_before": null, "wcpm_after": null, "wcpm_change": null}`. Drafts are ignored. `404` for an unknown learner.
 
 ## Class view
-- `GET /class` → `{"groups": [{"level", "learner_ids", "common_missed_words", "draft_plan"}]}`
-- `GET /class/export.csv`
+- `GET /class` → `{"groups": [{"level", "learner_ids", "common_missed_words", "draft_plan"}]}`. Optional `?refresh=1`.
+  - Each learner is in the group for the `level` of their latest **confirmed** check. Learners with no confirmed check are in no group. Groups go lowest level first (Low Emerging → At Grade Level), and only levels with learners are listed. `{"groups": []}` for a class with no confirmed checks.
+  - `common_missed_words`: words that at least **2** learners in the group missed (final label `misread` or `skipped`), most-missed first, at most **5**, without punctuation. If only **one** learner in the group has a Filipino check, it's that learner's own missed words, in passage order. It can be `[]` when no word is shared.
+  - `draft_plan`: plain text with `
+` line breaks, in **Filipino**. Only checks on Filipino passages count towards the words and the plan. A group with no Filipino check gets `null` (English plans come later). `null` also if the activity templates are broken (logged).
+  - **Can be slow.** A plan's example sentence comes from qwen2.5:7b on the laptop's CPU: about 25 s on first load for the demo class (2 groups needing a sentence), and up to minutes if a sentence is retried. Plans are cached, so later loads are instant until a group's level, size or words change. **Frontend:** show a loading state for this request.
+  - `?refresh=1` (or `true`) skips the cache and makes every group's plan again with new random seeds, for a teacher who doesn't like an example sentence. It always runs the model, so it's as slow as a first load. The new plan replaces the old one; if the model fails, the old plan is dropped anyway and the template-only plan is returned. A value that isn't a boolean is `422`.
+  - If Ollama is down, plans come back as the activity template without the example sentence, and are made again on the next load.
+- `GET /class/export.csv` → a `text/csv` download, `basa-results.csv`, one row per learner
+  - Columns: `learner_id, display_name, latest_check_date, passage_title, wcpm, level, missed_count`, from the learner's latest confirmed check. `latest_check_date` is `YYYY-MM-DD` (UTC). The check columns are blank for a learner with no confirmed check.
+  - UTF-8 with a BOM, so Excel shows ñ and accents. A text cell starting with `=`, `+`, `-` or `@` gets a leading `'` so Excel doesn't run it as a formula.
 
 ## Proposed by frontend (needs team agreement)
 These support the learner profile and story categories. Until the engine implements them, the app uses sample data for them.
@@ -124,9 +133,15 @@ These support the learner profile and story categories. Until the engine impleme
 
 ## Health
 - `GET /health` → `{"ok": true, "models": {"aligner": "loaded", "ollama": "up"}}`
-  - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up`, `down` or `unknown`. The engine reports `not_loaded` until the aligner is in memory (after the first `/assess`, or at startup with `BASA_WARM_UP=1`), and `unknown` for Ollama until it is wired in.
+  - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up` or `down`. The engine reports `not_loaded` until the aligner is in memory (after the first `/assess`, or at startup with `BASA_WARM_UP=1`). `ollama` is `up` if Ollama answers at `OLLAMA_URL` within 1 s; it doesn't check that the model is pulled.
 
 ## Contract changes
+
+### 2026-10-10 · backend-2 (P2-BE2-3)
+- `GET /class` and `GET /class/export.csv` are live. The `/class` shape is unchanged; `draft_plan` can be `null` (no Filipino check in the group, or broken templates).
+- New: `GET /class?refresh=1` makes new plans (a "new example" button).
+- The CSV columns are new (the old contract named only the route).
+- `/health` → `models.ollama` is now `up` or `down`, never `unknown`.
 
 ### 2026-10-10 · backend-2 (P2-BE2-2)
 - `GET /learners/{id}/progress` is live. **Additions to the old one-line contract:** `i` on each word (its passage index), the `checks` item fields, and `wcpm_change`.
