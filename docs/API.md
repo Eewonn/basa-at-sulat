@@ -91,6 +91,7 @@ A file that is already gone counts as deleted.
 - `GET /books/{id}` → `{"id", "title", "language", "text", "words": [{"i", "text", "start", "end"}]}`
 - `GET /books/{id}/audio` → the full model reading (`audio/wav`, 16 kHz mono)
 - `GET /books/{id}/clips/{i}` → audio for word `i` only (`audio/wav`, 16 kHz mono), cut from the model reading between that word's `start` and `end`
+- `DELETE /books/{id}` → 204. Removes the book, its word timings and its model reading. Sanay attempts that used one of its clips are kept, with `book_id`/`word_index` set to null. 404 if there is no such book.
 
 `POST /books` errors (body `{"detail": "<what went wrong>"}`). A rejected upload keeps nothing: no audio file and no book.
 

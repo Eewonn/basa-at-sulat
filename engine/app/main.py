@@ -46,7 +46,7 @@ app = FastAPI(title="Basa at Sulat engine", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
-    allow_methods=["GET", "POST", "PATCH"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
     allow_headers=["content-type"],
 )
 app.include_router(assess_router)

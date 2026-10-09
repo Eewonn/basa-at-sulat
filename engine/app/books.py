@@ -131,6 +131,22 @@ def _book_wav_path(book):
     return path
 
 
+@router.delete("/{book_id}", status_code=204)
+def delete_book(book_id: str, conn=Depends(get_conn)):
+    """Delete a book, its word timings and its model reading.
+
+    Sanay attempts that played a clip from it are history, so they're kept: they just lose the clip reference.
+    """
+    book = _get_book(conn, book_id)
+    with conn:
+        conn.execute("UPDATE practice_attempts SET book_id = NULL, word_index = NULL WHERE book_id = ?", (book_id,))
+        conn.execute("DELETE FROM books WHERE id = ?", (book_id,))
+    path = stored_wav(book["audio_path"])
+    if path is not None:
+        path.unlink(missing_ok=True)
+    return Response(status_code=204)
+
+
 @router.get("/{book_id}/audio")
 def get_book_audio(book_id: str, conn=Depends(get_conn)):
     book = _get_book(conn, book_id)

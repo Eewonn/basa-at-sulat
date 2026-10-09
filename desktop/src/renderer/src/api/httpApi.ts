@@ -112,6 +112,12 @@ export function createHttpApi(port: number): Api {
       saveLocal('basa.bookMeta', { ...bookMeta(), [created.id]: { category: book.category, reader: book.reader, duration_sec: durationSec } })
       return withAudio({ ...book, ...created, duration_sec: durationSec })
     },
+    deleteBook: async (id) => {
+      const res = await fetch(`${base}/books/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error(`${res.status} ${await res.text()}`)
+      const { [id]: _, ...rest } = bookMeta()
+      saveLocal('basa.bookMeta', rest)
+    },
     classGroups: async (refresh) => (await json<{ groups: ClassGroup[] }>(`/class${refresh ? '?refresh=1' : ''}`)).groups,
     exportCsv: async () => {
       const res = await fetch(`${base}/class/export.csv`)

@@ -202,3 +202,39 @@ def test_without_a_database_it_is_503_and_creates_nothing(env, monkeypatch):
     assert r.status_code == 503 and "database" in r.json()["detail"]
     assert not missing.exists()
     assert not (env / "storage" / "books").exists()
+
+
+def test_deleting_a_book_removes_it_its_words_and_its_audio(env):
+    posted = post_book(make_reading(env)).json()
+    assert client.delete(f"/books/{posted['id']}").status_code == 204
+    assert client.get(f"/books/{posted['id']}").status_code == 404
+    nothing_kept(env)
+
+
+def test_deleting_an_unknown_book_is_404(env):
+    assert client.delete("/books/b_nope").status_code == 404
+
+
+def test_deleting_a_book_keeps_practice_attempts_without_the_clip(env):
+    posted = post_book(make_reading(env)).json()
+    conn = connect()
+    conn.executescript(
+        "INSERT INTO learners (id, display_name, grade) VALUES ('l_01', 'Lina', 2);"
+        "INSERT INTO passages (id, title, language, grade, text) VALUES ('p_1', 'T', 'fil', 2, 'Ben');"
+        "INSERT INTO assessments (id, learner_id, passage_id, duration_sec) VALUES ('a_1', 'l_01', 'p_1', 5);"
+    )
+    conn.execute(
+        "INSERT INTO practice_attempts (learner_id, assessment_id, word, book_id, word_index, result, score)"
+        " VALUES ('l_01', 'a_1', 'Ben', ?, 1, 'match', 0.9)",
+        (posted["id"],),
+    )
+    conn.commit()
+    conn.close()
+
+    assert client.delete(f"/books/{posted['id']}").status_code == 204
+    conn = connect()
+    try:
+        row = conn.execute("SELECT word, book_id, word_index FROM practice_attempts").fetchone()
+    finally:
+        conn.close()
+    assert tuple(row) == ("Ben", None, None)

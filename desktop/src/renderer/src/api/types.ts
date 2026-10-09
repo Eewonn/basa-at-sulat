@@ -176,6 +176,7 @@ export interface Api {
   books(): Promise<Book[]>
   book(id: string): Promise<Book>
   createBook(book: NewBook, audio: Blob, durationSec: number): Promise<Book>
+  deleteBook(id: string): Promise<void>
   classGroups(refresh?: boolean): Promise<ClassGroup[]>
   exportCsv(): Promise<Blob> // GET /class/export.csv
   storage(): Promise<Storage | null> // null until the engine reports it
