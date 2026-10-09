@@ -31,6 +31,23 @@ def env(tmp_path, monkeypatch):
     return tmp_path
 
 
+@pytest.fixture(autouse=True)
+def fake_score(monkeypatch):
+    """Never load the real model in tests: the scorer needs torch and ~1.2 GB of weights."""
+
+    def fake(audio_path, passage_text):
+        words = passage_text.split()
+        return {
+            "words": [
+                {"i": i, "text": w, "label": "matched", "score": 0.9, "start": i * 0.1, "end": i * 0.1 + 0.1}
+                for i, w in enumerate(words)
+            ],
+            "pauses": [],
+        }
+
+    monkeypatch.setattr("app.assess.score", fake)
+
+
 def make_recording(tmp_path, ext, seconds=2):
     path = tmp_path / f"rec.{ext}"
     codec = ["-c:a", "libopus"] if ext in ("webm", "ogg") else []
@@ -51,6 +68,38 @@ def test_health():
     r = client.get("/health")
     assert r.status_code == 200
     assert r.json() == {"ok": True, "models": {"aligner": "not_loaded", "ollama": "unknown"}}
+
+
+def test_health_reports_a_loaded_aligner(monkeypatch):
+    monkeypatch.setattr("ai.aligner.model_loaded", lambda: True)
+    assert client.get("/health").json()["models"]["aligner"] == "loaded"
+
+
+def test_warm_up_is_off_by_default(monkeypatch):
+    called = []
+    monkeypatch.setattr("ai.aligner.warm_up", lambda: called.append(1))
+    with TestClient(app):
+        pass
+    assert called == []
+
+
+def test_warm_up_runs_when_enabled(monkeypatch):
+    called = []
+    monkeypatch.setenv("BASA_WARM_UP", "1")
+    monkeypatch.setattr("ai.aligner.warm_up", lambda: called.append(1))
+    with TestClient(app):
+        pass
+    assert called == [1]
+
+
+def test_a_failed_warm_up_does_not_stop_the_engine(monkeypatch):
+    def boom():
+        raise ModuleNotFoundError("torch")
+
+    monkeypatch.setenv("BASA_WARM_UP", "1")
+    monkeypatch.setattr("ai.aligner.warm_up", boom)
+    with TestClient(app) as c:
+        assert c.get("/health").status_code == 200
 
 
 @pytest.mark.parametrize("ext", ["webm", "ogg", "wav"])
@@ -106,6 +155,24 @@ def test_assess_unreadable_audio_is_400_and_leaves_no_files(env):
     bad = env / "bad.webm"
     bad.write_bytes(b"not audio")
     assert post(bad).status_code == 400
+    assert list((env / "storage" / "audio").iterdir()) == []
+
+
+def test_assess_without_the_model_installed_is_503_and_leaves_no_files(env, monkeypatch):
+    def missing(audio_path, passage_text):
+        raise ModuleNotFoundError("No module named 'torch'")
+
+    monkeypatch.setattr("app.assess.score", missing)
+    assert post(make_recording(env, "wav")).status_code == 503
+    assert list((env / "storage" / "audio").iterdir()) == []
+
+
+def test_assess_scoring_failure_is_500_and_leaves_no_files(env, monkeypatch):
+    def broken(audio_path, passage_text):
+        raise RuntimeError("unreadable")
+
+    monkeypatch.setattr("app.assess.score", broken)
+    assert post(make_recording(env, "wav")).status_code == 500
     assert list((env / "storage" / "audio").iterdir()) == []
 
 

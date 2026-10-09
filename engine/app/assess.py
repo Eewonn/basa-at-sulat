@@ -1,16 +1,14 @@
 """POST /assess: recording in, scored words out (P1-BE1-1)."""
 
 import logging
-import os
 import sys
 import time
 import uuid
 import wave
-from pathlib import Path
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
-from app.audio import AudioConversionError, convert_to_wav16k
+from app.audio import AudioConversionError, convert_to_wav16k, storage_dir
 from app.db import ENGINE_DIR, connect
 
 # `ai` is a sibling package at the repo root, not under engine/.
@@ -21,12 +19,6 @@ from ai import score  # noqa: E402
 
 log = logging.getLogger("engine.assess")
 router = APIRouter()
-
-
-def storage_dir() -> Path:
-    """Where audio lives at runtime. engine/storage/ is git-ignored."""
-    override = os.environ.get("BASA_STORAGE_DIR")
-    return Path(override) if override else ENGINE_DIR / "storage"
 
 
 def _ms(start: float) -> float:
@@ -81,7 +73,16 @@ def assess(
         duration_sec = round(f.getnframes() / f.getframerate(), 2)
 
     t = time.perf_counter()
-    scored = score(str(wav_path), passage["text"])
+    try:
+        scored = score(str(wav_path), passage["text"])
+    except ImportError as err:
+        wav_path.unlink(missing_ok=True)
+        log.error("scoring model is not installed: %s", err)
+        raise HTTPException(503, "the scoring model is not installed on this engine") from err
+    except Exception as err:
+        wav_path.unlink(missing_ok=True)
+        log.exception("scoring failed for %s", assessment_id)
+        raise HTTPException(500, "scoring failed") from err
     # ai.score does alignment and scoring in one call, so align_ms covers both.
     align_ms = _ms(t)
 
