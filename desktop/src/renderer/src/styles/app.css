@@ -1,40 +1,48 @@
 @import "tailwindcss";
-@import "@fontsource/domine/400.css";
-@import "@fontsource/domine/700.css";
-@import "@fontsource-variable/nunito-sans";
+@import "@fontsource-variable/nunito";
 
-/* Design tokens: same palette as the team deck (docs/FRONTEND.md §6). */
+/* Playful, BOOKR-inspired system (docs/FRONTEND.md §6).
+   White text: any size on blue/purple; only bold ≥20px on coral/teal (contrast 3.7 / 3.3). */
 @theme {
-  --color-ink: #1e2740;
-  --color-ink-2: #26314f;
-  --color-ink-3: #3a4870;
-  --color-paper: #faf6ee;
-  --color-paper-2: #f1eadb;
-  --color-card: #fffdf8;
-  --color-line: #e6dcc8;
-  --color-accent: #b4521a;
-  --color-accent-light: #f0a35e;
-  --color-accent-bg: #fbe3cf;
-  --color-correct: #1f6f6b;
-  --color-correct-light: #6cc3bc;
-  --color-correct-bg: #e3f1ef;
+  --color-blue: #3d63e8;
+  --color-blue-dark: #2f4fc4;
+  --color-blue-soft: #e4e9ff;
+  --color-coral: #ee4466;
+  --color-coral-ink: #b3203f;
+  --color-coral-soft: #ffe3e9;
+  --color-teal: #12a08a;
+  --color-teal-ink: #0b6e5f;
+  --color-teal-soft: #ddf5f0;
+  --color-sun: #ffc531;
+  --color-sun-soft: #fff2c9;
+  --color-purple: #7b3ff2;
+  --color-navy: #1e2a5a;
+  --color-body: #4a5578;
   --color-muted: #6b7280;
-  --color-body: #3d4559;
+  --color-side: #f2f1f6;
+  --color-line: #e6e8f0;
+  --color-page: #ffffff;
+  --color-kid: #f5f7ff;
 
-  --font-display: "Domine", Georgia, serif;
-  --font-sans: "Nunito Sans Variable", Arial, sans-serif;
+  --font-sans: "Nunito Variable", "Nunito", Arial, sans-serif;
 
-  --radius-card: 12px;
-  --shadow-soft: 0 12px 32px rgba(30, 39, 64, 0.12);
+  --radius-card: 20px;
+  --radius-tile: 14px;
+  --shadow-soft: 0 10px 28px rgba(30, 42, 90, 0.1);
+  --shadow-lift: 0 16px 36px rgba(30, 42, 90, 0.16);
 
-  --animate-word-in: word-in 320ms ease-out both;
+  --animate-word-in: word-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-shake: shake 360ms ease-in-out;
-  --animate-pop: pop 420ms ease-out both;
+  --animate-pop: pop 460ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-ring: ring 1.4s ease-out infinite;
+  --animate-bounce-soft: bounce-soft 900ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-confetti: confetti 1100ms ease-in forwards;
+  --animate-fly: fly 700ms cubic-bezier(0.5, 0, 0.75, 0) forwards;
 
   @keyframes word-in {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(10px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
@@ -43,19 +51,36 @@
   }
   @keyframes pop {
     0% { opacity: 0; transform: scale(0.6); }
-    60% { opacity: 1; transform: scale(1.08); }
-    100% { transform: scale(1); }
+    100% { opacity: 1; transform: scale(1); }
   }
   @keyframes ring {
-    0% { box-shadow: 0 0 0 0 rgba(180, 82, 26, 0.45); }
-    100% { box-shadow: 0 0 0 28px rgba(180, 82, 26, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(238, 68, 102, 0.45); }
+    100% { box-shadow: 0 0 0 28px rgba(238, 68, 102, 0); }
+  }
+  @keyframes bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-18px); }
+    55% { transform: translateY(0); }
+    75% { transform: translateY(-6px); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  @keyframes confetti {
+    0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)); }
+  }
+  @keyframes fly {
+    0% { opacity: 1; transform: translate(0, 0) scale(1.4); }
+    100% { opacity: 0.2; transform: translate(var(--dx), var(--dy)) scale(0.5); }
   }
 }
 
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: var(--color-paper);
+  background: var(--color-page);
   color: var(--color-body);
   font-family: var(--font-sans);
   font-size: 16px;
@@ -63,7 +88,7 @@ body {
   user-select: none;
 }
 input, textarea { user-select: text; }
-:focus-visible { outline: 3px solid var(--color-accent-light); outline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--color-blue); outline-offset: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

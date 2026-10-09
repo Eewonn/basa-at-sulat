@@ -37,7 +37,20 @@ export interface Learner {
   level?: string
   last_check?: string
   needs_practice?: boolean
+  stars?: number
+  streak_days?: number
 }
+
+// Proposed in docs/API.md: GET /learners/{id}/stats
+export interface LearnerStats {
+  stars: number
+  streak_days: number
+  minutes_read: number
+  wcpm_history: { date: string; wcpm: number }[]
+  practicing: string[]
+}
+
+export type Category = 'bukid' | 'pamilya' | 'hayop' | 'kalikasan' | 'paaralan'
 
 export interface Passage {
   id: string
@@ -45,6 +58,7 @@ export interface Passage {
   language: string
   grade: number
   text: string
+  category: Category
 }
 
 export interface Health {
@@ -65,6 +79,7 @@ export interface Api {
   assess(audio: Blob, learnerId: string, passageId: string): Promise<Assessment>
   overrideWord(id: string, i: number, label: WordLabel): Promise<Assessment>
   confirm(id: string): Promise<Assessment>
+  learnerStats(learnerId: string): Promise<LearnerStats>
   practice(learnerId: string): Promise<PracticeItem[]>
-  checkWord(audio: Blob, word: string): Promise<{ result: 'match' | 'no_match' }>
+  checkWord(audio: Blob, word: string, learnerId: string): Promise<{ result: 'match' | 'no_match' }>
 }

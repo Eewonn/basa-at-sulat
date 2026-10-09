@@ -17,7 +17,9 @@ npm run build      # production bundle in desktop/out/
 
 With no engine running, the app uses **sample data** (`src/renderer/src/api/mockApi.ts`) and says so in the status pill. Once the engine exists, start the app with `BASA_ENGINE_PORT=<port>` and it switches to the real API (`httpApi.ts`). Later the app will start the engine itself (P0-FE-4).
 
-**Clickable flow today:** Klase → Basahin (pick a passage, record with a live waveform) → processing stages → Resulta (tap a word to fix it, I-confirm) → Sanay kid mode (Pakinggan / Sabihin, reread, done). Pakinggan and the Sabihin result are simulated until the engine exists.
+**Clickable flow today:** Klase → learner profile (stars, days in a row, reading time, progress trend) → Basahin (pick a story by topic, record with a live waveform) → processing (the tamaraw thinks) → Resulta (tap a word to fix it, I-confirm) → Sanay kid mode (Pakinggan / Sabihin, confetti and stars, reread, done). Pakinggan and the Sabihin result are simulated until the engine exists.
+
+Illustrations are Microsoft Fluent Emoji (MIT) in `src/renderer/src/assets/emoji/`. The tamaraw mascot is our own SVG in `components/Tamaraw.tsx`.
 
 ## Why Electron
 It ships the same Chromium on Windows and Linux, so microphone recording and rendering behave identically. Tauri's Linux webview (WebKitGTK) denies microphone access unless the app adds a custom permission handler.

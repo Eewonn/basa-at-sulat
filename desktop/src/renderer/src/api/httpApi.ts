@@ -33,8 +33,10 @@ export function createHttpApi(port: number): Api {
         body: JSON.stringify({ label })
       }),
     confirm: (id) => json<Assessment>(`/assessments/${id}/confirm`, { method: 'POST' }),
+    learnerStats: (learnerId) => json(`/learners/${learnerId}/stats`),
     practice: async (learnerId) =>
       (await json<{ items: { word: string; sentence: string }[] }>(`/learners/${learnerId}/practice`)).items,
-    checkWord: (audio, word) => json('/practice/check', { method: 'POST', body: form({ audio, word }) })
+    checkWord: (audio, word, learnerId) =>
+      json('/practice/check', { method: 'POST', body: form({ audio, word, learner_id: learnerId }) })
   }
 }

@@ -6,6 +6,7 @@ import { AppShell } from './AppShell'
 import { ClassScreen } from '@/screens/ClassScreen'
 import { CheckScreen } from '@/screens/CheckScreen'
 import { ReviewScreen } from '@/screens/ReviewScreen'
+import { LearnerScreen } from '@/screens/LearnerScreen'
 import { PracticeScreen } from '@/screens/PracticeScreen'
 import { BooksScreen, CheckIndexScreen, SettingsScreen } from '@/screens/OtherScreens'
 import { LangContext, type Lang } from '@/strings'
@@ -39,6 +40,7 @@ export function App() {
             <Routes>
               <Route element={<AppShell />}>
                 <Route index element={<ClassScreen />} />
+                <Route path="learner/:learnerId" element={<LearnerScreen />} />
                 <Route path="check" element={<CheckIndexScreen />} />
                 <Route path="check/:learnerId" element={<CheckScreen />} />
                 <Route path="review/:assessmentId" element={<ReviewScreen />} />

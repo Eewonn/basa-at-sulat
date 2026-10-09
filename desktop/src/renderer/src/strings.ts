@@ -74,7 +74,30 @@ const fil = {
   language: 'Wika ng app',
   modelsTitle: 'Mga modelo (lahat ay tumatakbo sa laptop na ito)',
   comingSoon: 'Malapit na',
-  sampleData: 'Sample data'
+  sampleData: 'Sample data',
+  mascotName: 'Taw',
+  thinking: (n: string) => `Nag-iisip si ${n}…`,
+  navProfile: 'Profile',
+  back: 'Bumalik',
+  statStars: 'Mga star na nakuha:',
+  statStreak: 'Sunod-sunod na araw:',
+  statTime: 'Oras ng pagbasa:',
+  days: (n: number) => (n === 1 ? '1 araw' : `${n} araw`),
+  hm: (min: number) => `${Math.floor(min / 60)} h ${min % 60} m`,
+  trendTitle: 'Words correct per minute',
+  trendDelta: (d: number) => (d >= 0 ? `+${d} mula sa unang check` : `${d} mula sa unang check`),
+  trendEmpty: 'Wala pang check. Simulan sa Basahin!',
+  practicingTitle: 'Mga salitang pinag-aaralan',
+  practicingEmpty: 'Walang salitang kailangang i-practice.',
+  startSanay: 'Simulan ang Sanay',
+  categoriesTitle: 'Mga paksa',
+  showAll: 'Ipakita lahat',
+  pickStory: 'Pumili ng kuwento',
+  cat: { bukid: 'Bukid', pamilya: 'Pamilya', hayop: 'Hayop', kalikasan: 'Kalikasan', paaralan: 'Paaralan' } as Record<string, string>,
+  starsEarned: (n: number) => (n === 1 ? '1 star ang nakuha mo!' : `${n} star ang nakuha mo!`),
+  creditsTitle: 'Mga larawan',
+  creditsText: 'Microsoft Fluent Emoji (MIT License). Ang tamaraw ay orihinal na gawa ng team.',
+  learnersCount: (n: number) => `${n} learner`
 }
 
 export type Strings = typeof fil
@@ -140,7 +163,26 @@ const en: Strings = {
   language: 'App language',
   modelsTitle: 'Models (all run on this laptop)',
   comingSoon: 'Coming soon',
-  sampleData: 'Sample data'
+  sampleData: 'Sample data',
+  thinking: (n) => `${n} is thinking…`,
+  back: 'Back',
+  statStars: 'Stars collected:',
+  statStreak: 'Days read in a row:',
+  statTime: 'Time spent reading:',
+  days: (n) => (n === 1 ? '1 day' : `${n} days`),
+  trendDelta: (d) => (d >= 0 ? `+${d} since the first check` : `${d} since the first check`),
+  trendEmpty: 'No checks yet. Start with Check!',
+  practicingTitle: 'Words being practiced',
+  practicingEmpty: 'No words to practice.',
+  startSanay: 'Start practice',
+  categoriesTitle: 'Topics',
+  showAll: 'Show all',
+  pickStory: 'Choose a story',
+  cat: { bukid: 'Farm', pamilya: 'Family', hayop: 'Animals', kalikasan: 'Nature', paaralan: 'School' },
+  starsEarned: (n) => (n === 1 ? 'You earned 1 star!' : `You earned ${n} stars!`),
+  creditsTitle: 'Illustrations',
+  creditsText: 'Microsoft Fluent Emoji (MIT License). The tamaraw mascot is original work by the team.',
+  learnersCount: (n) => `${n} learners`
 }
 
 export const STRINGS = { fil, en }
