@@ -40,7 +40,11 @@ Processing time per minute of audio, on the machine that ran this.
 
 | Language | Audio (s) | Processing (s) | Seconds per audio minute |
 |---|---|---|---|
-| fil | 124.4 | 33.5 | 16.2 |
+| fil | 124.4 | 37.6 | 18.1 |
+
+Machine: AMD Ryzen 5 7520U with Radeon Graphics, 8 threads. Peak memory of the scoring process: 3.7 GB.
+
+Reading speed (WCPM) versus a human scorer: see `eval/WCPM_REPORT.md` (`eval/wcpm_compare.py`).
 
 ## Misses and false alarms at the tuned cutoff
 

@@ -81,3 +81,6 @@ These are adult test readings: fine to display, **not** evidence of accuracy, an
 
 ## Checking single words (P2-AI-2)
 `python eval/check_word_eval.py` cuts single-word clips from the eval readings and reports how often `ai.check_word()` matches correct words and rejects swaps, other words and silence, for the tuning and confirmation readings separately. There are no real single-word recordings yet, so these clips carry a little of their neighbours.
+
+## Reading speed versus a human scorer (P3-AI-1)
+A person fills `eval/wcpm_human.csv` by listening to each listed reading: `reading_seconds` with a stopwatch from the first word to the last, and `words_correct` from the mistakes they hear. Then `python eval/wcpm_compare.py` writes `eval/WCPM_REPORT.md`, comparing the human WCPM and level with the app's (the engine's own `compute_wcpm()` and `compute_level()`) three ways: the draft as shown, after the teacher's fixes, and after the fixes timed from the first word to the last.

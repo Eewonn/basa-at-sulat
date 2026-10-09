@@ -197,3 +197,17 @@ def test_export_refuses_predictions_saved_before_timings_were_kept(tmp_path, cap
     assert run_eval.main(export_args(tmp_path, gt, passages, recs_dir) + ["--reuse"]) == 1
     assert "re-run without --reuse" in capsys.readouterr().out
     assert not (tmp_path / "checks").exists()
+
+
+def test_report_shows_the_machine_and_peak_memory(tmp_path):
+    gt, passages, recs_dir = project(tmp_path)
+    recs = metrics.load_ground_truth(gt)
+    preds, skipped = run_eval.evaluate(recs, run_eval.load_passages(passages), recs_dir, oracle_scorer(recs_dir), log=lambda *_: None)
+    text = run_eval.build_report(recs, preds, skipped, {"cpu": "Test CPU", "threads": 8, "peak_memory_gb": 3.1})
+    assert "Machine: Test CPU, 8 threads. Peak memory of the scoring process: 3.1 GB." in text
+    assert "eval/WCPM_REPORT.md" in text
+
+
+def test_machine_info_names_the_cpu():
+    info = run_eval.machine_info()
+    assert info["cpu"] and info["threads"]
