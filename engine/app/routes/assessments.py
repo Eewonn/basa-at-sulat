@@ -39,6 +39,24 @@ def get_conn() -> Iterator[sqlite3.Connection]:
         yield conn
 
 
+@router.get("/recent")
+def recent(conn=Depends(get_conn)) -> list[dict]:
+    """The 10 most recently confirmed checks, newest first, for the Basa tab."""
+    rows = conn.execute(
+        """
+        SELECT a.id AS assessment_id, a.learner_id, l.display_name,
+               substr(a.confirmed_at, 1, 10) AS date, p.title AS passage_title, a.wcpm
+        FROM assessments a
+        JOIN learners l ON l.id = a.learner_id
+        JOIN passages p ON p.id = a.passage_id
+        WHERE a.status = 'confirmed'
+        ORDER BY a.confirmed_at DESC, a.created_at DESC, a.id DESC
+        LIMIT 10
+        """
+    ).fetchall()
+    return [{**dict(r), "wcpm": None if r["wcpm"] is None else int(r["wcpm"])} for r in rows]
+
+
 @router.patch("/{assessment_id}/words/{i}")
 def patch_word(
     body: WordOverride,

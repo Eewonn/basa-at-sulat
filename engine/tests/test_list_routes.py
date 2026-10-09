@@ -1,10 +1,13 @@
-"""GET /learners, GET /passages, GET /books and POST /practice/check. Contract: docs/API.md."""
+"""GET /learners, GET /passages, GET /books, GET /assessments/recent and POST /practice/check. Contract: docs/API.md."""
 
 import subprocess
+from contextlib import closing
 
 import pytest
 from fastapi.testclient import TestClient
 
+from app.assessments import confirm_assessment, save_assessment
+from app.db import connect
 from app.main import app
 from app.seed import seed_db
 
@@ -29,12 +32,55 @@ def tone(tmp_path, seconds=0.5):
     return path
 
 
+def save_check(tmp_path, assessment_id, learner_id, missed=(), confirm=True, confirmed_at=None):
+    """A check on eng_g2_01 where every word is matched except the indices in `missed`."""
+    with closing(connect(tmp_path / "test.db")) as conn:
+        text = conn.execute("SELECT text FROM passages WHERE id = 'eng_g2_01'").fetchone()["text"]
+        save_assessment(conn, {
+            "assessment_id": assessment_id, "learner_id": learner_id, "passage_id": "eng_g2_01",
+            "duration_sec": 30.0, "pauses": [],
+            "words": [{"i": i, "text": w, "label": "misread" if i in missed else "matched", "score": 0.9,
+                       "start": i * 0.5, "end": i * 0.5 + 0.4} for i, w in enumerate(text.split())],
+        })
+        if confirm:
+            confirm_assessment(conn, assessment_id)
+        if confirmed_at:
+            with conn:
+                conn.execute("UPDATE assessments SET confirmed_at = ? WHERE id = ?", (confirmed_at, assessment_id))
+
+
 def test_learners_lists_the_seeded_class():
     r = client.get("/learners")
     assert r.status_code == 200
     rows = r.json()
     assert rows[0] == {"id": "l_01", "display_name": "A.R.", "grade": 1}
     assert [x["id"] for x in rows] == sorted(x["id"] for x in rows)
+
+
+def test_learners_summarise_the_latest_confirmed_check(env):
+    save_check(env, "a_old", "l_01", missed={0, 1}, confirmed_at="2026-10-01T08:00:00.000Z")
+    save_check(env, "a_new", "l_01", confirmed_at="2026-10-05T08:00:00.000Z")
+    save_check(env, "a_02", "l_02", missed={2})
+    save_check(env, "a_draft", "l_03", missed={0}, confirm=False)
+    rows = {x["id"]: x for x in client.get("/learners").json()}
+    assert rows["l_01"]["last_check"] == "2026-10-05"
+    assert rows["l_01"]["needs_practice"] is False
+    assert isinstance(rows["l_01"]["latest_wcpm"], int)
+    assert rows["l_01"]["level"] is not None
+    assert rows["l_02"]["needs_practice"] is True
+    # Drafts don't count, and a learner with no confirmed check has no summary fields.
+    assert rows["l_03"] == {"id": "l_03", "display_name": "C.M.", "grade": 1}
+
+
+def test_recent_lists_confirmed_checks_newest_first(env):
+    assert client.get("/assessments/recent").json() == []
+    save_check(env, "a_1", "l_01", confirmed_at="2026-10-01T08:00:00.000Z")
+    save_check(env, "a_2", "l_02", confirmed_at="2026-10-03T08:00:00.000Z")
+    save_check(env, "a_3", "l_03", confirm=False)
+    rows = client.get("/assessments/recent").json()
+    assert [r["assessment_id"] for r in rows] == ["a_2", "a_1"]
+    assert rows[0]["display_name"] == "B.T." and rows[0]["date"] == "2026-10-03"
+    assert set(rows[0]) == {"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}
 
 
 def test_passages_lists_the_seeded_texts():

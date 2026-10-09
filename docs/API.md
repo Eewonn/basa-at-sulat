@@ -70,7 +70,9 @@ Marks the assessment final (`status: "confirmed"`) and deletes the child's audio
 A file that is already gone counts as deleted.
 
 ## Learners and passages
-- `GET /learners` → `[{"id", "display_name", "grade"}]` (display names are synthetic or initials only)
+- `GET /assessments/recent` → `[{"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}]`: the 10 most recently confirmed checks, newest first (`date` is `YYYY-MM-DD`, UTC). For the Basa tab.
+- `GET /learners` → `[{"id", "display_name", "grade", "level", "latest_wcpm", "last_check", "needs_practice"}]`, by `id` (display names are synthetic or initials only)
+  - The last four come from the learner's latest **confirmed** check (same "latest" as practice and `/class`): its `level`, its `wcpm`, its date (`YYYY-MM-DD`, UTC) and whether it has any `misread` or `skipped` word. They are left out for a learner with no confirmed check.
 - `GET /passages` → `[{"id", "title", "language", "grade", "text"}]`
 
 ## Sulat: books
@@ -122,11 +124,10 @@ A file that is already gone counts as deleted.
 ## Proposed by frontend (needs team agreement)
 These support the learner profile and story categories. Until the engine implements them, the app uses sample data for them.
 - `category` on every passage: `"bukid" | "pamilya" | "hayop" | "kalikasan" | "paaralan"`
-- `GET /learners` items also include `stars`, `streak_days` and `latest_wcpm` (for the class summary cards)
+- `GET /learners` items also include `stars` and `streak_days` (for the class summary cards)
 - `GET /learners/{id}/stats` → `{"stars", "streak_days", "minutes_read", "wcpm_history": [{"date", "wcpm"}], "practicing": ["palay", ...], "days_read": ["2026-10-10", ...]}` (`days_read` = dates with a check or practice, for the reading card)
   - stars = words gotten right in Sanay; streak = consecutive days with a check or practice; minutes = recording time
 - `POST /practice/check` also takes `learner_id`, so a correct word can earn a star
-- `GET /assessments/recent` → `[{"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}]` (Basa tab)
 - `GET /books` items and `GET /books/{id}` also include `category`, `reader` and `duration_sec`; `POST /books` also takes `category` and `reader`, and its story becomes a passage
 - `GET /storage` → `{"audio_files", "audio_mb", "db_mb", "data_dir"}`; `DELETE /audio` deletes all children's recordings (book readings are kept) → `{"deleted"}`
 - `POST /learners` `{"display_name"}` and `PATCH /learners/{id}` `{"display_name"}` (Settings → Klase)
@@ -139,7 +140,8 @@ These support the learner profile and story categories. Until the engine impleme
 ## Contract changes
 
 ### 2026-10-10 · frontend (wiring the app to the engine)
-- `GET /learners` and `GET /passages` are live, in the shape already agreed, ordered by `id`.
+- `GET /learners` and `GET /passages` are live, ordered by `id`. **Addition:** learners with a confirmed check also carry `level`, `latest_wcpm`, `last_check` and `needs_practice`.
+- `GET /assessments/recent` is live (it was a proposal).
 - `POST /practice/check` is live, with its errors listed. `learner_id` is accepted and ignored for now (stars are still a proposal).
 - New: `GET /books` → `[{"id", "title", "language", "text"}]`, newest first. `category`, `reader` and `duration_sec` stay in the proposals; until then the app shows engine books with a default category.
 
