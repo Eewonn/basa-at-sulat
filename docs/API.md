@@ -74,6 +74,7 @@ A file that is already gone counts as deleted.
 - `GET /passages` → `[{"id", "title", "language", "grade", "text"}]`
 
 ## Sulat: books
+- `GET /books` → `[{"id", "title", "language", "text"}]`, newest first, without word timings (`GET /books/{id}` has them). Every book has its model reading, because `POST /books` requires it.
 - `POST /books`: multipart form with `title`, `language` (2-3 lowercase letters, such as `fil`, `eng`, `ilo`), `text` and `audio` (the model reading). Returns `{"id", "words": [{"i", "text", "start", "end"}]}`. Use a fluent speaker's complete reading of the story, and keep digits and dashes out of it, because words with no letters get zero-length times.
 - `GET /books/{id}` → `{"id", "title", "language", "text", "words": [{"i", "text", "start", "end"}]}`
 - `GET /books/{id}/audio` → the full model reading (`audio/wav`, 16 kHz mono)
@@ -98,7 +99,7 @@ A file that is already gone counts as deleted.
   - Words are the ones the teacher left as `misread` or `skipped` (final labels), in passage order, once each, with surrounding punctuation removed. `sentence` is the passage sentence the word was missed in.
   - `book_id` / `word_index` point at the first timed occurrence of the word in a Sulat book of the same language, for `GET /books/{id}/clips/{i}`. Both are `null` when no book has the word.
   - `{"items": []}` when the learner has no confirmed check (drafts are not practised). `404` for an unknown learner.
-- `POST /practice/check`: multipart form with `audio` and `word`. Returns `{"word", "result": "match" | "no_match", "score"}`
+- `POST /practice/check`: multipart form with `audio` and `word`. Returns `{"word", "result": "match" | "no_match", "score"}`. The recording is used only for this answer and never kept. Errors: `400` if the audio can't be read, `422` if `word` is missing or blank, `503` if the scoring model isn't installed, `500` if checking fails.
 - `GET /learners/{id}/progress` → `{"checks": [{"assessment_id", "passage_id", "confirmed_at", "wcpm", "level"}, ...], "words": [{"i", "text", "before", "after"}], "wcpm_before", "wcpm_after", "wcpm_change"}`
   - Compares the learner's latest two **confirmed** checks **on the same passage**: the newest check that has an earlier one on its passage, and the newest of those earlier ones. `checks` is `[before, after]`. If the newest check is on a passage read only once, an older pair is used, so `after` is not always the learner's latest check.
   - `words` lists every passage word in passage order, one per position (repeats are not merged), with `text` as written (punctuation kept). `before`/`after` are the teacher's final labels (`matched`, `misread`, `skipped`), or `null` if that check has no result for the word.
@@ -126,7 +127,7 @@ These support the learner profile and story categories. Until the engine impleme
   - stars = words gotten right in Sanay; streak = consecutive days with a check or practice; minutes = recording time
 - `POST /practice/check` also takes `learner_id`, so a correct word can earn a star
 - `GET /assessments/recent` → `[{"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}]` (Basa tab)
-- `GET /books` → `[{"id", "title", "language", "category", "text", "reader", "has_recording", "duration_sec"}]`; `GET /books/{id}` adds `words` timings; `POST /books` also takes `category` and `reader`, and its story becomes a passage
+- `GET /books` items and `GET /books/{id}` also include `category`, `reader` and `duration_sec`; `POST /books` also takes `category` and `reader`, and its story becomes a passage
 - `GET /storage` → `{"audio_files", "audio_mb", "db_mb", "data_dir"}`; `DELETE /audio` deletes all children's recordings (book readings are kept) → `{"deleted"}`
 - `POST /learners` `{"display_name"}` and `PATCH /learners/{id}` `{"display_name"}` (Settings → Klase)
 - `GET /class/settings` → `{"teacher_name", "section", "grade"}` and `PATCH /class/settings` (greeting, Klase subtitle)
@@ -136,6 +137,11 @@ These support the learner profile and story categories. Until the engine impleme
   - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up` or `down`. The engine reports `not_loaded` until the aligner is in memory (after the first `/assess`, or at startup with `BASA_WARM_UP=1`). `ollama` is `up` if Ollama answers at `OLLAMA_URL` within 1 s; it doesn't check that the model is pulled.
 
 ## Contract changes
+
+### 2026-10-10 · frontend (wiring the app to the engine)
+- `GET /learners` and `GET /passages` are live, in the shape already agreed, ordered by `id`.
+- `POST /practice/check` is live, with its errors listed. `learner_id` is accepted and ignored for now (stars are still a proposal).
+- New: `GET /books` → `[{"id", "title", "language", "text"}]`, newest first. `category`, `reader` and `duration_sec` stay in the proposals; until then the app shows engine books with a default category.
 
 ### 2026-10-10 · backend-2 (P2-BE2-3)
 - `GET /class` and `GET /class/export.csv` are live. The `/class` shape is unchanged; `draft_plan` can be `null` (no Filipino check in the group, or broken templates).

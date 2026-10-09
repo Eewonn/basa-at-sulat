@@ -90,6 +90,13 @@ def _time_the_words(wav_path, text: str, book_id: str) -> list[dict]:
         raise HTTPException(500, "could not time the words") from err
 
 
+@router.get("")
+def list_books(conn=Depends(get_conn)):
+    """Every book, newest first, without word timings (GET /books/{id} has those)."""
+    rows = conn.execute("SELECT id, title, language, text FROM books ORDER BY created_at DESC, id").fetchall()
+    return [dict(r) for r in rows]
+
+
 def _get_book(conn, book_id: str):
     book = conn.execute(
         "SELECT id, title, language, text, audio_path FROM books WHERE id = ?", (book_id,)

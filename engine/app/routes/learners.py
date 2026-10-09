@@ -1,4 +1,4 @@
-"""Learner endpoints: Sanay practice sets (P2-BE2-1) and progress (P2-BE2-2). Contract: docs/API.md."""
+"""Learner endpoints: the class list, Sanay practice sets (P2-BE2-1) and progress (P2-BE2-2). Contract: docs/API.md."""
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -7,6 +7,13 @@ from app.progress import build_progress
 from app.routes.assessments import get_conn
 
 router = APIRouter(prefix="/learners", tags=["learners"])
+
+
+@router.get("")
+def list_learners(conn=Depends(get_conn)) -> list[dict]:
+    """Every learner in the class, by id."""
+    rows = conn.execute("SELECT id, display_name, grade FROM learners ORDER BY id").fetchall()
+    return [dict(r) for r in rows]
 
 
 @router.get("/{learner_id}/practice")
