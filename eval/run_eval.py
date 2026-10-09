@@ -183,7 +183,8 @@ def build_report(recordings: dict, predictions: dict, skipped: list) -> str:
     return "\n".join(lines)
 
 
-def main(argv=None) -> int:
+def main(argv=None, scorer=None) -> int:
+    """CLI entry point. `scorer` replaces ai.score (tests pass a stub so they never load the model)."""
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--ground-truth", default=HERE / "ground_truth.csv")
     ap.add_argument("--recordings", default=HERE / "recordings")
@@ -203,10 +204,14 @@ def main(argv=None) -> int:
         saved = json.loads(predictions_path.read_text(encoding="utf-8"))
         predictions, skipped = saved["predictions"], [tuple(s) for s in saved["skipped"]]
     else:
-        sys.path.insert(0, str(ROOT))
-        from ai import score
+        if scorer is None:
+            sys.path.insert(0, str(ROOT))
+            import ai
 
-        predictions, skipped = evaluate(recordings, load_passages(args.passages), args.recordings, score)
+            print("loading the aligner model...")
+            ai.warm_up()  # load before timing, or the first recording's time includes the ~10 s load
+            scorer = ai.score
+        predictions, skipped = evaluate(recordings, load_passages(args.passages), args.recordings, scorer)
         predictions_path.parent.mkdir(parents=True, exist_ok=True)
         predictions_path.write_text(json.dumps({"predictions": predictions, "skipped": skipped}, indent=1), encoding="utf-8")
 

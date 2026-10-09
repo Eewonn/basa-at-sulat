@@ -38,6 +38,20 @@ def weights_cached() -> bool:
     return checkpoints.is_dir() and any(checkpoints.iterdir())
 
 
+def warm_up() -> None:
+    """Load the model now (about 10 s), so the first score() call isn't the slow one.
+
+    Call it once at engine startup. Downloads the weights first if they aren't cached, so on an
+    offline laptop they must already be in models/torch/.
+    """
+    _load()
+
+
+def model_loaded() -> bool:
+    """True once the model is in memory (for GET /health: "loaded" / "not_loaded")."""
+    return _load.cache_info().currsize > 0
+
+
 @lru_cache(maxsize=1)
 def _load():
     import torchaudio

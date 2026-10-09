@@ -1,3 +1,4 @@
+import importlib.util
 import struct
 import wave
 
@@ -6,8 +7,8 @@ import pytest
 from ai import aligner
 
 requires_model = pytest.mark.skipif(
-    not aligner.weights_cached(),
-    reason="MMS weights not downloaded yet (run ai/smoke_test.py once to fetch them)",
+    importlib.util.find_spec("torch") is None or not aligner.weights_cached(),
+    reason="needs torch and the MMS weights (pip install -r ai/requirements.txt, then run ai/smoke_test.py once)",
 )
 
 

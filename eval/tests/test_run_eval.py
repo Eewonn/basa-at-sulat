@@ -84,14 +84,20 @@ def test_a_perfect_scorer_gets_a_go_verdict(tmp_path):
     assert "swap | skip" in report
 
 
-def test_main_with_the_stub_scorer_is_no_go(tmp_path):
-    """The stub marks every word matched, so it must never produce a GO."""
+def matched_scorer(audio_path, text):
+    """Like the old ai.score stub: every word matched, nothing flagged. Never loads the model."""
+    return {"words": [{"i": i, "text": w, "label": "matched", "score": 0.9, "start": 0, "end": 0}
+                      for i, w in enumerate(text.split())], "pauses": []}
+
+
+def test_main_with_a_scorer_that_flags_nothing_is_no_go(tmp_path):
+    """A scorer that marks every word matched catches no mistakes, so it must never produce a GO."""
     gt, passages, recs_dir = project(tmp_path)
     out = tmp_path / "REPORT.md"
     code = run_eval.main([
         "--ground-truth", str(gt), "--passages", str(passages), "--recordings", str(recs_dir),
         "--predictions", str(tmp_path / "out" / "predictions.json"), "--out", str(out),
-    ])
+    ], scorer=matched_scorer)
     assert code == 0
     assert "**Overall: NO-GO**" in out.read_text(encoding="utf-8")
     assert (tmp_path / "out" / "predictions.json").exists()
@@ -101,7 +107,7 @@ def test_reuse_rebuilds_the_report_without_running_the_model(tmp_path):
     gt, passages, recs_dir = project(tmp_path)
     args = ["--ground-truth", str(gt), "--passages", str(passages), "--recordings", str(recs_dir),
             "--predictions", str(tmp_path / "p.json")]
-    run_eval.main(args + ["--out", str(tmp_path / "first.md")])
+    run_eval.main(args + ["--out", str(tmp_path / "first.md")], scorer=matched_scorer)
     for wav in (recs_dir / "fil").glob("*.wav"):
         wav.unlink()  # prove --reuse doesn't need the audio
     assert run_eval.main(args + ["--out", str(tmp_path / "second.md"), "--reuse"]) == 0
@@ -113,3 +119,23 @@ def test_empty_ground_truth_exits_with_a_hint(tmp_path, capsys):
     gt.write_text(HEADER, encoding="utf-8")
     assert run_eval.main(["--ground-truth", str(gt)]) == 1
     assert "Record the test set" in capsys.readouterr().out
+
+
+def test_main_defaults_to_ai_score_and_warms_the_model_up_first(tmp_path, monkeypatch):
+    """Without a scorer, main() uses ai.score, after ai.warm_up() (so timing excludes the model load).
+
+    Both are replaced here, so the model is never loaded and torch isn't needed.
+    """
+    import sys
+
+    sys.path.insert(0, str(run_eval.ROOT))
+    import ai
+
+    calls = []
+    monkeypatch.setattr(ai, "warm_up", lambda: calls.append("warm_up"))
+    monkeypatch.setattr(ai, "score", lambda path, text: calls.append("score") or matched_scorer(path, text))
+    gt, passages, recs_dir = project(tmp_path)
+    run_eval.main(["--ground-truth", str(gt), "--passages", str(passages), "--recordings", str(recs_dir),
+                   "--predictions", str(tmp_path / "p.json"), "--out", str(tmp_path / "r.md")])
+    assert calls[0] == "warm_up" and calls.count("warm_up") == 1
+    assert calls.count("score") == 4
