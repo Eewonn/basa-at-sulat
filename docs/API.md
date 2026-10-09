@@ -65,3 +65,4 @@ Marks the assessment final (`status: "confirmed"`) and deletes the audio unless 
 
 ## Health
 - `GET /health` → `{"ok": true, "models": {"aligner": "loaded", "ollama": "up"}}`
+  - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up`, `down` or `unknown`. Until a model is wired in, the engine reports `not_loaded` / `unknown`.
