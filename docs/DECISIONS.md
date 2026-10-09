@@ -29,6 +29,28 @@ Every saved check gets a `level` (P1-BE2-2), computed in `engine/app/levels.py` 
 
 **Sources (checked 2026-10-10):** [DepEd BLD CRLA school submission form](https://bld.deped.gov.ph/crla) (level names, SY 2026-27); [CRLA EoSY slides](https://www.slideshare.net/slideshow/comprehensive-rapid-literacy-assessment-crla-eosy-final-1-pptx/276427333) (passage %, time limits, comprehension, passage lengths); [General overview of CRLA](https://www.slideshare.net/slideshow/general-overview-of-crlapptx/258713065) (the beginning-of-year Refresher scale).
 
+## 2026-10-10: Go: keep the MMS aligner, scoring each word by its weakest letter
+The Phase 0 gate passed (P0-ALL-2). We keep the full plan, Meta's MMS forced aligner, and **don't build the Whisper fallback** (P1-AI-2).
+
+**The test:** 15 Filipino readings of `fil_g2_01` with planted mistakes (4 clean; 22 swaps and skips; quiet, fan noise, farther away, faster and slower, TV in the background), then a **confirmation set** of 8 new readings of two passages written for it (`fil_g2_02`, `fil_g2_03`; 13 mistakes), recorded after the thresholds were fixed and never tuned on. One adult teammate read them all. Details: `eval/REPORT.md` and `eval/CONFIRM_REPORT.md`.
+
+| | F1 | Precision | Recall |
+|---|---|---|---|
+| Tuning set, first scoring (average of the letters), held-out | **0.55: no-go** | 0.52 | 0.59 |
+| Tuning set, weakest letter, held-out | 0.76 | 0.74 | 0.77 |
+| **Confirmation set, thresholds fixed in advance** | **0.74: go** | 0.71 | 0.77 |
+
+**Why the scoring changed:** averaging a word's letters hid near-miss swaps (palay → "pala", lolo → "lola"), where every letter fits but one. Scoring a word by its weakest letter (log scale; flagged when a letter gets under a 1-in-1000 chance) caught 9 of 12 swaps instead of 4; skips were 10 of 10 either way. The cutoff sits in a flat F1 range (0.74 to 0.78 for any cutoff from 0.00 to 0.35) and leans toward recall, because the teacher confirms every flag and a miss goes unseen.
+
+**Why not Whisper:** prompted with the passage, it tends to hear the expected word, so it would likely do worse on exactly these near-miss swaps.
+
+**Limits we accept and say openly:**
+- **Filipino only.** English and regional languages are untested (we chose Filipino first), so P0-ALL-1 stays open for them.
+- **One adult reader.** Accuracy for other voices, and for children, is unknown. Two or three readings from another teammate would cover other voices.
+- **Misses:** e/i and o/u swaps (Lina → "Lena", bola → "bula", palengke → "palingke") and a syllable added inside a word (kumain → "kumakain"). Open question for a teacher: do e/i and o/u swaps count as misreadings in everyday Filipino?
+- **False alarms:** mostly the word next to a skip or an insert (still the right spot for the teacher), plus some `ng` before an m-word and sentence-final words under fan noise.
+- **Speed:** about 40 s of processing per minute of audio on an 8-core CPU laptop, so a 40-second reading takes about 26 s. The pitch's "in seconds" needs the measured number (P3-ALL-1).
+
 ## 2026-10-10: Group plans are templates plus one model sentence from Qwen 2.5 7B, in Filipino first
 A draft group plan (P0-BE2-3, P2-BE2-3) is a **teacher-style activity template** (`engine/prompts/activities-fil.json`) filled with the group's missed words, plus **one example sentence** written by **qwen2.5:7b** running locally in Ollama (offline, laptop CPU). The sentence is kept only if it passes checks (one line, 3 to 20 words, not repetitive, Latin letters only, no English or Spanish words from a short blocklist, uses a missed word). A rejected sentence is retried with up to 3 fixed seeds. If Ollama is down or every try is rejected, the plan is the template alone, and the reason is logged. Plans are **Filipino only for now**; English and regional languages come later. Prompt instructions are in English, with a firm rule to reply in Filipino. A native speaker reviews the templates and saved examples before the task is ticked.
 

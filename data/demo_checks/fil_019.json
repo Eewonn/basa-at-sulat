@@ -1,0 +1,265 @@
+{
+ "recording_id": "fil_019",
+ "passage_id": "fil_g2_02",
+ "duration_sec": 17.45,
+ "words": [
+  {
+   "i": 0,
+   "text": "Si",
+   "label": "matched",
+   "score": 1.0,
+   "start": 1.16,
+   "end": 1.26
+  },
+  {
+   "i": 1,
+   "text": "Mila",
+   "label": "matched",
+   "score": 1.0,
+   "start": 1.36,
+   "end": 1.66
+  },
+  {
+   "i": 2,
+   "text": "ay",
+   "label": "matched",
+   "score": 1.0,
+   "start": 1.76,
+   "end": 1.86
+  },
+  {
+   "i": 3,
+   "text": "may",
+   "label": "matched",
+   "score": 1.0,
+   "start": 1.94,
+   "end": 2.08
+  },
+  {
+   "i": 4,
+   "text": "maliit",
+   "label": "matched",
+   "score": 1.0,
+   "start": 2.14,
+   "end": 2.54
+  },
+  {
+   "i": 5,
+   "text": "na",
+   "label": "matched",
+   "score": 1.0,
+   "start": 2.62,
+   "end": 2.7
+  },
+  {
+   "i": 6,
+   "text": "aso.",
+   "label": "matched",
+   "score": 1.0,
+   "start": 2.8,
+   "end": 3.06
+  },
+  {
+   "i": 7,
+   "text": "Puti",
+   "label": "matched",
+   "score": 0.96,
+   "start": 3.84,
+   "end": 4.1
+  },
+  {
+   "i": 8,
+   "text": "ang",
+   "label": "matched",
+   "score": 0.99,
+   "start": 4.22,
+   "end": 4.32
+  },
+  {
+   "i": 9,
+   "text": "balahibo",
+   "label": "matched",
+   "score": 1.0,
+   "start": 4.36,
+   "end": 4.94
+  },
+  {
+   "i": 10,
+   "text": "nito.",
+   "label": "misread",
+   "score": 0.0,
+   "start": 4.94,
+   "end": 5.44
+  },
+  {
+   "i": 11,
+   "text": "Tuwing",
+   "label": "misread",
+   "score": 0.0,
+   "start": 5.44,
+   "end": 5.72
+  },
+  {
+   "i": 12,
+   "text": "umaga,",
+   "label": "matched",
+   "score": 0.98,
+   "start": 5.8,
+   "end": 6.18
+  },
+  {
+   "i": 13,
+   "text": "naglalaro",
+   "label": "matched",
+   "score": 1.0,
+   "start": 6.98,
+   "end": 7.52
+  },
+  {
+   "i": 14,
+   "text": "sila",
+   "label": "matched",
+   "score": 1.0,
+   "start": 7.62,
+   "end": 7.84
+  },
+  {
+   "i": 15,
+   "text": "sa",
+   "label": "matched",
+   "score": 1.0,
+   "start": 7.96,
+   "end": 8.04
+  },
+  {
+   "i": 16,
+   "text": "bakuran.",
+   "label": "matched",
+   "score": 0.99,
+   "start": 8.1,
+   "end": 8.56
+  },
+  {
+   "i": 17,
+   "text": "Hinahabol",
+   "label": "matched",
+   "score": 0.99,
+   "start": 9.64,
+   "end": 10.26
+  },
+  {
+   "i": 18,
+   "text": "ng",
+   "label": "matched",
+   "score": 1.0,
+   "start": 10.3,
+   "end": 10.44
+  },
+  {
+   "i": 19,
+   "text": "aso",
+   "label": "matched",
+   "score": 1.0,
+   "start": 10.56,
+   "end": 10.8
+  },
+  {
+   "i": 20,
+   "text": "ang",
+   "label": "matched",
+   "score": 0.98,
+   "start": 10.92,
+   "end": 11.02
+  },
+  {
+   "i": 21,
+   "text": "bola.",
+   "label": "matched",
+   "score": 0.45,
+   "start": 11.06,
+   "end": 11.34
+  },
+  {
+   "i": 22,
+   "text": "Pagod",
+   "label": "matched",
+   "score": 0.98,
+   "start": 12.4,
+   "end": 12.7
+  },
+  {
+   "i": 23,
+   "text": "na",
+   "label": "matched",
+   "score": 1.0,
+   "start": 12.74,
+   "end": 12.82
+  },
+  {
+   "i": 24,
+   "text": "sila",
+   "label": "matched",
+   "score": 1.0,
+   "start": 12.88,
+   "end": 13.1
+  },
+  {
+   "i": 25,
+   "text": "pagkatapos,",
+   "label": "matched",
+   "score": 1.0,
+   "start": 13.22,
+   "end": 13.92
+  },
+  {
+   "i": 26,
+   "text": "kaya",
+   "label": "matched",
+   "score": 1.0,
+   "start": 14.65,
+   "end": 14.83
+  },
+  {
+   "i": 27,
+   "text": "umiinom",
+   "label": "matched",
+   "score": 0.94,
+   "start": 14.91,
+   "end": 15.39
+  },
+  {
+   "i": 28,
+   "text": "sila",
+   "label": "matched",
+   "score": 1.0,
+   "start": 15.45,
+   "end": 15.67
+  },
+  {
+   "i": 29,
+   "text": "ng",
+   "label": "matched",
+   "score": 0.99,
+   "start": 15.77,
+   "end": 15.93
+  },
+  {
+   "i": 30,
+   "text": "tubig.",
+   "label": "misread",
+   "score": 0.0,
+   "start": 15.97,
+   "end": 16.43
+  }
+ ],
+ "pauses": [
+  {
+   "before_word": 17,
+   "seconds": 1.08
+  },
+  {
+   "before_word": 22,
+   "seconds": 1.06
+  }
+ ]
+}

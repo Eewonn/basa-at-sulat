@@ -139,3 +139,61 @@ def test_main_defaults_to_ai_score_and_warms_the_model_up_first(tmp_path, monkey
                    "--predictions", str(tmp_path / "p.json"), "--out", str(tmp_path / "r.md")])
     assert calls[0] == "warm_up" and calls.count("warm_up") == 1
     assert calls.count("score") == 4
+
+
+# --- demo export (--export-dir) ------------------------------------------------
+
+def scorer_with_timings(audio_path, text):
+    """Like ai.score: timings on every word, a pause, and a timings key that the export must leave out."""
+    words = [{"i": i, "text": w, "label": "misread" if i == 1 else "matched", "score": 0.1 if i == 1 else 0.95,
+              "start": round(0.5 * i, 2), "end": round(0.5 * i + 0.4, 2)} for i, w in enumerate(text.split())]
+    return {"words": words, "pauses": [{"before_word": 2, "seconds": 1.3}], "timings": {"align_ms": 9, "score_ms": 1}}
+
+
+def export_args(tmp_path, gt, passages, recs_dir):
+    return ["--ground-truth", str(gt), "--passages", str(passages), "--recordings", str(recs_dir),
+            "--predictions", str(tmp_path / "p.json"), "--out", str(tmp_path / "r.md"),
+            "--export-dir", str(tmp_path / "checks")]
+
+
+def test_export_writes_one_check_per_scored_recording(tmp_path):
+    gt, passages, recs_dir = project(tmp_path, have_audio=("fil_001", "fil_002", "fil_004"))
+    assert run_eval.main(export_args(tmp_path, gt, passages, recs_dir), scorer=scorer_with_timings) == 0
+    files = sorted(p.name for p in (tmp_path / "checks").iterdir())
+    assert files == ["fil_001.json", "fil_002.json", "fil_004.json"]  # fil_003 had no audio: not exported
+
+    check = json.loads((tmp_path / "checks" / "fil_001.json").read_text(encoding="utf-8"))
+    assert list(check) == ["recording_id", "passage_id", "duration_sec", "words", "pauses"]
+    assert (check["recording_id"], check["passage_id"], check["duration_sec"]) == ("fil_001", "p1", 1.0)
+    assert check["words"][1] == {"i": 1, "text": "two", "label": "misread", "score": 0.1, "start": 0.5, "end": 0.9}
+    assert check["pauses"] == [{"before_word": 2, "seconds": 1.3}]
+
+
+def test_export_has_no_reader_initials_or_timings(tmp_path):
+    gt, passages, recs_dir = project(tmp_path)
+    run_eval.main(export_args(tmp_path, gt, passages, recs_dir), scorer=scorer_with_timings)
+    for path in (tmp_path / "checks").iterdir():
+        raw = path.read_text(encoding="utf-8")
+        assert "KM" not in raw  # the reader column of the ground truth never leaks
+        assert "timings" not in raw and "align_ms" not in raw  # machine-specific, not part of a saved check
+
+
+def test_export_works_from_saved_predictions(tmp_path):
+    gt, passages, recs_dir = project(tmp_path)
+    args = export_args(tmp_path, gt, passages, recs_dir)
+    run_eval.main([a for a in args if a not in ("--export-dir", str(tmp_path / "checks"))], scorer=scorer_with_timings)
+    for wav in (recs_dir / "fil").glob("*.wav"):
+        wav.unlink()  # --reuse must not need the audio
+    assert run_eval.main(args + ["--reuse"]) == 0
+    assert len(list((tmp_path / "checks").iterdir())) == 4
+
+
+def test_export_refuses_predictions_saved_before_timings_were_kept(tmp_path, capsys):
+    gt, passages, recs_dir = project(tmp_path)
+    old = {"predictions": {"fil_001": {"language": "fil", "duration_sec": 1.0, "elapsed_sec": 0.1,
+                                       "words": [{"i": 0, "text": "one", "label": "matched", "score": 0.9}]}},
+           "skipped": []}
+    (tmp_path / "p.json").write_text(json.dumps(old), encoding="utf-8")
+    assert run_eval.main(export_args(tmp_path, gt, passages, recs_dir) + ["--reuse"]) == 1
+    assert "re-run without --reuse" in capsys.readouterr().out
+    assert not (tmp_path / "checks").exists()
