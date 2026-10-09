@@ -1,8 +1,30 @@
-import type { Api, Assessment, Book } from './types'
+import type { Api, Assessment, Book, BookWord } from './types'
+
+// The engine stores ISO 639 codes (fil, eng, ilo…), but the book editor takes the language's name.
+const LANGUAGE_CODES: Record<string, string> = {
+  filipino: 'fil',
+  tagalog: 'fil',
+  english: 'eng',
+  ilocano: 'ilo',
+  ilokano: 'ilo',
+  cebuano: 'ceb',
+  hiligaynon: 'hil',
+  kapampangan: 'pam',
+  waray: 'war'
+}
+
+// An unknown name goes through as typed, and the engine's 422 says what it expects.
+function languageCode(name: string): string {
+  const key = name.trim().toLowerCase()
+  return LANGUAGE_CODES[key] ?? key
+}
 
 // Talks to the local engine (docs/API.md). Only ever 127.0.0.1: nothing leaves the laptop.
 export function createHttpApi(port: number): Api {
   const base = `http://127.0.0.1:${port}`
+
+  // Every engine book has its model reading (POST /books requires the audio), so it always has audio to play.
+  const withAudio = <T extends { id: string }>(b: T) => ({ ...b, has_recording: true, audio_url: `${base}/books/${b.id}/audio` })
 
   async function json<T>(path: string, init?: RequestInit): Promise<T> {
     const res = await fetch(base + path, init)
@@ -40,11 +62,15 @@ export function createHttpApi(port: number): Api {
       json('/practice/check', { method: 'POST', body: form({ audio, word, learner_id: learnerId }) }),
     recentChecks: () => json('/assessments/recent'),
     books: () => json('/books'),
-    book: async (id) => {
-      const b = await json<Book>(`/books/${id}`)
-      return b.has_recording ? { ...b, audio_url: `${base}/books/${id}/audio` } : b
+    book: async (id) => withAudio(await json<Book>(`/books/${id}`)),
+    createBook: async (book, audio, durationSec) => {
+      // The engine replies with only {id, words}; the rest of the book is what the teacher just entered.
+      const created = await json<{ id: string; words: BookWord[] }>('/books', {
+        method: 'POST',
+        body: form({ title: book.title, language: languageCode(book.language), text: book.text, audio })
+      })
+      return withAudio({ ...book, ...created, duration_sec: durationSec })
     },
-    createBook: (book, audio) => json('/books', { method: 'POST', body: form({ ...book, audio }) }),
     storage: () => json('/storage'),
     deleteAllAudio: () => json('/audio', { method: 'DELETE' }),
     addLearner: (name) =>
