@@ -1,6 +1,6 @@
 # API contract
 
-The app talks to the engine (`engine/`, FastAPI) on `http://localhost:8000` by default. Set the `PORT` environment variable to use another port (the desktop app picks a free one). Start it from `engine/` with `python -m app`. **Change this file first, tell the team, then change code.** Frontend builds against [`api/assess.example.json`](api/assess.example.json) until the real endpoint exists.
+The app talks to the engine (`engine/`, FastAPI) on `http://localhost:8000` by default. Start it from `engine/` with `python -m app [--port N] [--data-dir D]`. The port is `--port`, else the `PORT` environment variable, else 8000. `--data-dir D` keeps the database at `D/basa.db` and the audio under `D`. `scripts/start.sh` picks a free port itself and gives it to the desktop app as `BASA_ENGINE_PORT`. **Browser access:** the engine answers browser requests only from pages on this laptop, meaning origins `http://localhost:<port>` and `http://127.0.0.1:<port>` (any port), so the Vite dev server of the desktop app can call it. A packaged app loaded from `file://` is not affected. Any other origin gets no CORS headers and the browser blocks it. **Change this file first, tell the team, then change code.** Frontend builds against [`api/assess.example.json`](api/assess.example.json) until the real endpoint exists.
 
 ## Word labels
 
