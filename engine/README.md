@@ -134,3 +134,9 @@ It writes nothing unless every word group gets a model sentence (here, unlike in
 - `GET /books/{id}` returns the book with its words, `GET /books/{id}/audio` returns the WAV. Limits: 25 MB of audio, 3,000 words (`MAX_AUDIO_BYTES`, `MAX_WORDS` in `app/books.py`).
 - The `sys.path` insert that lets the engine import the `ai` package now lives in `app/__init__.py`.
 - Tests replace `word_timings`, so they never load the model. Real timing quality is checked by the AI engineer's `eval/timing_check.py`, not here.
+
+## Update: word clips (P2-BE1-2)
+- `GET /books/{id}/clips/{i}` (`app/books.py`) cuts word `i`'s frames from the stored book WAV with Python's `wave` module and returns a small 16 kHz mono WAV. It is cut on every request and nothing is written to disk, so there are no clips to clean up.
+- It relies on the stored file being the PCM WAV that `POST /books` makes; it would need ffmpeg if we ever stored another format.
+- A zero-length word (digits, dashes) returns `422`; an unknown book, word or missing audio returns `404`. `GET /books/{id}/audio` now shares the same path check (the stored path must stay inside `engine/storage/`).
+- Tests build a recording where each word is a different tone, so they prove that a clip holds only its own word. Real word quality is the AI engineer's `eval/timing_check.py`.

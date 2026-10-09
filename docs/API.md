@@ -77,7 +77,7 @@ A file that is already gone counts as deleted.
 - `POST /books`: multipart form with `title`, `language` (2-3 lowercase letters, such as `fil`, `eng`, `ilo`), `text` and `audio` (the model reading). Returns `{"id", "words": [{"i", "text", "start", "end"}]}`. Use a fluent speaker's complete reading of the story, and keep digits and dashes out of it, because words with no letters get zero-length times.
 - `GET /books/{id}` → `{"id", "title", "language", "text", "words": [{"i", "text", "start", "end"}]}`
 - `GET /books/{id}/audio` → the full model reading (`audio/wav`, 16 kHz mono)
-- `GET /books/{id}/clips/{i}` → audio for word `i` only
+- `GET /books/{id}/clips/{i}` → audio for word `i` only (`audio/wav`, 16 kHz mono), cut from the model reading between that word's `start` and `end`
 
 `POST /books` errors (body `{"detail": "<what went wrong>"}`). A rejected upload keeps nothing: no audio file and no book.
 
@@ -90,6 +90,8 @@ A file that is already gone counts as deleted.
 | `503` | The engine has no database yet, or the scoring model isn't installed |
 
 `GET /books/{id}` and `GET /books/{id}/audio` return `404` for an unknown id.
+
+`GET /books/{id}/clips/{i}` errors: `404` for an unknown book, an unknown word index, or missing audio; `422` if `i` isn't a whole number, or the word has no audio in the reading (words with no letters, such as digits, get zero-length times, so the app should not offer "Hear it" for them); `503` if the engine has no database yet. A word that runs past the end of the recording is cut at the end.
 
 ## Sanay: practice
 - `GET /learners/{id}/practice` → `{"items": [{"word", "sentence", "book_id", "word_index"}]}`, built from the child's latest confirmed check
