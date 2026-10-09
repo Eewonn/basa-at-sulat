@@ -52,6 +52,8 @@ The Phase 0 gate passed (P0-ALL-2). We keep the full plan, Meta's MMS forced ali
 | Tuning set, weakest letter, held-out | 0.76 | 0.74 | 0.77 |
 | **Confirmation set, thresholds fixed in advance** | **0.74: go** | 0.71 | 0.77 |
 
+**Correction (2026-10-10, P3-AI-1):** re-listening for the WCPM check found an unplanted slip in `fil_010`, logged as clean ("Tinutulungan" for *Tinulungan*), now in `eval/ground_truth.csv`. With it, the tuning set is labels F1 0.75 and held-out F1 0.69 (the held-out split moves a lot with 15 readings). The confirmation set, which decided the go, is unchanged at 0.74.
+
 **Why the scoring changed:** averaging a word's letters hid near-miss swaps (palay → "pala", lolo → "lola"), where every letter fits but one. Scoring a word by its weakest letter (log scale; flagged when a letter gets under a 1-in-1000 chance) caught 9 of 12 swaps instead of 4; skips were 10 of 10 either way. The cutoff sits in a flat F1 range (0.74 to 0.78 for any cutoff from 0.00 to 0.35) and leans toward recall, because the teacher confirms every flag and a miss goes unseen.
 
 **Why not Whisper:** prompted with the passage, it tends to hear the expected word, so it would likely do worse on exactly these near-miss swaps.
