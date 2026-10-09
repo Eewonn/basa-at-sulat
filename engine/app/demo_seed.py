@@ -239,3 +239,44 @@ def load_demo_checks(conn: sqlite3.Connection, checks: list[DemoCheck]) -> DemoS
                 f"{saved['assessment_id']}: expected {check.expected_level}, got {saved['level']}"
             )
     return outcome
+
+
+# --- Demo Sanay practice ---------------------------------------------------
+
+def load_demo_practice(conn: sqlite3.Connection, streaks: dict[str, int],
+                       now: datetime | None = None) -> int:
+    """Add Sanay attempts so stars and streaks have data. Returns how many were added.
+
+    streaks maps a learner id to how many days in a row, ending today, they practised.
+    Each day the learner tries up to 3 words from their latest demo check (missed words
+    first) and gets all but the first try of the first day right. Every attempt points at
+    a demo_ check, so load_demo_checks removes them on the next run. Synthetic, like the checks.
+    """
+    now = now or datetime.now(timezone.utc)
+    rows = []
+    for learner_id, days in streaks.items():
+        check = conn.execute(
+            "SELECT id FROM assessments WHERE learner_id = ? AND id LIKE ? ESCAPE '\\' "
+            "ORDER BY created_at DESC LIMIT 1",
+            (learner_id, DEMO_PREFIX.replace("_", r"\_") + "%"),
+        ).fetchone()
+        if check is None or days <= 0:
+            continue
+        words = [r["text"] for r in conn.execute(
+            "SELECT text FROM word_results WHERE assessment_id = ? "
+            "ORDER BY final_label = 'matched', i LIMIT 3",
+            (check["id"],),
+        )]
+        for day in range(days):
+            moment = now - timedelta(days=day, minutes=10)
+            for n, word in enumerate(words):
+                right = not (day == days - 1 and n == 0)
+                rows.append((learner_id, check["id"], word, "match" if right else "no_match",
+                             0.9 if right else 0.3, _db_time(moment + timedelta(seconds=n))))
+    with conn:
+        conn.executemany(
+            "INSERT INTO practice_attempts (learner_id, assessment_id, word, result, score, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            rows,
+        )
+    return len(rows)

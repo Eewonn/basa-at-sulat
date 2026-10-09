@@ -2,7 +2,7 @@
 
 Run from engine/: python -m app.seed [--path PATH] [--reset] [--demo]
 
---demo also loads the demo Basa checks (see app/demo_seed.py).
+--demo also loads the demo Basa checks and Sanay practice (see app/demo_seed.py).
 
 Re-running is safe: rows are inserted or updated from the JSON files. The one
 exception is a passage whose text changed while assessments already point at
@@ -21,7 +21,7 @@ from pathlib import Path
 
 from app.assessments import AssessmentError
 from app.db import ENGINE_DIR, add_missing_columns, connect, get_db_path, init_db
-from app.demo_seed import DemoSeedError, load_demo_checks, prepare_demo_checks
+from app.demo_seed import DemoSeedError, load_demo_checks, load_demo_practice, prepare_demo_checks
 
 DATA_DIR = ENGINE_DIR.parent / "data"
 DEFAULT_LEARNERS_PATH = DATA_DIR / "learners" / "learners.json"
@@ -282,6 +282,10 @@ def main(argv: list[str] | None = None) -> int:
             db_path = Path(args.path) if args.path else get_db_path()
             with closing(connect(db_path)) as conn:
                 demo = load_demo_checks(conn, demo_checks)
+                streaks = json.loads(DEFAULT_DEMO_CONFIG_PATH.read_text(encoding="utf-8")).get("practice_streaks", {})
+                practice_added = load_demo_practice(
+                    conn, {k: v for k, v in streaks.items() if not k.startswith("_")}
+                )
     except (SeedError, DemoSeedError, AssessmentError) as err:
         print(f"Error: {err}", file=sys.stderr)
         return 1
@@ -298,6 +302,7 @@ def main(argv: list[str] | None = None) -> int:
             f"Demo checks: {demo.loaded} loaded (synthetic, see data/demo_seed.json), "
             f"{demo.replaced} old ones replaced, {demo.practice_removed} demo practice attempts removed."
         )
+        print(f"Demo Sanay practice: {practice_added} attempts added (synthetic).")
         for mismatch in demo.level_mismatches:
             # Usually means levels.py cutoffs changed; update expected_level in the config.
             print(f"Warning: {mismatch}", file=sys.stderr)

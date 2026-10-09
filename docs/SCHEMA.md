@@ -119,6 +119,8 @@ python -m app.seed --demo
 
 This loads 14 confirmed Basa checks for the 10 synthetic learners, so the level, class and progress screens have something to show. Every level appears at least once. Learners `l_03`, `l_07`, `l_09` and `l_10` have an earlier and a later check (2026-09-07 → 2026-10-05) for progress.
 
+It also adds synthetic Sanay attempts so stars and streaks have data: `practice_streaks` in `data/demo_seed.json` says how many days in a row, ending on the day the seed runs, each learner practised (up to 3 words a day from their latest demo check). They point at `demo_` checks, so a re-run replaces them. Streaks are counted from the seed day, so they fade if the database is kept for weeks; re-run `--demo` to refresh them.
+
 **Where the data comes from.** Each check starts as a real `score()` result from the AI engineer's tuning recordings (`data/demo_checks/`, one JSON per recording, from PR #16). There's no audio and no reader names. `demo_seed.json` maps each recording to a learner and changes it:
 - **Slowed down.** The readers were adults (80–155 WCPM), so `target_wcpm` (or `duration_sec`) sets a child's pace. Word `start`/`end` and pause lengths are scaled by the same factor, so they still fit the recording.
 - **Hand-edited labels.** The recordings have at most 3 mistakes, which only reaches Transitioning and At Grade Level. To show the lower levels, `relabel` changes chosen words to `misread` or `skipped` **by hand** (`demo_l01_a` to `demo_l05_a`). Their scores are capped (0.3 / 0.05) so they match the new label. **These checks are synthetic, not model output.**

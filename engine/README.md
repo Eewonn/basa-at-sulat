@@ -96,7 +96,7 @@ Built against `docs/api/assess.example.json`, ahead of the real `/assess`.
 - No `CHECK` constraint on `level` yet (it would force a `--reset`). It's noted as a P3 to do in `docs/SCHEMA.md`.
 
 ### Demo checks (P1-BE2-3)
-`python -m app.seed --demo` loads 14 confirmed demo checks (ids `demo_…`) covering every level, plus before-and-after pairs for progress. Some are hand-edited and synthetic. See "Demo checks" in `docs/SCHEMA.md`. The score() results in `data/demo_checks/` came from the AI engineer (#16).
+`python -m app.seed --demo` loads 14 confirmed demo checks (ids `demo_…`) covering every level, plus before-and-after pairs for progress, and synthetic Sanay attempts so stars and streaks show (`practice_streaks`). Some are hand-edited and synthetic. See "Demo checks" in `docs/SCHEMA.md`. The score() results in `data/demo_checks/` came from the AI engineer (#16).
 
 - `validate_result(conn, result)` in `app/assessments.py` runs `save_assessment`'s checks without saving.
 - **For the AI engineer (P3-AI-1):** leave out `demo_` checks.
