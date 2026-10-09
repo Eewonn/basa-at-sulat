@@ -1,5 +1,11 @@
-fastapi
-uvicorn
-python-multipart
-httpx
-pytest
+# Engine dependencies. Pin exact versions so every laptop runs the same thing.
+# Install from engine/: python -m pip install -r requirements.txt
+
+# API
+fastapi==0.143.0
+uvicorn==0.54.0
+python-multipart==0.0.32
+
+# Testing
+httpx==0.28.1
+pytest==9.1.1
