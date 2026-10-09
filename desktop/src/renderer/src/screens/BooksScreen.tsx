@@ -50,12 +50,12 @@ export function BooksScreen() {
             onClick={() => navigate(`/books/${b.id}`)}
             className="stagger flex min-h-80 cursor-pointer flex-col overflow-hidden rounded-card bg-white text-left shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift"
           >
-            <div className={`grid h-40 place-items-center ${COVER[b.category]}`}>
-              <Emoji name={CATEGORY_EMOJI[b.category]} size={88} />
+            <div className={`grid h-40 place-items-center ${b.category ? COVER[b.category] : 'bg-side'}`}>
+              <Emoji name={b.category ? CATEGORY_EMOJI[b.category] : 'books'} size={88} />
             </div>
             <div className="flex flex-1 flex-col gap-2 p-5">
               <p className="text-xs font-extrabold tracking-wider text-muted uppercase">
-                {b.language === 'fil' ? 'Filipino' : b.language === 'eng' ? 'English' : b.language} · {t.cat[b.category]}
+                {b.language === 'fil' ? 'Filipino' : b.language === 'eng' ? 'English' : b.language}{b.category && ` · ${t.cat[b.category]}`}
               </p>
               <p className="text-xl leading-tight font-black text-navy">{b.title}</p>
               <span

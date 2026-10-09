@@ -212,7 +212,15 @@ export function PracticeScreen() {
     setTimeout(async () => {
       const audio = await rec.stop()
       setPhase('checking')
-      const { result } = await api.checkWord(audio, item.word, learnerId)
+      let result: 'match' | 'no_match'
+      try {
+        ;({ result } = await api.checkWord(audio, item.word, learnerId))
+      } catch {
+        // The engine couldn't check (for example, no scoring model): let the child try again instead of waiting forever.
+        setBubble(t.kidCheckFailed)
+        setPhase('ready')
+        return
+      }
       if (result === 'match') {
         const nextStreak = firstTry ? streak + 1 : 0
         setStreak(nextStreak)

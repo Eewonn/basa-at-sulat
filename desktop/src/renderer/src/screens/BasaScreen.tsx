@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
 import { Mic } from 'lucide-react'
 import { api } from '@/api'
-import { Tamaraw } from '@/components/Tamaraw'
 import { Avatar, LevelChip } from '@/components/ui'
 import { isDue, weekAgo } from '@/lib/due'
 import { daysSince, useT } from '@/strings'
@@ -23,12 +22,9 @@ export function BasaScreen() {
   return (
     <div className="flex w-full max-w-[1680px] gap-8 px-10 py-10">
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-5">
-          <Tamaraw size={96} />
-          <div>
-            <p className="font-hand text-[28px] leading-tight text-coral-ink">{t.basaEyebrow}</p>
-            <h1 className="text-[40px] leading-tight font-black text-navy">{t.navCheck}</h1>
-          </div>
+        <div>
+          <p className="font-hand text-[28px] leading-tight text-coral-ink">{t.basaEyebrow}</p>
+          <h1 className="text-[40px] leading-tight font-black text-navy">{t.navCheck}</h1>
         </div>
 
         <h2 className="mt-8 text-xl font-extrabold text-navy">
@@ -95,7 +91,7 @@ export function BasaScreen() {
                   </p>
                 </div>
                 <span className="rounded-full bg-blue-soft px-3 py-1 text-sm font-black text-blue-dark tabular-nums">
-                  {r.wcpm} {t.wpm}
+                  {r.wcpm ?? '—'} {t.wpm}
                 </span>
               </li>
             ))}

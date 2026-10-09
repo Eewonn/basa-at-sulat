@@ -62,7 +62,7 @@ export interface Passage {
   language: string
   grade: number
   text: string
-  category: Category
+  category?: Category // proposed; the engine doesn't store one yet
 }
 
 export interface RecentCheck {
@@ -71,7 +71,7 @@ export interface RecentCheck {
   display_name: string
   date: string
   passage_title: string
-  wcpm: number
+  wcpm: number | null
 }
 
 export interface BookWord {
@@ -85,7 +85,7 @@ export interface Book {
   id: string
   title: string
   language: string
-  category: Category
+  category?: Category // proposed; the engine doesn't store one yet
   text: string
   reader?: string
   has_recording: boolean
@@ -152,6 +152,14 @@ export interface Progress {
   wcpm_change: number | null
 }
 
+// GET /class: learners grouped by the level of their latest confirmed check, lowest level first.
+export interface ClassGroup {
+  level: Level
+  learner_ids: string[]
+  common_missed_words: string[]
+  draft_plan: string | null // Filipino, with \n line breaks; null when the group has no Filipino check
+}
+
 export interface Api {
   mode: 'mock' | 'engine'
   health(): Promise<Health>
@@ -169,7 +177,9 @@ export interface Api {
   books(): Promise<Book[]>
   book(id: string): Promise<Book>
   createBook(book: NewBook, audio: Blob, durationSec: number): Promise<Book>
-  storage(): Promise<Storage>
+  classGroups(refresh?: boolean): Promise<ClassGroup[]>
+  exportCsv: (() => Promise<Blob>) | null // GET /class/export.csv; null with sample data
+  storage(): Promise<Storage | null> // null until the engine reports it
   deleteAllAudio(): Promise<{ deleted: number }>
   addLearner(name: string): Promise<Learner>
   renameLearner(id: string, name: string): Promise<Learner>

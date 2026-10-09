@@ -64,7 +64,7 @@ export function AppShell() {
                 <Avatar name={learner.display_name} index={learnerIndex} size={112} />
               ) : (
                 <button onClick={poke} aria-label={t.mascotName} className="grid size-28 cursor-pointer place-items-center overflow-hidden rounded-full bg-sun-soft">
-                  <Tamaraw key={cheer ?? 'idle'} mood={cheer ? 'happy' : 'idle'} size={103} />
+                  <Tamaraw key={cheer ?? 'idle'} mood={cheer ? 'happy' : 'idle'} size={94} />
                 </button>
               )}
             </div>

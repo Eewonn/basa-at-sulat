@@ -12,6 +12,8 @@ from app.retention import delete_owed_audio
 from app.routes.assessments import router as assessments_router
 from app.routes.class_view import router as class_router
 from app.routes.learners import router as learners_router
+from app.routes.passages import router as passages_router
+from app.routes.practice import router as practice_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
 log = logging.getLogger("engine")
@@ -48,6 +50,8 @@ app.include_router(books_router)
 app.include_router(assessments_router)
 app.include_router(learners_router)
 app.include_router(class_router)
+app.include_router(passages_router)
+app.include_router(practice_router)
 
 
 def aligner_status() -> str:

@@ -65,14 +65,13 @@ export function BookPlayerScreen() {
         <ArrowLeft className="size-5" strokeWidth={3} aria-hidden /> {t.booksTitle}
       </button>
       <div className="mt-4 flex items-center gap-5">
-        <span className={`grid size-24 shrink-0 place-items-center rounded-card ${COVER[book.category]}`}>
-          <Emoji name={CATEGORY_EMOJI[book.category]} size={64} />
+        <span className={`grid size-24 shrink-0 place-items-center rounded-card ${book.category ? COVER[book.category] : 'bg-side'}`}>
+          <Emoji name={book.category ? CATEGORY_EMOJI[book.category] : 'books'} size={64} />
         </span>
         <div>
           <h1 className="text-[40px] leading-tight font-black text-navy">{book.title}</h1>
           <p className="font-semibold text-body">
-            {t.cat[book.category]}
-            {book.reader && ` · ${t.readBy(book.reader)}`}
+            {[book.category && t.cat[book.category], book.reader && t.readBy(book.reader)].filter(Boolean).join(' · ')}
           </p>
         </div>
       </div>
