@@ -159,3 +159,66 @@ def test_every_return_path_has_timings(monkeypatch):
     assert set(scoring.score("any.wav", "Ben kite")["timings"]) == {"align_ms", "score_ms"}
     assert set(scoring.score("any.wav", "")["timings"]) == {"align_ms", "score_ms"}
     assert set(scoring.score("any.wav", "2026")["timings"]) == {"align_ms", "score_ms"}
+
+
+# --- word_timings() with canned alignments (frame = 0.02 s) -----------------------
+
+def test_words_that_touch_meet_at_the_midpoint(monkeypatch):
+    # raw spans 0.20-0.32 and 0.38-0.50: a 0.06 s gap inside a sentence
+    monkeypatch.setattr(aligner, "align", lambda path, words: fake([wa(10, 16, [0.9]), wa(19, 25, [0.9])]))
+    first, second = scoring.word_timings("any.wav", "Ben has")
+    assert first["end"] == second["start"] == 0.35
+
+
+def test_a_sentence_break_keeps_its_silence_out_of_both_words(monkeypatch):
+    # "kite." ends at 0.50, "He" starts at 2.00: each gets its pad, the silence between stays out
+    monkeypatch.setattr(aligner, "align", lambda path, words: fake([wa(19, 25, [0.9]), wa(100, 104, [0.9])]))
+    kite, he = scoring.word_timings("any.wav", "kite. He")
+    assert kite["end"] == pytest.approx(0.50 + scoring.PAD_AFTER_SEC)
+    assert he["start"] == pytest.approx(2.00 - scoring.PAD_BEFORE_SEC)
+
+
+def test_first_and_last_words_are_padded_but_stay_inside_the_recording(monkeypatch):
+    monkeypatch.setattr(aligner, "align", lambda path, words: fake([wa(2, 10, [0.9]), wa(100, 498, [0.9])], duration=10.0))
+    first, last = scoring.word_timings("any.wav", "one two")
+    assert first["start"] == 0.0  # 0.04 - 0.10 would be before the recording starts
+    assert last["end"] == 10.0  # 9.96 + 0.15 would run past its end
+
+
+def test_timings_keep_passage_indexing_and_skip_letterless_words(monkeypatch):
+    seen = {}
+
+    def spy(path, words):
+        seen["words"] = words
+        return fake([wa(10, 16, [0.9]), wa(100, 110, [0.9])])
+
+    monkeypatch.setattr(aligner, "align", spy)
+    timings = scoring.word_timings("any.wav", "Ben 2026 kite.")
+    assert seen["words"] == ["ben", "kite"]
+    assert [t["i"] for t in timings] == [0, 1, 2]
+    assert [t["text"] for t in timings] == ["Ben", "2026", "kite."]
+    assert timings[1]["start"] == timings[1]["end"] == timings[0]["end"]  # zero length, after "Ben"
+
+
+def test_word_clips_never_overlap(monkeypatch):
+    spans = [wa(5, 9, [0.9]), wa(9, 12, [0.9]), wa(12, 30, [0.9]), wa(31, 33, [0.9]), wa(200, 240, [0.9])]
+    monkeypatch.setattr(aligner, "align", lambda path, words: fake(spans))
+    timings = scoring.word_timings("any.wav", "a b c d e")
+    assert all(t["start"] <= t["end"] for t in timings)
+    assert all(a["end"] <= b["start"] for a, b in zip(timings, timings[1:]))
+
+
+def test_word_timings_too_short_raises(monkeypatch):
+    monkeypatch.setattr(aligner, "align", lambda path, words: None)
+    with pytest.raises(ValueError, match="too short"):
+        scoring.word_timings("any.wav", "Ben has a red kite")
+
+
+def test_word_timings_without_letters_never_touches_the_model(monkeypatch):
+    def boom(*_):
+        raise AssertionError("the aligner should not run")
+
+    monkeypatch.setattr(aligner, "align", boom)
+    assert scoring.word_timings("any.wav", "") == []
+    assert scoring.word_timings("any.wav", "2026 —") == [
+        {"i": 0, "text": "2026", "start": 0.0, "end": 0.0}, {"i": 1, "text": "—", "start": 0.0, "end": 0.0}]

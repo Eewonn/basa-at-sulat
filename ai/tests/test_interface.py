@@ -54,11 +54,23 @@ def test_score_raises_on_an_unreadable_file(tmp_path):
         ai.score(str(tmp_path / "missing.wav"), FIL)
 
 
-def test_word_timings_stub_shape(make_wav):
-    timings = ai.word_timings(make_wav(2), FIL)
+@requires_model
+def test_word_timings_shape_on_a_full_alignment(make_wav):
+    timings = ai.word_timings(make_wav(30), FIL)
     assert all(set(t) == {"i", "text", "start", "end"} for t in timings)
+    assert [t["i"] for t in timings] == list(range(len(FIL.split())))
     assert [t["text"] for t in timings] == FIL.split()
-    assert all(a["end"] <= b["start"] + 1e-6 for a, b in zip(timings, timings[1:]))
+    assert all(0 <= t["start"] <= t["end"] <= 30.1 for t in timings)
+    assert all(a["end"] <= b["start"] for a, b in zip(timings, timings[1:]))
+
+
+@requires_model
+def test_word_timings_rejects_audio_too_short_for_the_text(make_wav):
+    with pytest.raises(ValueError):
+        ai.word_timings(make_wav(2), FIL)
+
+
+def test_word_timings_of_nothing_is_empty(make_wav):
     assert ai.word_timings(make_wav(2), "   ") == []
 
 

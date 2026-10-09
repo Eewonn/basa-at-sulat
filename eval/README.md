@@ -75,3 +75,6 @@ python eval/run_eval.py --reuse --export-dir eval/out/demo_checks   # from the l
 ```
 
 These are adult test readings: fine to display, **not** evidence of accuracy, and adult speed (about 80–155 WCPM) puts every check at the top level unless `duration_sec` is set synthetically.
+
+## Checking word timings by ear (P2-AI-1)
+`python eval/timing_check.py fil_001 fil_016 fil_020` writes one page per recording to `eval/out/timing_check/`. Each plays the reading with every word highlighted as it's spoken, and clicking a word plays only that word's clip. Use clean readings: `word_timings()` is for a fluent speaker's correct reading.
