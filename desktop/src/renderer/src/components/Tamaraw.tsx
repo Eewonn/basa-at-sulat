@@ -65,7 +65,7 @@ export function Tamaraw({
 
   return (
     <svg
-      viewBox="10 -16 220 220"
+      viewBox="10 -10 220 220"
       width={size}
       height={size}
       role="img"

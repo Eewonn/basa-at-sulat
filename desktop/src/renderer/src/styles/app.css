@@ -151,9 +151,10 @@
     55% { transform: translateY(0); }
     75% { transform: translateY(-6px); }
   }
+  /* Even above and below the resting spot, so a centered mascot stays centered. */
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    0%, 100% { transform: translateY(3px); }
+    50% { transform: translateY(-3px); }
   }
   @keyframes confetti {
     0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
