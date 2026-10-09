@@ -2,6 +2,9 @@
 
 Newest first. Each entry: what we decided, and why.
 
+## 2026-10-10: "Silid-aralan craft": make it look made for Filipino classrooms, not AI-made
+Stock emoji, a sparkles icon and dashboard stat cards made the app look generated. We replaced them with our own illustrations in Taw's style and borrowed real classroom objects: the teacher's violet "VG / Very Good!" stamp, manila-paper flashcards with ruled lines, a reading card with a stamp per day, marker lettering for kid headings, a faint paper grain, the teacher's name and section in the greeting, and natural dates. Each signature element appears in one or two places so screens stay calm.
+
 ## 2026-10-10: Reading level is a fluency-based estimate that uses CRLA's names
 Every saved check gets a `level` (P1-BE2-2), computed in `engine/app/levels.py` from the final (overridden) labels. It uses the five reading levels on DepEd's CRLA submission form for SY 2026-27, lowest first: **Low Emerging, High Emerging, Developing, Transitioning, At Grade Level**. The same form has a second scale (Full / Moderate / Light Refresher, Grade Ready). That one is for the beginning-of-year letter and sound tasks, so we don't use it, and "At Grade Level" is not "Grade Ready".
 

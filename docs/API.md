@@ -77,7 +77,7 @@ A file that is already gone counts as deleted.
 - `POST /books`: multipart form with `title`, `language` (2-3 lowercase letters, such as `fil`, `eng`, `ilo`), `text` and `audio` (the model reading). Returns `{"id", "words": [{"i", "text", "start", "end"}]}`. Use a fluent speaker's complete reading of the story, and keep digits and dashes out of it, because words with no letters get zero-length times.
 - `GET /books/{id}` → `{"id", "title", "language", "text", "words": [{"i", "text", "start", "end"}]}`
 - `GET /books/{id}/audio` → the full model reading (`audio/wav`, 16 kHz mono)
-- `GET /books/{id}/clips/{i}` → audio for word `i` only
+- `GET /books/{id}/clips/{i}` → audio for word `i` only (`audio/wav`, 16 kHz mono), cut from the model reading between that word's `start` and `end`
 
 `POST /books` errors (body `{"detail": "<what went wrong>"}`). A rejected upload keeps nothing: no audio file and no book.
 
@@ -90,6 +90,8 @@ A file that is already gone counts as deleted.
 | `503` | The engine has no database yet, or the scoring model isn't installed |
 
 `GET /books/{id}` and `GET /books/{id}/audio` return `404` for an unknown id.
+
+`GET /books/{id}/clips/{i}` errors: `404` for an unknown book, an unknown word index, or missing audio; `422` if `i` isn't a whole number, or the word has no audio in the reading (words with no letters, such as digits, get zero-length times, so the app should not offer "Hear it" for them); `503` if the engine has no database yet. A word that runs past the end of the recording is cut at the end.
 
 ## Sanay: practice
 - `GET /learners/{id}/practice` → `{"items": [{"word", "sentence", "book_id", "word_index"}]}`, built from the child's latest confirmed check
@@ -107,9 +109,14 @@ A file that is already gone counts as deleted.
 These support the learner profile and story categories. Until the engine implements them, the app uses sample data for them.
 - `category` on every passage: `"bukid" | "pamilya" | "hayop" | "kalikasan" | "paaralan"`
 - `GET /learners` items also include `stars`, `streak_days` and `latest_wcpm` (for the class summary cards)
-- `GET /learners/{id}/stats` → `{"stars", "streak_days", "minutes_read", "wcpm_history": [{"date", "wcpm"}], "practicing": ["palay", ...]}`
+- `GET /learners/{id}/stats` → `{"stars", "streak_days", "minutes_read", "wcpm_history": [{"date", "wcpm"}], "practicing": ["palay", ...], "days_read": ["2026-10-10", ...]}` (`days_read` = dates with a check or practice, for the reading card)
   - stars = words gotten right in Sanay; streak = consecutive days with a check or practice; minutes = recording time
 - `POST /practice/check` also takes `learner_id`, so a correct word can earn a star
+- `GET /assessments/recent` → `[{"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}]` (Basa tab)
+- `GET /books` → `[{"id", "title", "language", "category", "text", "reader", "has_recording", "duration_sec"}]`; `GET /books/{id}` adds `words` timings; `POST /books` also takes `category` and `reader`, and its story becomes a passage
+- `GET /storage` → `{"audio_files", "audio_mb", "db_mb", "data_dir"}`; `DELETE /audio` deletes all children's recordings (book readings are kept) → `{"deleted"}`
+- `POST /learners` `{"display_name"}` and `PATCH /learners/{id}` `{"display_name"}` (Settings → Klase)
+- `GET /class/settings` → `{"teacher_name", "section", "grade"}` and `PATCH /class/settings` (greeting, Klase subtitle)
 
 ## Health
 - `GET /health` → `{"ok": true, "models": {"aligner": "loaded", "ollama": "up"}}`

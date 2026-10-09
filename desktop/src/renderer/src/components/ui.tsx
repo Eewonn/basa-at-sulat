@@ -1,31 +1,37 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useState, type CSSProperties, type ReactNode } from 'react'
 import { CheckCircle2 } from 'lucide-react'
+import type { Level } from '@/api/types'
+import { useT } from '@/strings'
 import { Emoji, type EmojiName } from './Emoji'
 import { Tamaraw } from './Tamaraw'
 
-const LEVEL_STYLE: Record<string, string> = {
-  Emerging: 'bg-coral-soft text-coral-ink',
+const LEVEL_STYLE: Record<Level, string> = {
+  'Low Emerging': 'bg-coral-soft text-coral-ink',
+  'High Emerging': 'bg-[#ffe9d6] text-[#9a4a00]',
   Developing: 'bg-sun-soft text-[#7a5a00]',
   Transitioning: 'bg-blue-soft text-blue-dark',
-  'Grade level': 'bg-teal-soft text-teal-ink'
+  'At Grade Level': 'bg-teal-soft text-teal-ink'
 }
 
-// Level is always written out, never color alone.
-export function LevelChip({ level, onDark = false }: { level?: string; onDark?: boolean }) {
+// Level is always written out, never color alone, and marked as an estimate (it isn't an official CRLA result).
+export function LevelChip({ level, onDark = false }: { level?: Level | null; onDark?: boolean }) {
+  const t = useT()
   if (!level) return null
   return (
     <span
-      className={`inline-flex self-start rounded-full px-3 py-1 text-sm font-extrabold ${
+      title={t.levelEstNote}
+      className={`inline-flex items-baseline gap-1.5 self-start rounded-full px-3 py-1 text-sm font-extrabold ${
         onDark ? 'bg-white text-navy' : LEVEL_STYLE[level] ?? 'bg-side text-navy'
       }`}
     >
+      <span className="text-xs font-bold">{t.levelEst}</span>
       {level}
     </span>
   )
 }
 
 export function SampleBadge({ label }: { label: string }) {
-  return <span className="rounded-full bg-side px-3 py-1 text-xs font-bold text-muted">{label}</span>
+  return <span className="sample-badge rounded-full bg-side px-3 py-1 text-xs font-bold text-muted">{label}</span>
 }
 
 const AVATAR_COLORS = ['bg-blue', 'bg-coral', 'bg-teal', 'bg-purple']
@@ -51,20 +57,25 @@ export function StatCard({
   value,
   emoji,
   color,
-  compact = false
+  compact = false,
+  index = 0
 }: {
   title: string
-  value: string
+  value: ReactNode
   emoji: EmojiName
   color: 'coral' | 'blue' | 'teal' | 'purple'
   compact?: boolean
+  index?: number
 }) {
   const bg = { coral: 'bg-coral', blue: 'bg-blue', teal: 'bg-teal', purple: 'bg-purple' }[color]
   return (
-    <div className={`relative flex flex-col overflow-hidden rounded-card text-white shadow-soft ${bg} ${compact ? 'h-36 p-5' : 'h-52 p-6'}`}>
+    <div
+      className={`group stagger relative flex flex-col overflow-hidden rounded-card text-white shadow-soft ${bg} ${compact ? 'min-h-36 p-5' : 'min-h-52 p-6'}`}
+      style={{ '--i': index } as CSSProperties}
+    >
       <p className={`font-extrabold ${compact ? 'pr-16 text-lg leading-snug' : 'text-xl'}`}>{title}</p>
       <p className="mt-1 text-[40px] leading-tight font-black">{value}</p>
-      <Emoji name={emoji} size={compact ? 72 : 104} className={`absolute drop-shadow-md ${compact ? 'right-4 bottom-3' : 'right-5 bottom-4'}`} />
+      <Emoji name={emoji} size={compact ? 72 : 104} className={`absolute drop-shadow-md transition-transform duration-300 group-hover:-rotate-8 group-hover:scale-115 ${compact ? 'right-4 bottom-3' : 'right-5 bottom-4'}`} />
     </div>
   )
 }

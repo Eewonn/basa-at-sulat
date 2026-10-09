@@ -135,6 +135,12 @@ It writes nothing unless every word group gets a model sentence (here, unlike in
 - The `sys.path` insert that lets the engine import the `ai` package now lives in `app/__init__.py`.
 - Tests replace `word_timings`, so they never load the model. Real timing quality is checked by the AI engineer's `eval/timing_check.py`, not here.
 
+## Update: word clips (P2-BE1-2)
+- `GET /books/{id}/clips/{i}` (`app/books.py`) cuts word `i`'s frames from the stored book WAV with Python's `wave` module and returns a small 16 kHz mono WAV. It is cut on every request and nothing is written to disk, so there are no clips to clean up.
+- It relies on the stored file being the PCM WAV that `POST /books` makes; it would need ffmpeg if we ever stored another format.
+- A zero-length word (digits, dashes) returns `422`; an unknown book, word or missing audio returns `404`. `GET /books/{id}/audio` now shares the same path check (the stored path must stay inside `engine/storage/`).
+- Tests build a recording where each word is a different tone, so they prove that a clip holds only its own word. Real word quality is the AI engineer's `eval/timing_check.py`.
+
 ## Update: Sanay practice sets (P2-BE2-1)
 - `GET /learners/{id}/practice` (`app/routes/learners.py`, logic in `app/practice.py`) returns the missed words from the learner's latest **confirmed** check, using the teacher's final labels.
 - **Sentence:** found by the word's index, so a word that appears twice gets the sentence it was missed in. A sentence ends at `.` `!` `?` `…` unless the next word starts in lowercase, which keeps dialogue such as `"Tara na!" sabi niya.` together.

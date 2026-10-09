@@ -19,7 +19,9 @@ With no engine running, the app uses **sample data** (`src/renderer/src/api/mock
 
 **Clickable flow today:** Klase → learner profile (stars, days in a row, reading time, progress trend) → Basahin (pick a story by topic, record with a live waveform) → processing (the tamaraw thinks) → Resulta (tap a word to fix it, I-confirm) → Sanay kid mode (Pakinggan / Sabihin, confetti and stars, reread, done). Pakinggan and the Sabihin result are simulated until the engine exists.
 
-Illustrations are Microsoft Fluent Emoji (MIT) in `src/renderer/src/assets/emoji/`. The tamaraw mascot is our own SVG in `components/Tamaraw.tsx`.
+Also built: the **Basa** tab (who's due for a check this week, recent checks), **Sulat** (book library, a 3-step book maker that records a fluent speaker and previews with word highlighting, and a read-along player), and **Settings** (language, text size, privacy and data with delete-all-audio, class roster add/rename, models, about). Sample books without real audio use simulated timing; books you record play your real audio.
+
+All illustrations are our own SVGs (`components/Art.tsx`), drawn to match Taw the tamaraw (`components/Tamaraw.tsx`). No stock art or icon packs for anything kids see.
 
 ## Why Electron
 It ships the same Chromium on Windows and Linux, so microphone recording and rendering behave identically. Tauri's Linux webview (WebKitGTK) denies microphone access unless the app adds a custom permission handler.

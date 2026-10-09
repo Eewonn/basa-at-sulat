@@ -31,3 +31,30 @@ export function Confetti({ count = 28 }: { count?: number }) {
     </div>
   )
 }
+
+// Confetti falling from the top of the screen, for the finish screen.
+export function ConfettiRain({ count = 70 }: { count?: number }) {
+  const pieces = useMemo(
+    () =>
+      Array.from({ length: count }, (_, i) => ({
+        color: COLORS[i % COLORS.length],
+        left: `${Math.random() * 100}%`,
+        delay: `${Math.random() * 1.6}s`,
+        dur: `${2.4 + Math.random() * 1.8}s`,
+        rot: `${Math.random() * 900 - 450}deg`,
+        round: i % 3 === 0
+      })),
+    [count]
+  )
+  return (
+    <div className="pointer-events-none fixed inset-0 z-10 overflow-hidden" aria-hidden>
+      {pieces.map((p, i) => (
+        <span
+          key={i}
+          className={`rain absolute top-0 block size-3 ${p.round ? 'rounded-full' : 'rounded-[2px]'}`}
+          style={{ left: p.left, background: p.color, ['--delay' as string]: p.delay, ['--dur' as string]: p.dur, ['--rot' as string]: p.rot }}
+        />
+      ))}
+    </div>
+  )
+}

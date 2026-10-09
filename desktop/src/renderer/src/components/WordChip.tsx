@@ -10,7 +10,7 @@ const STYLE: Record<WordLabel, string> = {
 }
 
 // One word of the passage. Flagged words always show their label as text, not just color.
-export function WordChip({ word, delayMs, onFix }: { word: Word; delayMs: number; onFix: (label: WordLabel) => void }) {
+export function WordChip({ word, delayMs, onFix, pauseBefore }: { word: Word; delayMs: number; onFix: (label: WordLabel) => void; pauseBefore?: number }) {
   const t = useT()
   const labelText = { matched: t.labelMatched, misread: t.labelMisread, skipped: t.labelSkipped }
 
@@ -28,17 +28,22 @@ export function WordChip({ word, delayMs, onFix }: { word: Word; delayMs: number
           >
             {word.label === 'misread' ? <TriangleAlert className="size-3.5" aria-hidden /> : <CircleDashed className="size-3.5" aria-hidden />}
             {labelText[word.label]}
-            {word.heard && ` · “${word.heard}”`}
           </span>
         )}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content sideOffset={8} className="z-50 w-64 rounded-tile bg-white p-3 shadow-lift">
           <p className="text-2xl font-black text-navy">{word.text}</p>
-          {word.heard && (
-            <p className="mt-1 text-sm text-body">
-              {t.heard}: <b className="text-coral-ink">“{word.heard}”</b>
-            </p>
+          {(word.label !== 'matched' || pauseBefore) && (
+            <div className="mt-3 rounded-lg bg-sun-soft px-3 py-2 text-sm text-navy">
+              <p className="font-extrabold">{t.whyTitle}</p>
+              <ul className="mt-1 space-y-0.5 font-semibold">
+                {word.label === 'misread' && <li>{t.whyMisread(Math.round(word.score * 100))}</li>}
+                {word.label === 'skipped' && <li>{t.whySkipped}</li>}
+                {pauseBefore ? <li>{t.whyPause(pauseBefore.toFixed(1))}</li> : null}
+              </ul>
+              <p className="mt-1 text-xs font-bold text-body">{t.whyCheck}</p>
+            </div>
           )}
           <p className="mt-3 mb-1.5 text-xs font-extrabold tracking-wider text-muted uppercase">{t.fixAs}</p>
           <div className="grid gap-1.5">

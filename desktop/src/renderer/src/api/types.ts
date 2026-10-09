@@ -2,14 +2,16 @@
 
 export type WordLabel = 'matched' | 'misread' | 'skipped'
 
+// CRLA's names, lowest first. Our level is an estimate from reading fluency, not an official CRLA result.
+export type Level = 'Low Emerging' | 'High Emerging' | 'Developing' | 'Transitioning' | 'At Grade Level'
+
 export interface Word {
   i: number
   text: string
   label: WordLabel
   score: number
-  start: number
-  end: number
-  heard?: string
+  start: number | null // null when the aligner couldn't time the word (usually a skipped one)
+  end: number | null
 }
 
 export interface Pause {
@@ -24,8 +26,8 @@ export interface Assessment {
   duration_sec: number
   words: Word[]
   pauses: Pause[]
-  wcpm: number
-  level: string
+  wcpm: number | null // null from /assess for now; saved checks always have a number
+  level: Level | null // a saved check always has one, but the database allows NULL
   status: 'draft' | 'confirmed'
   timings?: { convert_ms: number; align_ms: number; score_ms: number }
 }
@@ -34,7 +36,7 @@ export interface Learner {
   id: string
   display_name: string
   grade: number
-  level?: string
+  level?: Level
   last_check?: string
   needs_practice?: boolean
   stars?: number
@@ -49,6 +51,7 @@ export interface LearnerStats {
   minutes_read: number
   wcpm_history: { date: string; wcpm: number }[]
   practicing: string[]
+  days_read: string[]
 }
 
 export type Category = 'bukid' | 'pamilya' | 'hayop' | 'kalikasan' | 'paaralan'
@@ -60,6 +63,56 @@ export interface Passage {
   grade: number
   text: string
   category: Category
+}
+
+export interface RecentCheck {
+  assessment_id: string
+  learner_id: string
+  display_name: string
+  date: string
+  passage_title: string
+  wcpm: number
+}
+
+export interface BookWord {
+  i: number
+  text: string
+  start: number
+  end: number
+}
+
+export interface Book {
+  id: string
+  title: string
+  language: string
+  category: Category
+  text: string
+  reader?: string
+  has_recording: boolean
+  duration_sec?: number
+  words?: BookWord[]
+  audio_url?: string
+}
+
+export interface NewBook {
+  title: string
+  language: string
+  category: Category
+  text: string
+  reader: string
+}
+
+export interface Storage {
+  audio_files: number
+  audio_mb: number
+  db_mb: number
+  data_dir: string
+}
+
+export interface ClassSettings {
+  teacher_name: string
+  section: string
+  grade: number
 }
 
 export interface Health {
@@ -83,4 +136,14 @@ export interface Api {
   learnerStats(learnerId: string): Promise<LearnerStats>
   practice(learnerId: string): Promise<PracticeItem[]>
   checkWord(audio: Blob, word: string, learnerId: string): Promise<{ result: 'match' | 'no_match' }>
+  recentChecks(): Promise<RecentCheck[]>
+  books(): Promise<Book[]>
+  book(id: string): Promise<Book>
+  createBook(book: NewBook, audio: Blob, durationSec: number): Promise<Book>
+  storage(): Promise<Storage>
+  deleteAllAudio(): Promise<{ deleted: number }>
+  addLearner(name: string): Promise<Learner>
+  renameLearner(id: string, name: string): Promise<Learner>
+  classSettings(): Promise<ClassSettings>
+  saveClassSettings(settings: Partial<ClassSettings>): Promise<ClassSettings>
 }

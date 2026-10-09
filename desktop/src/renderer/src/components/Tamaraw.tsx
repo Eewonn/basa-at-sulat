@@ -18,7 +18,7 @@ function Eyes({ mood }: { mood: Mood }) {
   }
   const look = mood === 'thinking' ? -5 : 0
   return (
-    <g>
+    <g className="animate-blink" style={{ transformOrigin: '100px 96px', transformBox: 'view-box' }}>
       <circle cx="78" cy="96" r="13" fill="#fff" />
       <circle cx="122" cy="96" r="13" fill="#fff" />
       <circle cx="80" cy={98 + look} r="7.5" fill={NAVY} />
@@ -29,14 +29,30 @@ function Eyes({ mood }: { mood: Mood }) {
   )
 }
 
-function Mouth({ mood }: { mood: Mood }) {
+function Mouth({ mood, talk }: { mood: Mood; talk?: number }) {
+  // While the child speaks, Taw's mouth opens with their voice.
+  if (talk !== undefined) return <ellipse cx="100" cy="150" rx={7 + talk * 5} ry={2 + talk * 11} fill="#C2404F" />
   if (mood === 'thinking') return <circle cx="100" cy="150" r="5" fill={FUR_DARK} />
   if (mood === 'happy') return <path d="M86 146 q14 16 28 0 z" fill="#C2404F" />
   return <path d="M90 148 q10 8 20 0" stroke={FUR_DARK} strokeWidth="4" strokeLinecap="round" fill="none" />
 }
 
-export function Tamaraw({ mood = 'idle', size = 160, className = '' }: { mood?: Mood; size?: number; className?: string }) {
-  const leftEar = mood === 'listening' ? 'rotate(-28 46 86)' : 'rotate(-8 46 86)'
+export function Tamaraw({
+  mood = 'idle',
+  size = 160,
+  className = '',
+  talk,
+  dance = false
+}: {
+  mood?: Mood
+  size?: number
+  className?: string
+  talk?: number
+  dance?: boolean
+}) {
+  const wiggle = (talk ?? 0) * 22
+  const leftEar = mood === 'listening' ? `rotate(${-28 - wiggle} 46 86)` : 'rotate(-8 46 86)'
+  const rightEar = `rotate(${8 + wiggle} 154 86)`
   return (
     <svg
       viewBox="0 0 200 200"
@@ -44,16 +60,16 @@ export function Tamaraw({ mood = 'idle', size = 160, className = '' }: { mood?: 
       height={size}
       role="img"
       aria-label="Tamaraw"
-      className={`${mood === 'happy' ? 'animate-bounce-soft' : 'animate-float'} ${className}`}
+      className={`${dance ? 'animate-dance' : mood === 'happy' ? 'animate-bounce-soft' : 'animate-float'} ${className}`}
     >
       {/* horns: short and V-shaped, like a real tamaraw */}
       <path d="M70 64 C64 54 62 44 64 34 C72 40 80 48 88 58 Z" fill={HORN} />
       <path d="M130 64 C136 54 138 44 136 34 C128 40 120 48 112 58 Z" fill={HORN} />
       {/* ears */}
       <ellipse cx="46" cy="86" rx="20" ry="11" fill={FUR} transform={leftEar} />
-      <ellipse cx="154" cy="86" rx="20" ry="11" fill={FUR} transform="rotate(8 154 86)" />
+      <ellipse cx="154" cy="86" rx="20" ry="11" fill={FUR} transform={rightEar} />
       <ellipse cx="46" cy="86" rx="11" ry="5" fill="#E9A3A6" transform={leftEar} />
-      <ellipse cx="154" cy="86" rx="11" ry="5" fill="#E9A3A6" transform="rotate(8 154 86)" />
+      <ellipse cx="154" cy="86" rx="11" ry="5" fill="#E9A3A6" transform={rightEar} />
       {/* head */}
       <ellipse cx="100" cy="108" rx="58" ry="56" fill={FUR} />
       <path d="M86 58 q14 12 28 0 q-2 14 -14 18 q-12 -4 -14 -18 z" fill={FUR_DARK} />
@@ -65,7 +81,7 @@ export function Tamaraw({ mood = 'idle', size = 160, className = '' }: { mood?: 
       <ellipse cx="100" cy="140" rx="34" ry="24" fill={MUZZLE} />
       <ellipse cx="88" cy="134" rx="4.5" ry="3.5" fill={FUR_DARK} />
       <ellipse cx="112" cy="134" rx="4.5" ry="3.5" fill={FUR_DARK} />
-      <Mouth mood={mood} />
+      <Mouth mood={mood} talk={talk} />
       {mood === 'thinking' && (
         <g fill="#2D5BD3">
           <circle cx="160" cy="44" r="6" />
