@@ -12,6 +12,7 @@ export function daysSince(iso: string): number {
 // All UI text lives here. Default is Filipino, with English where it's clearer for teachers.
 const fil = {
   appName: 'Basa at Sulat',
+  splashTag: 'Para sa bawat batang natututong bumasa',
   navClass: 'Klase',
   navCheck: 'Basa',
   navBooks: 'Sulat',
@@ -216,6 +217,7 @@ export type Strings = typeof fil
 
 const en: Strings = {
   ...fil,
+  splashTag: 'For every child learning to read',
   navClass: 'Class',
   navCheck: 'Check',
   navBooks: 'Books',
