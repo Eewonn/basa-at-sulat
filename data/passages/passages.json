@@ -12,5 +12,21 @@
     "language": "eng",
     "grade": 2,
     "text": "Ben has a red kite. He runs to the hill with his sister. The wind is strong, and the kite flies high. They laugh and wave at the birds."
+  },
+  {
+    "id": "fil_g2_02",
+    "title": "Ang Aso ni Mila",
+    "language": "fil",
+    "grade": 2,
+    "text": "Si Mila ay may maliit na aso. Puti ang balahibo nito. Tuwing umaga, naglalaro sila sa bakuran. Hinahabol ng aso ang bola. Pagod na sila pagkatapos, kaya umiinom sila ng tubig.",
+    "credit": "Drafted by Claude (AI) and checked by a native Filipino-speaking teammate (KM). Used for the aligner confirmation test."
+  },
+  {
+    "id": "fil_g2_03",
+    "title": "Sa Palengke",
+    "language": "fil",
+    "grade": 2,
+    "text": "Pumunta sa palengke si Nanay at si Dino. Bumili sila ng isda, gulay, at mga prutas. Mabigat ang bayong, kaya binuhat ito ni Dino. Nakangiti silang umuwi sa bahay.",
+    "credit": "Drafted by Claude (AI) and checked by a native Filipino-speaking teammate (KM). Used for the aligner confirmation test."
   }
 ]

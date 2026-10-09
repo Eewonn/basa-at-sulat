@@ -56,3 +56,13 @@ Inserted words are counted but kept out of F1, since they have no passage word t
 
 ## The report (P0-AI-1, then P3-AI-1)
 `eval/REPORT.md` must show, per language: precision, recall and F1 for mistake detection, the reading-speed error versus a human scorer, and processing time per minute of audio on our CPU laptops. **Gate: F1 of 0.6 or better = go.**
+
+## Confirmation set (fresh readings, never tuned on)
+The thresholds in `ai/scoring.py` were tuned on the readings in `ground_truth.csv`. To check they hold up, new readings of passages the scoring has never seen (`fil_g2_02`, `fil_g2_03`) go in a **separate** file, `confirm_ground_truth.csv`, and nothing is tuned on them:
+
+```bash
+python eval/record.py --reader KM --passage fil_g2_02 --ground-truth eval/confirm_ground_truth.csv
+python eval/run_eval.py --ground-truth eval/confirm_ground_truth.csv --out eval/CONFIRM_REPORT.md --predictions eval/out/confirm_predictions.json
+```
+
+For this set the number that counts is the **"labels from `score()`" F1** (the thresholds fixed in advance), not the tuned or held-out rows. F1 of 0.6 or better confirms the go.
