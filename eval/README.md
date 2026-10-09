@@ -33,7 +33,7 @@ For `insert` (an extra word the reader added), use the index of the passage word
 `recording_id` must equal the file name (`fil_007` → `fil/fil_007.wav`), and `language` must match the folder. The test rejects a row that breaks these rules and names the row number.
 
 ## Running the test (P0-AI-1)
-From the repo root, with the venv active:
+From the repo root, in the AI environment (`pip install -r ai/requirements-dev.txt`, see `ai/README.md`). The engine's environment alone is missing `soundfile` and torch:
 
 ```bash
 python eval/run_eval.py            # scores every recording and writes eval/REPORT.md

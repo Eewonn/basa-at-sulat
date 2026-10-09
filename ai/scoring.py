@@ -3,6 +3,7 @@
 score() is real (MMS forced alignment, see aligner.py). word_timings() and check_word() are still STUBS
 that return the docs/API.md shapes so the engine can wire against them (P2-AI-1 and P2-AI-2 replace them).
 """
+import time
 import wave
 
 from . import aligner, text
@@ -34,33 +35,43 @@ def score(audio_path: str, passage_text: str) -> dict:
     """Basa: label every passage word and report pauses.
 
     Returns {"words": [{"i", "text", "label", "score", "start", "end"}],
-             "pauses": [{"before_word", "seconds"}]}
+             "pauses": [{"before_word", "seconds"}],
+             "timings": {"align_ms", "score_ms"}}
     `i` and `text` follow docs/API.md: the passage split on whitespace, punctuation attached.
     `score` is 0-1, how well the word's letters fit the audio (higher is better). `start`/`end` are seconds.
+    `timings`: align_ms = reading the audio, running the model and aligning (nearly all the time, and it
+    includes the ~10 s model load if warm_up() wasn't called); score_ms = turning that into labels and pauses.
 
     - Audio too short to hold the text: every word is "skipped" (nothing was read).
     - Words with no letters the aligner knows (digits, dashes) can't be checked: they come back "matched"
       with score 1.0 so they never raise a false alarm. Keep digits out of passages.
     - Raises if the audio file can't be read: convert to wav first (the engine's audio pipeline does).
     """
+    started = time.perf_counter()
     words = text.split_words(passage_text)
-    if not words:
-        return {"words": [], "pauses": []}
     normalised = [text.normalize_word(w) for w in words]
     alignable = [i for i, n in enumerate(normalised) if n]
 
     result = None
     if alignable:
         result = aligner.align(audio_path, [normalised[i] for i in alignable])
-        if result is None:  # too short for the text
-            return {
-                "words": [
-                    {"i": i, "text": w, "label": "skipped" if normalised[i] else "matched",
-                     "score": 0.0 if normalised[i] else 1.0, "start": 0.0, "end": 0.0}
-                    for i, w in enumerate(words)
-                ],
-                "pauses": [],
-            }
+    aligned = time.perf_counter()
+
+    def timings():
+        return {"align_ms": round((aligned - started) * 1000), "score_ms": round((time.perf_counter() - aligned) * 1000)}
+
+    if not words:
+        return {"words": [], "pauses": [], "timings": timings()}
+    if alignable and result is None:  # too short for the text
+        return {
+            "words": [
+                {"i": i, "text": w, "label": "skipped" if normalised[i] else "matched",
+                 "score": 0.0 if normalised[i] else 1.0, "start": 0.0, "end": 0.0}
+                for i, w in enumerate(words)
+            ],
+            "pauses": [],
+            "timings": timings(),
+        }
     by_index = dict(zip(alignable, result.words)) if result else {}
 
     rows, pauses, prev_end = [], [], 0.0
@@ -78,7 +89,7 @@ def score(audio_path: str, passage_text: str) -> dict:
         rows.append({"i": i, "text": word, "label": label_word(mean_prob, n, frames_per_char),
                      "score": round(mean_prob, 2), "start": start, "end": end})
         prev_end = end
-    return {"words": rows, "pauses": pauses}
+    return {"words": rows, "pauses": pauses, "timings": timings()}
 
 
 # --- stubs (P2-AI-1, P2-AI-2) -----------------------------------------------

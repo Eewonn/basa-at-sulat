@@ -7,8 +7,13 @@ A plain Python package the engine imports. No web code.
 
 ```python
 score(audio_path: str, passage_text: str) -> dict
-# -> {"words": [{"i", "text", "label", "score", "start", "end"}], "pauses": [{"before_word", "seconds"}]}
+# -> {"words": [{"i", "text", "label", "score", "start", "end"}], "pauses": [{"before_word", "seconds"}],
+#     "timings": {"align_ms", "score_ms"}}
 # label: "matched" | "misread" | "skipped"   (see ../docs/API.md)
+# align_ms: read audio + model + alignment (nearly all of it); score_ms: labels and pauses (milliseconds)
+
+warm_up() -> None        # load the model (~10 s) at engine startup, so the first child's check isn't slow
+model_loaded() -> bool   # for GET /health: "loaded" / "not_loaded"
 
 word_timings(audio_path: str, text: str) -> list[dict]   # Sulat: a fluent speaker's correct reading
 check_word(audio_path: str, word: str) -> dict           # Sanay "Say it": {"result": "match"|"no_match", "score"}
@@ -38,10 +43,12 @@ Run the tests from `ai/`: `python -m pytest`. The model-backed tests skip if the
 ```bash
 python -m venv .venv
 .venv/Scripts/activate            # Windows (macOS/Linux: source .venv/bin/activate)
-pip install -r ai/requirements.txt
+pip install -r ai/requirements.txt       # to run the scorer (the engine needs this too)
+pip install -r ai/requirements-dev.txt   # ...plus pytest, to run the ai/ and eval/ tests
 python ai/smoke_test.py path/to/reading.wav "the passage text it reads"
 ```
 The first run downloads the MMS aligner (about 1.2 GB) into `models/torch/` (git-ignored).
+The `eval/` tests run in this same environment: they import `ai` and need `soundfile`, which `engine/requirements.txt` doesn't install.
 
 ## Rules
 - Weights are downloaded by script into `models/` (git-ignored). Never commit them.
