@@ -134,3 +134,10 @@ It writes nothing unless every word group gets a model sentence (here, unlike in
 - `GET /books/{id}` returns the book with its words, `GET /books/{id}/audio` returns the WAV. Limits: 25 MB of audio, 3,000 words (`MAX_AUDIO_BYTES`, `MAX_WORDS` in `app/books.py`).
 - The `sys.path` insert that lets the engine import the `ai` package now lives in `app/__init__.py`.
 - Tests replace `word_timings`, so they never load the model. Real timing quality is checked by the AI engineer's `eval/timing_check.py`, not here.
+
+## Update: Sanay practice sets (P2-BE2-1)
+- `GET /learners/{id}/practice` (`app/routes/learners.py`, logic in `app/practice.py`) returns the missed words from the learner's latest **confirmed** check, using the teacher's final labels.
+- **Sentence:** found by the word's index, so a word that appears twice gets the sentence it was missed in. A sentence ends at `.` `!` `?` `…` unless the next word starts in lowercase, which keeps dialogue such as `"Tara na!" sabi niya.` together.
+- **Clip:** passages and books aren't linked, so the clip is the first timed occurrence of the same word in a book of the same language (oldest book first). Words are compared with `ai.text.normalize_word`, the aligner's rule, and words with zero-length timings are skipped. No match means `book_id` and `word_index` are `null`.
+- The set is not capped (up to 18 words in the demo seed). How many a child sees per session is left to frontend; see the P2-BE2-1 entry in `docs/API.md`.
+- Clips play once backend-1's `GET /books/{id}/clips/{i}` (P2-BE1-2) lands; the references don't change.

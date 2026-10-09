@@ -93,6 +93,9 @@ A file that is already gone counts as deleted.
 
 ## Sanay: practice
 - `GET /learners/{id}/practice` → `{"items": [{"word", "sentence", "book_id", "word_index"}]}`, built from the child's latest confirmed check
+  - Words are the ones the teacher left as `misread` or `skipped` (final labels), in passage order, once each, with surrounding punctuation removed. `sentence` is the passage sentence the word was missed in.
+  - `book_id` / `word_index` point at the first timed occurrence of the word in a Sulat book of the same language, for `GET /books/{id}/clips/{i}`. Both are `null` when no book has the word.
+  - `{"items": []}` when the learner has no confirmed check (drafts are not practised). `404` for an unknown learner.
 - `POST /practice/check`: multipart form with `audio` and `word`. Returns `{"word", "result": "match" | "no_match", "score"}`
 - `GET /learners/{id}/progress` → `{"checks": [...], "words": [{"text", "before", "after"}], "wcpm_before", "wcpm_after"}`
 
@@ -113,6 +116,11 @@ These support the learner profile and story categories. Until the engine impleme
   - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up`, `down` or `unknown`. The engine reports `not_loaded` until the aligner is in memory (after the first `/assess`, or at startup with `BASA_WARM_UP=1`), and `unknown` for Ollama until it is wired in.
 
 ## Contract changes
+
+### 2026-10-10 · backend-2 (P2-BE2-1)
+- `GET /learners/{id}/practice` is live. `book_id` and `word_index` can be `null` (no book has the word yet). **Frontend:** `PracticeItem` in `desktop/src/renderer/src/api/types.ts` needs `book_id: string | null` and `word_index: number | null`, and "Hear it" should be hidden or disabled when they are `null`.
+- **The set is not capped.** A struggling reader can get a long one: in the demo seed, `l_01` gets 18 words and `l_05` gets 16. **Frontend decides** how many to show per session (a cap, paging, or "more later"). Items are in passage order, so taking the first N keeps them in reading order.
+- Clips are matched by word text, because passages and books aren't linked. A word gets a clip only once a book in the same language contains it.
 
 ### 2026-10-10 · backend-2 (P1-BE2-2)
 - `level` is now computed for every saved check. It is one of `Low Emerging`, `High Emerging`, `Developing`, `Transitioning`, `At Grade Level`. It is a **fluency-based estimate** using CRLA's names, not an official CRLA result (see `docs/DECISIONS.md`).

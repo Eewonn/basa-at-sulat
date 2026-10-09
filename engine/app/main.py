@@ -8,6 +8,7 @@ from app.assess import router as assess_router
 from app.books import router as books_router
 from app.retention import delete_owed_audio
 from app.routes.assessments import router as assessments_router
+from app.routes.learners import router as learners_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
 log = logging.getLogger("engine")
@@ -32,6 +33,7 @@ app = FastAPI(title="Basa at Sulat engine", lifespan=lifespan)
 app.include_router(assess_router)
 app.include_router(books_router)
 app.include_router(assessments_router)
+app.include_router(learners_router)
 
 
 def aligner_status() -> str:
