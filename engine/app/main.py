@@ -7,8 +7,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.assess import router as assess_router
 from app.books import router as books_router
+from app.plans import ollama_status
 from app.retention import delete_owed_audio
 from app.routes.assessments import router as assessments_router
+from app.routes.class_view import router as class_router
 from app.routes.learners import router as learners_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
@@ -45,6 +47,7 @@ app.include_router(assess_router)
 app.include_router(books_router)
 app.include_router(assessments_router)
 app.include_router(learners_router)
+app.include_router(class_router)
 
 
 def aligner_status() -> str:
@@ -55,4 +58,4 @@ def aligner_status() -> str:
 
 @app.get("/health")
 def health():
-    return {"ok": True, "models": {"aligner": aligner_status(), "ollama": "unknown"}}
+    return {"ok": True, "models": {"aligner": aligner_status(), "ollama": ollama_status()}}

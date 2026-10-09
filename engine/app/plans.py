@@ -353,15 +353,16 @@ def check_sentence(raw, words: list[str]) -> str:
     return sentence
 
 
-def generate_sentence(words: list[str], language: str,
-                      settings: OllamaSettings) -> tuple[str, dict, int]:
+def generate_sentence(words: list[str], language: str, settings: OllamaSettings,
+                      seeds: tuple[int, ...] = SENTENCE_SEEDS) -> tuple[str, dict, int]:
     """Ask the model for one example sentence, retrying rejections with the next seed.
 
     Returns (sentence, reply, tries). Raises PlanError if Ollama fails, or if
     every seed's sentence is rejected (the message gives the last reason).
+    Other seeds give a different sentence, e.g. when a teacher asks for a new plan.
     """
     prompt = build_sentence_prompt(words, language)
-    for tries, seed in enumerate(SENTENCE_SEEDS, start=1):
+    for tries, seed in enumerate(seeds, start=1):
         # Errors reaching Ollama propagate at once: another seed won't help.
         reply = _post_generate(prompt, settings, seed)
         try:
@@ -369,13 +370,13 @@ def generate_sentence(words: list[str], language: str,
         except PlanError as err:
             logger.info("sentence try %d (seed %d) rejected: %s", tries, seed, err)
             last_error = err
-    raise PlanError(f"all {len(SENTENCE_SEEDS)} tries were rejected; last: {last_error}")
+    raise PlanError(f"all {len(seeds)} tries were rejected; last: {last_error}")
 
 
 # --- Putting it together ---------------------------------------------------
 
-def generate_plan_result(group: GroupStats,
-                         settings: OllamaSettings | None = None) -> PlanResult:
+def generate_plan_result(group: GroupStats, settings: OllamaSettings | None = None,
+                         seeds: tuple[int, ...] = SENTENCE_SEEDS) -> PlanResult:
     """Build the plan from its template, then try to add the model's sentence.
 
     Raises PlanError only for bad input or a broken template file. Anything
@@ -389,7 +390,7 @@ def generate_plan_result(group: GroupStats,
 
     try:
         settings = settings or OllamaSettings.from_env()
-        sentence, reply, tries = generate_sentence(words, group.language, settings)
+        sentence, reply, tries = generate_sentence(words, group.language, settings, seeds)
     except PlanError as err:
         logger.warning("group plan for level '%s' has no example sentence: %s",
                        group.level, err)
@@ -408,3 +409,24 @@ def generate_plan_result(group: GroupStats,
 def generate_plan(group: GroupStats, settings: OllamaSettings | None = None) -> str:
     """Return the `draft_plan` text for one group, in the group's language."""
     return generate_plan_result(group, settings).text
+
+
+# --- Health -------------------------------------------------------------------
+
+# Short, because /health is polled by the app and must stay quick.
+HEALTH_TIMEOUT_SEC = 1.0
+
+
+def ollama_status() -> str:
+    """"up" if Ollama answers at OLLAMA_URL, "down" otherwise, for GET /health.
+
+    Only checks that the server answers, not that the model is pulled: a
+    missing model shows up as a template-only plan and a logged warning.
+    """
+    url = (os.environ.get("OLLAMA_URL") or DEFAULT_URL).rstrip("/")
+    try:
+        with urllib.request.urlopen(f"{url}/api/tags", timeout=HEALTH_TIMEOUT_SEC) as response:
+            return "up" if response.status == 200 else "down"
+    except (OSError, ValueError):
+        # URLError and timeouts are OSErrors; ValueError is a malformed OLLAMA_URL.
+        return "down"

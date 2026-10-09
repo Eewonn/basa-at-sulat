@@ -174,3 +174,11 @@ scripts/start.sh --check              # only report what is ready or missing
 - `python scripts/offline_audit.py` fails if the Python in `engine/app`, `ai` or `scripts` contains a URL to anything but this laptop, or imports a network client library (`requests`, `httpx`, `aiohttp`, and so on). The engine's CORS pattern, which admits only local pages, is the one allowed exception. Tests are not audited. It is a tripwire, not a proof.
 - The engine and scripts test suites install `scripts/netguard.py`: any test that opens a connection to something other than this laptop fails with `NetworkBlocked`. It derives from `BaseException`, so a broad `except Exception` cannot hide it. It covers the test process only; tests that start the engine or the launcher as separate processes (`test_cli.py`, `test_launch.py`) are not covered.
 - The real airplane-mode run, its steps and a results table are in `docs/OFFLINE_CHECKLIST.md`. P3-BE1-2 stays unticked until that run passes.
+
+## Update: class view, plans and export (P2-BE2-3)
+- `GET /class` (`app/class_view.py`, `app/routes/class_view.py`) groups learners by the level of their latest confirmed check and adds a draft plan per group from `app/plans.py`. Rules are in `docs/API.md`.
+- A group where only one learner has a Filipino check uses that learner's own missed words (the 2-learner minimum can't be met).
+- **Filipino only.** Only checks on `fil` passages count towards a group's missed words, and Ollama is never called for a group without one (its plan is `null`).
+- **Plan cache** (`app/plan_cache.py`): `storage/plan-cache.json`. The key is the language, `OLLAMA_MODEL`, level, learner count, the missed words in order, and a hash of the prompt files, so editing `prompts/activities-fil.json` or a sentence prompt makes new plans. Only plans with a model sentence are kept. A broken cache file is logged and started over. `GET /class?refresh=1` makes new plans with random seeds (`plans.generate_plan_result(..., seeds=...)`; the default is still `SENTENCE_SEEDS`, so `plan_examples` is unchanged). Deleting `storage/plan-cache.json` also starts over.
+- `GET /class/export.csv`: one row per learner, UTF-8 with a BOM for Excel.
+- `/health` now pings Ollama (`GET /api/tags`, 1 s timeout) for `models.ollama`.
