@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router'
 import { Cpu, Lock, Pause, RotateCcw, Sparkles } from 'lucide-react'
 import { api } from '@/api'
 import type { Assessment, Learner, WordLabel } from '@/api/types'
+import { CountUp } from '@/components/CountUp'
 import { Tamaraw } from '@/components/Tamaraw'
 import { WordChip } from '@/components/WordChip'
 import { LevelChip, useToast } from '@/components/ui'
@@ -79,7 +80,9 @@ export function ReviewScreen() {
 
       <aside className="flex w-80 shrink-0 flex-col gap-4 bg-side px-6 py-10">
         <div className="flex flex-col gap-2 rounded-card bg-blue p-6 text-white shadow-soft">
-          <p className="text-[64px] leading-none font-black tabular-nums">{a.wcpm}</p>
+          <p className="text-[64px] leading-none font-black">
+            <CountUp value={a.wcpm} />
+          </p>
           <p className="text-sm font-bold">{t.wcpmLabel}</p>
           <LevelChip level={a.level} onDark />
         </div>

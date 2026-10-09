@@ -1,4 +1,6 @@
+import type { CSSProperties } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { CountUp } from '@/components/CountUp'
 import { useNavigate } from 'react-router'
 import { Mic, Sparkles } from 'lucide-react'
 import { api } from '@/api'
@@ -34,17 +36,17 @@ export function ClassScreen() {
 
       {learners && (
         <div className="mt-6 grid grid-cols-2 gap-5 xl:grid-cols-4">
-          <StatCard compact color="blue" title={t.sumChecked} value={`${checked}/${learners.length}`} emoji="microphone" />
-          <StatCard compact color="coral" title={t.sumPractice} value={String(needPractice)} emoji="books" />
-          <StatCard compact color="teal" title={t.sumWcpm} value={String(avgWcpm)} emoji="chart" />
-          <StatCard compact color="purple" title={t.sumStars} value={String(stars)} emoji="star" />
+          <StatCard compact index={0} color="blue" title={t.sumChecked} value={<><CountUp value={checked} />/{learners.length}</>} emoji="microphone" />
+          <StatCard compact index={1} color="coral" title={t.sumPractice} value={<CountUp value={needPractice} />} emoji="books" />
+          <StatCard compact index={2} color="teal" title={t.sumWcpm} value={<CountUp value={avgWcpm} />} emoji="chart" />
+          <StatCard compact index={3} color="purple" title={t.sumStars} value={<CountUp value={stars} />} emoji="star" />
         </div>
       )}
 
       <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6">
-        {isLoading && Array.from({ length: 6 }, (_, i) => <div key={i} className="h-60 animate-pulse rounded-card bg-side" />)}
+        {isLoading && Array.from({ length: 6 }, (_, i) => <div key={i} className="shimmer h-60 rounded-card" />)}
         {learners?.map((l, i) => (
-          <article key={l.id} className="flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift">
+          <article key={l.id} style={{ '--i': i + 4 } as CSSProperties} className="stagger flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift">
             <button onClick={() => navigate(`/learner/${l.id}`)} className="flex cursor-pointer items-center gap-4 text-left">
               <Avatar name={l.display_name} index={i} size={64} />
               <div className="min-w-0 flex-1">

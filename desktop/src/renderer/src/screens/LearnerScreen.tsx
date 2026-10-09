@@ -1,4 +1,6 @@
+import type { CSSProperties } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { CountUp } from '@/components/CountUp'
 import { useNavigate, useParams } from 'react-router'
 import { Mic, Sparkles } from 'lucide-react'
 import { api } from '@/api'
@@ -27,20 +29,22 @@ export function LearnerScreen() {
       </div>
 
       <div className="mt-6 grid grid-cols-3 gap-6">
-        <StatCard color="coral" title={t.statStars} value={String(stats?.stars ?? 0)} emoji="star" />
-        <StatCard color="blue" title={t.statStreak} value={t.days(stats?.streak_days ?? 0)} emoji="fire" />
-        <StatCard color="teal" title={t.statTime} value={t.hm(stats?.minutes_read ?? 0)} emoji="hourglass" />
+        <StatCard index={0} color="coral" title={t.statStars} value={<CountUp value={stats?.stars ?? 0} />} emoji="star" />
+        <StatCard index={1} color="blue" title={t.statStreak} value={<CountUp value={stats?.streak_days ?? 0} format={t.days} />} emoji="fire" />
+        <StatCard index={2} color="teal" title={t.statTime} value={<CountUp value={stats?.minutes_read ?? 0} format={t.hm} />} emoji="hourglass" />
       </div>
 
       <div className="mt-8 grid grid-cols-5 gap-6">
-        <section className="col-span-3 rounded-card bg-white p-6 shadow-soft ring-1 ring-line">
+        <section className="stagger col-span-3 rounded-card bg-white p-6 shadow-soft ring-1 ring-line" style={{ '--i': 3 } as CSSProperties}>
           <h2 className="flex items-center gap-2 text-xl font-extrabold text-navy">
             <Emoji name="chart" size={28} /> {t.trendTitle}
           </h2>
           {history.length >= 2 ? (
             <div className="mt-4 flex items-end gap-6">
               <div>
-                <p className="text-[56px] leading-none font-black text-navy tabular-nums">{latest}</p>
+                <p className="text-[56px] leading-none font-black text-navy">
+                  <CountUp value={latest ?? 0} />
+                </p>
                 <p className="mt-2 text-sm font-extrabold text-teal-ink">{t.trendDelta((latest ?? 0) - history[0].wcpm)}</p>
               </div>
               <Sparkline values={history.map((h) => h.wcpm)} width={380} height={110} />
@@ -53,7 +57,7 @@ export function LearnerScreen() {
           )}
         </section>
 
-        <section className="col-span-2 flex flex-col rounded-card bg-white p-6 shadow-soft ring-1 ring-line">
+        <section className="stagger col-span-2 flex flex-col rounded-card bg-white p-6 shadow-soft ring-1 ring-line" style={{ '--i': 4 } as CSSProperties}>
           <h2 className="text-xl font-extrabold text-navy">{t.practicingTitle}</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {stats?.practicing.length ? (

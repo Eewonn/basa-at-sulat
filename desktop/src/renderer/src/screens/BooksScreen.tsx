@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
 import { Plus } from 'lucide-react'
@@ -30,7 +31,7 @@ export function BooksScreen() {
       <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
         <button
           onClick={() => navigate('/books/new')}
-          className="flex min-h-80 cursor-pointer flex-col items-center justify-center gap-3 rounded-card border-3 border-dashed border-blue/40 bg-blue-soft/50 p-6 text-center transition hover:-translate-y-1 hover:border-blue"
+          className="stagger flex min-h-80 cursor-pointer flex-col items-center justify-center gap-3 rounded-card border-3 border-dashed border-blue/40 bg-blue-soft/50 p-6 text-center transition hover:-translate-y-1 hover:border-blue"
         >
           <span className="grid size-16 place-items-center rounded-full bg-blue text-white">
             <Plus className="size-8" strokeWidth={3} aria-hidden />
@@ -40,13 +41,14 @@ export function BooksScreen() {
           <Tamaraw size={80} />
         </button>
 
-        {isLoading && Array.from({ length: 3 }, (_, i) => <div key={i} className="min-h-80 animate-pulse rounded-card bg-side" />)}
+        {isLoading && Array.from({ length: 3 }, (_, i) => <div key={i} className="shimmer min-h-80 rounded-card" />)}
 
-        {books?.map((b) => (
+        {books?.map((b, i) => (
           <button
             key={b.id}
+            style={{ '--i': i + 1 } as CSSProperties}
             onClick={() => navigate(`/books/${b.id}`)}
-            className="flex min-h-80 cursor-pointer flex-col overflow-hidden rounded-card bg-white text-left shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift"
+            className="stagger flex min-h-80 cursor-pointer flex-col overflow-hidden rounded-card bg-white text-left shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift"
           >
             <div className={`grid h-40 place-items-center ${COVER[b.category]}`}>
               <Emoji name={CATEGORY_EMOJI[b.category]} size={88} />

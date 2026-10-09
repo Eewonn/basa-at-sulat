@@ -102,7 +102,13 @@ Bright color-block cards, rounded type, a warm sidebar with a blue header and an
 - **Mascot:** an original tamaraw (`components/Tamaraw.tsx`, pure SVG) with moods idle / happy / listening / encourage / thinking. It appears in the sidebar, the processing screen, Sanay, the Done screen and empty states. Its name lives in `strings.ts` (`mascotName`, currently "Taw").
 - **Gamification:** stat cards (stars collected, days read in a row, time spent reading) on the learner profile, and story categories (Bukid, Pamilya, Hayop, Kalikasan, Paaralan) in the Check flow. No badges and no levels, on purpose.
 - **Accessibility:** status is never shown by color alone (word labels have text and icons); full keyboard use in teacher mode (Space = record, Enter = confirm); `prefers-reduced-motion` respected.
-- **Motion:** word reveal, waveform, mascot bounce, confetti and a flying star on "Tama!". Teacher-mode motion stays short.
+- **Motion (CSS only, no animation library):**
+  - page fade-and-rise on every route change; cards enter one after another (`stagger` utility, `--i` = order)
+  - numbers count up (`components/CountUp.tsx`) and re-animate when they change (e.g. fixing a word on Resulta)
+  - the white nav pill slides between items; buttons squish slightly on press; stat-card art wiggles on hover
+  - Taw blinks while idle and cheers with a speech bubble when clicked; the profile trend line draws itself; loading placeholders shimmer
+  - kid mode adds the word-card pop, confetti and the flying star on "Tama!"
+  - teacher-mode motion stays under about 0.5 s, and everything stops under `prefers-reduced-motion` (numbers show their final value immediately)
 - **Light theme only** for this release.
 - **Language:** all UI text lives in one `strings.ts` with Filipino and English. Default: Filipino with English labels where clearer.
 

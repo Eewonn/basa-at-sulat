@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useState, type CSSProperties, type ReactNode } from 'react'
 import { CheckCircle2 } from 'lucide-react'
 import { Emoji, type EmojiName } from './Emoji'
 import { Tamaraw } from './Tamaraw'
@@ -51,20 +51,25 @@ export function StatCard({
   value,
   emoji,
   color,
-  compact = false
+  compact = false,
+  index = 0
 }: {
   title: string
-  value: string
+  value: ReactNode
   emoji: EmojiName
   color: 'coral' | 'blue' | 'teal' | 'purple'
   compact?: boolean
+  index?: number
 }) {
   const bg = { coral: 'bg-coral', blue: 'bg-blue', teal: 'bg-teal', purple: 'bg-purple' }[color]
   return (
-    <div className={`relative flex flex-col overflow-hidden rounded-card text-white shadow-soft ${bg} ${compact ? 'min-h-36 p-5' : 'min-h-52 p-6'}`}>
+    <div
+      className={`group stagger relative flex flex-col overflow-hidden rounded-card text-white shadow-soft ${bg} ${compact ? 'min-h-36 p-5' : 'min-h-52 p-6'}`}
+      style={{ '--i': index } as CSSProperties}
+    >
       <p className={`font-extrabold ${compact ? 'pr-16 text-lg leading-snug' : 'text-xl'}`}>{title}</p>
       <p className="mt-1 text-[40px] leading-tight font-black">{value}</p>
-      <Emoji name={emoji} size={compact ? 72 : 104} className={`absolute drop-shadow-md ${compact ? 'right-4 bottom-3' : 'right-5 bottom-4'}`} />
+      <Emoji name={emoji} size={compact ? 72 : 104} className={`absolute drop-shadow-md transition-transform duration-300 group-hover:-rotate-8 group-hover:scale-115 ${compact ? 'right-4 bottom-3' : 'right-5 bottom-4'}`} />
     </div>
   )
 }

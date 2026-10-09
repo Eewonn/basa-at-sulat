@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
 import { Mic } from 'lucide-react'
@@ -37,8 +38,8 @@ export function BasaScreen() {
           <p className="mt-3 rounded-card bg-teal-soft p-5 font-bold text-teal-ink">{t.dueEmpty}</p>
         ) : (
           <div className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-5">
-            {due.map(({ l, i }) => (
-              <article key={l.id} className="flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft ring-2 ring-coral-soft">
+            {due.map(({ l, i }, n) => (
+              <article key={l.id} style={{ '--i': n } as CSSProperties} className="stagger flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft ring-2 ring-coral-soft">
                 <div className="flex items-center gap-4">
                   <Avatar name={l.display_name} index={i} size={64} />
                   <div className="min-w-0 flex-1">
@@ -64,11 +65,12 @@ export function BasaScreen() {
           {t.doneTitle} <span className="text-teal-ink">({done.length})</span>
         </h2>
         <div className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-          {done.map(({ l, i }) => (
+          {done.map(({ l, i }, n) => (
             <button
               key={l.id}
+              style={{ '--i': due.length + n } as CSSProperties}
               onClick={() => navigate(`/check/${l.id}`)}
-              className="flex cursor-pointer items-center gap-3 rounded-card bg-white p-4 text-left shadow-soft ring-1 ring-line transition hover:-translate-y-1"
+              className="stagger flex cursor-pointer items-center gap-3 rounded-card bg-white p-4 text-left shadow-soft ring-1 ring-line transition hover:-translate-y-1"
             >
               <Avatar name={l.display_name} index={i} size={44} />
               <div className="min-w-0">
@@ -81,7 +83,7 @@ export function BasaScreen() {
       </div>
 
       <aside className="w-80 shrink-0 space-y-5">
-        <section className="rounded-card bg-white p-5 shadow-soft ring-1 ring-line">
+        <section className="stagger rounded-card bg-white p-5 shadow-soft ring-1 ring-line" style={{ '--i': 2 } as CSSProperties}>
           <h2 className="text-lg font-extrabold text-navy">{t.recentTitle}</h2>
           <ul className="mt-3 divide-y divide-line">
             {recent?.map((r) => (

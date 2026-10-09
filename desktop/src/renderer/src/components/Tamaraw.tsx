@@ -18,7 +18,7 @@ function Eyes({ mood }: { mood: Mood }) {
   }
   const look = mood === 'thinking' ? -5 : 0
   return (
-    <g>
+    <g className="animate-blink" style={{ transformOrigin: '100px 96px', transformBox: 'view-box' }}>
       <circle cx="78" cy="96" r="13" fill="#fff" />
       <circle cx="122" cy="96" r="13" fill="#fff" />
       <circle cx="80" cy={98 + look} r="7.5" fill={NAVY} />

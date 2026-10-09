@@ -156,7 +156,7 @@ export function PracticeScreen() {
               key={`${index}-${phase === 'retry' ? 'r' : ''}`}
               className={`relative flex min-w-[480px] flex-col items-center rounded-[28px] bg-white px-16 py-10 shadow-lift ${
                 phase === 'correct' ? 'ring-4 ring-teal' : ''
-              } ${phase === 'retry' ? 'animate-shake ring-4 ring-coral' : ''}`}
+              } ${phase === 'retry' ? 'animate-shake ring-4 ring-coral' : 'animate-pop'}`}
             >
               {phase === 'correct' && <Confetti key={burst} />}
               <p className="text-[120px] leading-none font-black text-navy">{item.word}</p>

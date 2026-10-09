@@ -1,4 +1,4 @@
-import { useContext, useState, type ReactNode } from 'react'
+import { useContext, useState, type CSSProperties, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Cpu, FolderOpen, Info, Pencil, Shield, Type, Users } from 'lucide-react'
 import { api } from '@/api'
@@ -12,9 +12,9 @@ const MODELS = [
   { name: 'Qwen 2.5 3B (Ollama)', role: 'Group plans', license: 'See model card' }
 ]
 
-function Card({ title, icon, children, wide = false }: { title: string; icon: ReactNode; children: ReactNode; wide?: boolean }) {
+function Card({ title, icon, children, index = 0 }: { title: string; icon: ReactNode; children: ReactNode; index?: number }) {
   return (
-    <section className={`rounded-card bg-white p-6 shadow-soft ring-1 ring-line ${wide ? 'xl:col-span-2' : ''}`}>
+    <section className="stagger rounded-card bg-white p-6 shadow-soft ring-1 ring-line" style={{ '--i': index } as CSSProperties}>
       <h2 className="flex items-center gap-2 text-xl font-extrabold text-navy">
         {icon} {title}
       </h2>
@@ -78,7 +78,7 @@ export function SettingsScreen() {
           <Segmented value={lang} options={[['fil', 'Filipino'], ['en', 'English']]} onChange={setLang} />
         </Card>
 
-        <Card title={t.secDisplay} icon={<Type className="size-5 text-blue" aria-hidden />}>
+        <Card index={1} title={t.secDisplay} icon={<Type className="size-5 text-blue" aria-hidden />}>
           <Segmented
             value={size}
             options={[
@@ -92,7 +92,7 @@ export function SettingsScreen() {
           />
         </Card>
 
-        <Card title={t.secPrivacy} icon={<Shield className="size-5 text-teal-ink" aria-hidden />}>
+        <Card index={2} title={t.secPrivacy} icon={<Shield className="size-5 text-teal-ink" aria-hidden />}>
           {storage && (
             <div className="space-y-3">
               <p className="text-lg font-extrabold text-navy">{t.audioStored(storage.audio_files, storage.audio_mb)}</p>
@@ -114,7 +114,7 @@ export function SettingsScreen() {
           )}
         </Card>
 
-        <Card title={t.secClass} icon={<Users className="size-5 text-blue" aria-hidden />}>
+        <Card index={3} title={t.secClass} icon={<Users className="size-5 text-blue" aria-hidden />}>
           <ul className="max-h-64 divide-y divide-line overflow-y-auto">
             {learners?.map((l, i) => (
               <li key={l.id} className="flex items-center gap-3 py-2">
@@ -164,7 +164,7 @@ export function SettingsScreen() {
           </form>
         </Card>
 
-        <Card title={t.modelsTitle} icon={<Cpu className="size-5 text-teal-ink" aria-hidden />}>
+        <Card index={4} title={t.modelsTitle} icon={<Cpu className="size-5 text-teal-ink" aria-hidden />}>
           <ul className="divide-y divide-line">
             {MODELS.map((m) => (
               <li key={m.name} className="flex items-center justify-between py-3">
@@ -178,7 +178,7 @@ export function SettingsScreen() {
           </ul>
         </Card>
 
-        <Card title={t.secAbout} icon={<Info className="size-5 text-blue" aria-hidden />}>
+        <Card index={5} title={t.secAbout} icon={<Info className="size-5 text-blue" aria-hidden />}>
           <div className="flex items-center gap-4">
             <Tamaraw size={72} />
             <div className="space-y-1">
