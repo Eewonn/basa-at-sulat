@@ -16,10 +16,12 @@ python -m pip install -r requirements.txt
 python -m app.init_db             # creates engine/storage/basa.db
 python -m app.init_db --reset     # deletes it and starts fresh (all data is lost)
 python -m app.init_db --path other.db
+python -m app.seed                # loads learners and passages (creates the database if missing)
+python -m app.seed --reset        # fresh database + seed data in one command (all data is lost)
 python -m pytest                  # runs the tests
 ```
 
-`BASA_DB_PATH` overrides the default location. Without `--reset`, the script refuses to touch an existing database.
+`BASA_DB_PATH` overrides the default location. Without `--reset`, `init_db` refuses to touch an existing database. `seed` is safe to re-run (see [Seed data](#seed-data)).
 
 ## Tables
 
@@ -78,6 +80,33 @@ Bad data fails at insert time with `sqlite3.IntegrityError` instead of breaking 
 - `engine/requirements.txt` was created with `pytest==9.1.1`. **Add your engine dependencies here**, pinned to exact versions.
 - `engine/pytest.ini` lets `python -m pytest` find the `app` package from `engine/`.
 - `engine/app/__init__.py` (empty) makes `app` a package.
+
+## Seed data
+
+**Task:** P0-BE2-2 · **Code:** [`engine/app/seed.py`](../engine/app/seed.py)
+
+| File | What it holds |
+|---|---|
+| [`data/learners/learners.json`](../data/learners/learners.json) | 10 synthetic learners, `l_01`–`l_10`, **initials only**, grades 1–3 |
+| [`data/passages/passages.json`](../data/passages/passages.json) | Basa passages (see [its README](../data/passages/README.md)) |
+
+### How a run works
+1. **Both files are checked before the database is touched.** Every required field must be present, IDs must be unique, text can't be blank, grades must be 1–12, and `language` must be a 2–3 letter lowercase ISO 639 code (`fil`, `eng`, `ilo`, `ceb`, `pam`…). Extra fields, such as a credit line, are ignored. Any problem stops the run with exit code 1 and names the file and entry. Because the check runs first, a typo can't make `--reset` wipe the database.
+2. **The database is created if it's missing**, or recreated with `--reset`.
+3. **Rows are upserted in one transaction.** New IDs are added and changed rows are updated. Either everything lands or nothing does.
+4. **Guard:** if a passage's `text` changed and assessments already use that passage, the run stops and nothing is written. `word_results` are stored by word index (`i`), so new text would quietly misalign every saved result. **To change a passage that's in use,** add the new text under a new ID (e.g. `fil_g2_02`), or use `--reset` if losing results is fine.
+
+**Adding the regional passage:** a teammate who speaks the language adds it to `passages.json` with its ISO code (e.g. `"language": "ilo"`), then runs `python -m app.seed`. No code changes are needed.
+
+### Drawbacks of the upsert approach
+We chose "upsert, but guard passages in use" over "insert only" and "always rebuild." These are the trade-offs to know about:
+
+- **Deleting an entry from the JSON doesn't delete it from the database.** The seed only adds and updates. A removed learner or passage stays until `--reset`, and the stale row still shows up in `GET /learners` and `GET /passages`. We don't delete automatically because assessments may reference the row.
+- **The JSON overwrites edits made in the database.** If the app later lets teachers rename learners or edit passages, re-seeding silently reverts those changes to whatever the JSON says. Once that feature exists, seeding has to become insert-only or scoped to seed-owned rows.
+- **The guard only covers `text`.** Changing `title`, `grade` or `language` on a passage in use goes through. This keeps word indices intact, but past assessments now point to a passage whose metadata changed. For example, a grade change can shift how a past result reads once levels are computed (P1-BE2-2).
+- **Learner changes are never guarded.** Changing a learner's `grade` rewrites it for all past checks, because there's no per-assessment snapshot of the grade.
+- **The text comparison is exact.** Fixing a typo or even trailing whitespace in a passage in use still counts as a change, and the run is refused. That's deliberate, since even a one-word fix can shift indices, but it means a small correction needs a new passage ID.
+- **Fixing a passage in use leaves both versions.** The new-ID workaround keeps the old passage in the database and in the passage picker until it's removed with `--reset` or by hand.
 
 ## Rules for code that uses the database
 
