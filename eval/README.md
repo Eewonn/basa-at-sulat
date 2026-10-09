@@ -3,6 +3,16 @@
 **Owner:** AI engineer (everyone records) · **Tasks:** P0-ALL-1, P0-AI-1, P3-AI-1
 
 ## Recording the test set (P0-ALL-1)
+
+**Easiest: use the recorder.** It shows the passage with word numbers, asks which mistakes you'll plant, shows the exact script to read, records from the mic, and on "keep" saves the WAV in the right place and adds the right rows to `ground_truth.csv`, so nothing is typed by hand:
+
+```bash
+pip install -r eval/requirements-record.txt   # once; small, no torch
+python eval/record.py --reader KM             # your initials; Filipino passage fil_g2_01 by default
+```
+
+Mistakes are typed as `swap 4 pala`, `skip 12` or `insert 13 mabait` (one per line, Enter on an empty line when done; Enter straight away for a clean reading). If it picks the wrong microphone, run `python eval/record.py --list-devices` and add `--device <number>`. Recording by hand still works if you follow the rules below.
+
 - **Adults only.** Never record children.
 - About 10 readings per language: Filipino, English, and one regional language a teammate actually speaks.
 - Use passages from `data/passages/`. In each reading, plant 2–3 mistakes and vary the type:

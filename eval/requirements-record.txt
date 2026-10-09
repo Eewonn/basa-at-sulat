@@ -1,0 +1,5 @@
+# Just enough to record test readings with eval/record.py. No torch: anyone can record
+# without the 1.2 GB model setup. Versions match ai/requirements.txt.
+sounddevice==0.5.6
+soundfile==0.14.0
+numpy==2.5.3
