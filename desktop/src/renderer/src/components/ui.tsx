@@ -11,7 +11,7 @@ const LEVEL_STYLE: Record<string, string> = {
 }
 
 // Level is always written out, never color alone.
-export function LevelChip({ level, onDark = false }: { level?: string; onDark?: boolean }) {
+export function LevelChip({ level, onDark = false }: { level?: string | null; onDark?: boolean }) {
   if (!level) return null
   return (
     <span

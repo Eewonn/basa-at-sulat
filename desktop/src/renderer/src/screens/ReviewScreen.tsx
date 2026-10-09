@@ -83,7 +83,7 @@ export function ReviewScreen() {
       <aside className="flex w-80 shrink-0 flex-col gap-4 bg-side px-6 py-10">
         <div className="flex flex-col gap-2 rounded-card bg-blue p-6 text-white shadow-soft">
           <p className="text-[64px] leading-none font-black">
-            <CountUp value={a.wcpm} />
+            {a.wcpm === null ? '—' : <CountUp value={a.wcpm} />}
           </p>
           <p className="text-sm font-bold">{t.wcpmLabel}</p>
           <LevelChip level={a.level} onDark />

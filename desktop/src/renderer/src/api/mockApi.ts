@@ -235,13 +235,13 @@ export const mockApi: Api = {
       display_name: LEARNERS.find((l) => l.id === a.learner_id)?.display_name ?? '',
       date: daysAgo(0),
       passage_title: PASSAGES.find((p) => p.id === a.passage_id)?.title ?? '',
-      wcpm: next.wcpm
+      wcpm: next.wcpm ?? 0
     })
     const learner = LEARNERS.find((l) => l.id === a.learner_id)
     if (learner) learner.last_check = daysAgo(0)
     const s = STATS[a.learner_id]
     if (s) {
-      s.wcpm_history.push({ date: '2026-10-10', wcpm: next.wcpm })
+      s.wcpm_history.push({ date: '2026-10-10', wcpm: next.wcpm ?? 0 })
       s.minutes_read += Math.max(1, Math.round(a.duration_sec / 60))
       s.practicing = next.words.filter((w) => w.label !== 'matched').map((w) => clean(w.text))
       if (s.streak_days === 0) s.streak_days = 1

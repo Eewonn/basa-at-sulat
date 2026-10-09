@@ -7,8 +7,8 @@ export interface Word {
   text: string
   label: WordLabel
   score: number
-  start: number
-  end: number
+  start: number | null // null when the aligner couldn't time the word (usually a skipped one)
+  end: number | null
   heard?: string
 }
 
@@ -24,8 +24,8 @@ export interface Assessment {
   duration_sec: number
   words: Word[]
   pauses: Pause[]
-  wcpm: number
-  level: string
+  wcpm: number | null // null from /assess for now; saved checks always have a number
+  level: string | null // null until P1-BE2-2 maps levels to CRLA profiles
   status: 'draft' | 'confirmed'
   timings?: { convert_ms: number; align_ms: number; score_ms: number }
 }
