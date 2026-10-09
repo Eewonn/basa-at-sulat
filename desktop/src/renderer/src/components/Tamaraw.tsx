@@ -65,7 +65,7 @@ export function Tamaraw({
 
   return (
     <svg
-      viewBox="10 -10 220 220"
+      viewBox="10 -16 220 220"
       width={size}
       height={size}
       role="img"
@@ -73,16 +73,6 @@ export function Tamaraw({
       className={`${dance ? 'animate-dance' : mood === 'happy' ? 'animate-bounce-soft' : 'animate-float'} ${className}`}
     >
       <defs>
-        {/* White die-cut border, like the logo sticker. */}
-        <filter id={`${id}s`} x="-20%" y="-20%" width="140%" height="140%">
-          <feMorphology in="SourceAlpha" operator="dilate" radius="6" result="grow" />
-          <feFlood floodColor="#fff" />
-          <feComposite in2="grow" operator="in" result="outline" />
-          <feMerge>
-            <feMergeNode in="outline" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
         {/* Nudges every line a little so nothing is perfectly geometric. */}
         <filter id={`${id}w`}>
           <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" />
@@ -93,7 +83,7 @@ export function Tamaraw({
         </clipPath>
       </defs>
 
-      <g filter={`url(#${id}s)`}>
+      <g>
         <g filter={`url(#${id}w)`}>
           {/* palay sprig tucked behind the ear */}
           <path d="M30 44 C40 58 50 74 60 96" fill="none" stroke="#B98A2E" strokeWidth="3" strokeLinecap="round" />
@@ -161,9 +151,9 @@ export function Tamaraw({
 
         {mood === 'thinking' && (
           <g fill="#fff" {...ink} strokeWidth={2.4}>
-            <circle cx="188" cy="44" r="6" />
-            <circle cx="204" cy="28" r="8" />
-            <circle cx="218" cy="8" r="9" />
+            <circle cx="186" cy="50" r="6" />
+            <circle cx="202" cy="36" r="8" />
+            <circle cx="216" cy="18" r="9" />
           </g>
         )}
         {mood === 'happy' && (
