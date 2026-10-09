@@ -19,22 +19,24 @@ word_timings(audio_path: str, text: str) -> list[dict]   # Sulat: a fluent speak
 check_word(audio_path: str, word: str) -> dict           # Sanay "Say it": {"result": "match"|"no_match", "score"}
 ```
 
-**Status:** `score()` is real (MMS forced alignment). `word_timings()` and `check_word()` are still stubs that return the contract shape (P2-AI-1, P2-AI-2). **The thresholds in `scoring.py` are untuned starting values**: P1-AI-1 isn't done until they're tuned on real recordings in `eval/`.
+**Status:** `score()` is real (MMS forced alignment). `word_timings()` and `check_word()` are still stubs that return the contract shape (P2-AI-1, P2-AI-2). Thresholds are tuned on 15 Filipino readings of `fil_g2_01` by **one adult reader** (`eval/REPORT.md`: held-out F1 0.76). They still need confirming on fresh recordings that weren't used to tune them.
 
 Run the tests from `ai/`: `python -m pytest`. The model-backed tests skip if the weights aren't downloaded.
 
 ## Approach (to validate in P0-AI-1)
 1. `text.py` normalizes each passage word to what the aligner knows: lowercase `a-z` and the apostrophe. `ñ` becomes `ny`, accents and punctuation go, and **hyphens are removed** (token 0 is the CTC blank, so `mag-aral` would corrupt the alignment). The original word and its index are kept for the output.
 2. `aligner.py` runs Meta's MMS aligner (`torchaudio.pipelines.MMS_FA`) on 16 kHz mono audio and force-aligns the known letters, with a `*` wildcard **only before and after the text** so chatter at either end doesn't land on the first or last word. Never between words: `*` costs nothing at any frame and would swallow real speech.
-3. `scoring.py` turns each word into a score: the mean probability of its letters at their aligned frames (0 to 1), plus its frames per letter.
-4. Labels: score ≥ 0.6 → `matched`; below that, `skipped` if the word was squeezed to about one frame per letter (the aligner still has to put every letter somewhere), otherwise `misread`. A gap of 1 s or more before a word is a pause.
+3. `scoring.py` scores each word by its **weakest letter**: the probability of the worst-fitting letter at its aligned frames, on a log scale (`1 + log10(p) / 4`, clipped to 0–1, so 1e-2 → 0.5, 1e-3 → 0.25, 1e-4 → 0). Not the average: a near-miss swap (palay → "pala", lolo → "lola") gets every letter right but one, which the average hides. On the eval set this raised held-out F1 from 0.55 to 0.76.
+4. Labels: score above 0.25 → `matched`; at or below, `skipped` if the word was squeezed to about one frame per letter (the aligner still has to put every letter somewhere), otherwise `misread`. F1 is flat (0.74–0.78) for cutoffs 0.00–0.35; 0.25 leans to recall because the teacher confirms every flag. A gap of 1 s or more before a word is a pause.
 5. Tune the cutoffs on `eval/`, never on demo recordings.
 
 **Known limits**
-- A swap to a similar-sounding word that shares letters (kite → bike) scores middling and is the hardest case.
+- **Added syllables inside a word** (kumain → "kumakain", Tinulungan → "Tinutulungan") are missed: every expected letter is still there. Word length caught one of the two, so it isn't used yet.
+- **Very close vowels** (Lina → "Lena") can slip under the cutoff.
+- **False alarms** on the eval set: `ng` before `mangga` (sounds blend), sentence-final `bukid.` under fan noise, and the word next to a skip or an insert (still the right spot for the teacher). Not special-cased, to avoid tuning to this one set.
 - Words with no aligner letters (digits, dashes) can't be checked and come back `matched`. Keep digits out of passages.
 - Audio too short to hold the text comes back all `skipped`.
-- Speed: about 6.5 s to score 10.5 s of audio on an 8-core CPU laptop (after a one-time ~10 s model load), roughly 0.6× real time.
+- Speed: about 40 s of processing per minute of audio on an 8-core CPU laptop (after a one-time ~10 s model load), roughly 0.67× real time.
 - `torchaudio.functional.forced_align` is deprecated and **removed in torchaudio 2.9**, so `requirements.txt` stays on 2.8.x. If we ever need to move, the replacements are the standalone `ctc-forced-aligner` package or our own CTC alignment over the Hugging Face MMS model.
 
 **Fallback (P1-AI-2):** Whisper prompted with the passage, for Filipino and English only.
