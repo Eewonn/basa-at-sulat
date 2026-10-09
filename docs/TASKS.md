@@ -41,7 +41,7 @@ Nobody waits on the result. The AI engineer runs the test while everyone else bu
 
 ## Phase 2: complete the loop (Sulat, Sanay, class view)
 
-- [ ] **P2-AI-1** · Word timings for a model reading — owner: ai · depends: P1-AI-1 · done when: a fluent speaker's correct reading yields start and end times for every word, checked by ear on 3 recordings
+- [x] **P2-AI-1** · Word timings for a model reading — owner: ai · depends: P1-AI-1 · done when: a fluent speaker's correct reading yields start and end times for every word, checked by ear on 3 recordings
 - [ ] **P2-AI-2** · Single-word check — owner: ai · depends: P1-AI-1 · done when: `ai.check_word(audio_path, word)` returns a match or no-match result for Sanay's "Say it"
 - [ ] **P2-BE1-1** · Sulat alignment endpoint — owner: backend-1 · depends: P2-AI-1 · done when: `POST /books` stores a story, its model reading and word timings
 - [ ] **P2-BE1-2** · Word clips — owner: backend-1 · depends: P2-BE1-1 · done when: `GET /books/{id}/clips/{i}` returns that word's audio cut from the model reading
