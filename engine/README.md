@@ -147,3 +147,18 @@ It writes nothing unless every word group gets a model sentence (here, unlike in
 - **Clip:** passages and books aren't linked, so the clip is the first timed occurrence of the same word in a book of the same language (oldest book first). Words are compared with `ai.text.normalize_word`, the aligner's rule, and words with zero-length timings are skipped. No match means `book_id` and `word_index` are `null`.
 - The set is not capped (up to 18 words in the demo seed). How many a child sees per session is left to frontend; see the P2-BE2-1 entry in `docs/API.md`.
 - Clips play once backend-1's `GET /books/{id}/clips/{i}` (P2-BE1-2) lands; the references don't change.
+
+## Update: one-command offline start (P3-BE1-1)
+Run from the repo root (on Windows use Git Bash or WSL):
+```
+python scripts/download_models.py     # once, with internet: the MMS aligner weights and the Ollama model
+scripts/start.sh                      # every day, no internet needed
+scripts/start.sh --check              # only report what is ready or missing
+```
+- **`start.sh`** runs `scripts/check_setup.py` first. Missing required parts (ffmpeg, npm, Python packages, aligner weights, `desktop/node_modules`) stop the start with a fix command for each. A missing Ollama only warns, because group plans fall back to templates. Then `scripts/launch.py` creates and seeds the database if there isn't one, starts Ollama if it is installed and not running, starts the engine on a free port, runs the desktop app with `BASA_ENGINE_PORT`, and stops what it started when the app closes. It uses `engine/.venv` if present, else `python3`; set `BASA_PYTHON` to choose.
+- **`download_models.py`** skips anything already downloaded; `--check` only reports. The aligner needs `pip install -r engine/requirements.txt -r ai/requirements.txt` first. Ollama must be installed and running to pull its model (`qwen2.5:7b`).
+- **Engine command:** `python -m app [--port N] [--data-dir D]`. `--data-dir D` keeps the database at `D/basa.db` and the audio under `D`. `PORT` still works; `--port` wins.
+- **Settings (all optional):** `BASA_DATA_DIR` (default `engine/storage`), `BASA_APP_CMD` (default `npm --prefix desktop run dev`), `BASA_OLLAMA_URL`, `BASA_WARM_UP` (default `1` here: the aligner loads at startup so the first reading isn't slow).
+- **For the frontend:** the desktop app does not start the engine itself yet (`desktop/src/main/index.ts` only reads `BASA_ENGINE_PORT`), so `start.sh` does. `docs/FRONTEND.md` asks for `python -m engine --port <n> --data-dir <path>` and `POST /shutdown`: the real command is `python -m app` from `engine/` as above, and `/shutdown` is not built (it isn't in `TASKS.md`; `start.sh` stops the engine itself). If the app later gets its own launcher, drop the engine step from `launch.py`.
+- **Tests:** `cd engine && pytest` (includes the command line), `cd scripts && pytest` (download, check, launch; no internet, Ollama, torch or weights needed). The tests use a stub for the app and fake `ollama` scripts. What they cannot prove: real downloads, a real Ollama, the Electron launch and a full offline run. Those are in `docs/OFFLINE_CHECKLIST.md`.
+- **Run everything before a push:** `engine/`, `scripts/`, `ai/` and `eval/` each have their own `pytest.ini`; run `pytest` in each folder. `eval/` needs the AI packages (`soundfile`, `numpy`) to pass.
