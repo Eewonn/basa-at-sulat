@@ -7,7 +7,7 @@ import { api } from '@/api'
 import type { Learner } from '@/api/types'
 import { Art } from '@/components/Art'
 import { Emoji } from '@/components/Emoji'
-import { Avatar, LevelChip, SampleBadge, StatCard } from '@/components/ui'
+import { Avatar, LevelChip, StatCard } from '@/components/ui'
 import { isDue, nextDue, weekAgo } from '@/lib/due'
 import { daysSince, useT } from '@/strings'
 
@@ -15,7 +15,7 @@ type Filter = 'all' | 'practice' | 'due'
 
 // The window may not navigate to the engine, so the file is fetched and saved from a blob: URL.
 async function exportCsv() {
-  const url = URL.createObjectURL(await api.exportCsv!())
+  const url = URL.createObjectURL(await api.exportCsv())
   const a = document.createElement('a')
   a.href = url
   a.download = 'basa-results.csv'
@@ -55,12 +55,9 @@ export function ClassScreen() {
         </div>
         <div className="flex flex-col items-end gap-3">
           <div className="flex items-center gap-3">
-            {api.mode === 'mock' && <SampleBadge label={t.sampleData} />}
-            {api.exportCsv && (
-              <button onClick={() => void exportCsv()} className="flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 font-extrabold text-blue ring-2 ring-blue-soft transition hover:bg-blue-soft">
-                <Download className="size-4" aria-hidden /> {t.exportCsv}
-              </button>
-            )}
+            <button onClick={() => void exportCsv()} className="flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 font-extrabold text-blue ring-2 ring-blue-soft transition hover:bg-blue-soft">
+              <Download className="size-4" aria-hidden /> {t.exportCsv}
+            </button>
           </div>
           {next && (
             <button

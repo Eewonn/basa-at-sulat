@@ -15,11 +15,11 @@ npm run typecheck
 npm run build      # production bundle in desktop/out/
 ```
 
-With no engine running, the app uses **sample data** (`src/renderer/src/api/mockApi.ts`) and says so in the status pill. Once the engine exists, start the app with `BASA_ENGINE_PORT=<port>` and it switches to the real API (`httpApi.ts`). Later the app will start the engine itself (P0-FE-4).
+**Everything the app shows comes from the engine** (`src/renderer/src/api/httpApi.ts`); there is no sample data. Start both with `scripts/start.sh`, or run the engine yourself (`python -m app --port 8000` in `engine/`, `python -m app.seed --demo` once for demo data) and then `BASA_ENGINE_PORT=8000 npm run dev`. Without a port, the app shows an "engine not running" screen. Routes the engine doesn't have yet (docs/API.md, "Proposed by frontend") are hidden, never filled with made-up values; what the teacher types for them (class name, a book's category and reader) is kept on the laptop.
 
-**Clickable flow today:** Klase → learner profile (stars, days in a row, reading time, progress trend) → Basahin (pick a story by topic, record with a live waveform) → processing (the tamaraw thinks) → Resulta (tap a word to fix it, I-confirm) → Sanay kid mode (Pakinggan / Sabihin, confetti and stars, reread, done). Pakinggan and the Sabihin result are simulated until the engine exists.
+**Clickable flow today:** Klase → learner profile (stars, days in a row, reading time, progress trend) → Basahin (pick a story by topic, record with a live waveform) → processing (the tamaraw thinks) → Resulta (tap a word to fix it, I-confirm) → Sanay kid mode (Pakinggan / Sabihin, confetti and stars, reread, done). Pakinggan plays the word cut from a Sulat book (hidden when no book has it), and Sabihin is checked by the aligner; each attempt is saved and a correct one earns a star.
 
-Also built: the **Basa** tab (who's due for a check this week, recent checks), **Sulat** (book library, a 3-step book maker that records a fluent speaker and previews with word highlighting, and a read-along player), and **Settings** (language, text size, privacy and data with delete-all-audio, class roster add/rename, models, about). Sample books without real audio use simulated timing; books you record play your real audio.
+Also built: the **Basa** tab (who's due for a check this week, recent checks), **Sulat** (book library, a 3-step book maker that records a fluent speaker and previews with word highlighting, and a read-along player), and **Settings** (language, text size, privacy and data with delete-all-audio, class roster add/rename, models, about). Books play the recorded model reading, with the highlight following the real audio.
 
 All illustrations are our own SVGs (`components/Art.tsx`), drawn to match Taw the tamaraw (`components/Tamaraw.tsx`). No stock art or icon packs for anything kids see.
 
@@ -37,7 +37,7 @@ It ships the same Chromium on Windows and Linux, so microphone recording and ren
 
 ## Rules
 - **Works offline:** no CDN scripts, bundled fonts, strict CSP allowing only `127.0.0.1`.
-- **Mock first:** every screen runs on `api/mockApi.ts` fixtures before the engine exists.
+- **Real data only:** every number and label comes from the engine or the teacher. Nothing is hardcoded or simulated; a missing route hides its feature.
 - **Color never stands alone:** every label also shows as text or an icon.
 - **Design for 1366×768** (common cheap laptops), and check at 1920×1080 for the demo screen.
 - **Cross-platform:** no bash-only scripts, `path.join` everywhere, and test on Windows before each demo.

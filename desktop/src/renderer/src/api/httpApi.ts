@@ -1,4 +1,4 @@
-import type { Api, Assessment, Book, BookWord, Category, ClassGroup, ClassSettings, LearnerStats, PracticeItem, Progress } from './types'
+import type { Api, Assessment, Book, BookWord, Category, ClassGroup, ClassSettings, PracticeItem, Progress } from './types'
 
 // The engine stores ISO 639 codes (fil, eng, ilo…), but the book editor takes the language's name.
 const LANGUAGE_CODES: Record<string, string> = {
@@ -69,20 +69,6 @@ export function createHttpApi(port: number): Api {
     }
   }
 
-  // Until /learners/{id}/stats exists: what practice and progress already say. Stars and streaks need it.
-  async function statsFromLive(learnerId: string): Promise<LearnerStats> {
-    const [items, progress] = await Promise.all([api.practice(learnerId), api.progress(learnerId)])
-    const checks = progress.checks.filter((c) => c.wcpm !== null)
-    return {
-      stars: 0,
-      streak_days: 0,
-      minutes_read: 0,
-      wcpm_history: checks.map((c) => ({ date: c.confirmed_at.slice(0, 10), wcpm: c.wcpm! })),
-      practicing: items.map((x) => x.word),
-      days_read: progress.checks.map((c) => c.confirmed_at.slice(0, 10))
-    }
-  }
-
   const CLASS_KEY = 'basa.classSettings'
   const noClassSettings: ClassSettings = { teacher_name: '', section: '', grade: 0 }
 
@@ -93,7 +79,6 @@ export function createHttpApi(port: number): Api {
   }
 
   const api: Api = {
-    mode: 'engine',
     health: () => json('/health'),
     learners: () => json('/learners'),
     passages: () => json('/passages'),
@@ -109,7 +94,7 @@ export function createHttpApi(port: number): Api {
         body: JSON.stringify({ label })
       }),
     confirm: (id) => json<Assessment>(`/assessments/${id}/confirm`, { method: 'POST' }),
-    learnerStats: (learnerId) => orElse(json(`/learners/${learnerId}/stats`), () => statsFromLive(learnerId)),
+    learnerStats: (learnerId) => json(`/learners/${learnerId}/stats`),
     practice: async (learnerId) => (await json<{ items: PracticeItem[] }>(`/learners/${learnerId}/practice`)).items,
     clipUrl: (bookId, wordIndex) => `${base}/books/${bookId}/clips/${wordIndex}`,
     progress: (learnerId) => json<Progress>(`/learners/${learnerId}/progress`),

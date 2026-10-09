@@ -46,7 +46,6 @@ export function StatusPill() {
               </li>
             ))}
           </ul>
-          {api.mode === 'mock' && <p className="sample-badge mt-3 rounded-lg bg-sun-soft px-3 py-2 text-xs font-bold text-[#6b4f00]">{t.statusMock}</p>}
           <Popover.Arrow className="fill-white" />
         </Popover.Content>
       </Popover.Portal>

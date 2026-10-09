@@ -217,10 +217,9 @@
   }
 }
 
-/* Presentation mode (Ctrl+Shift+P) hides development-only badges and shows its own chip. */
+/* Presentation mode (Ctrl+Shift+P) shows its own chip in the status pill. */
 .presentation-chip { display: none; }
 [data-presentation] .presentation-chip { display: inline-flex; }
-[data-presentation] .sample-badge { display: none; }
 
 html, body, #root { height: 100%; }
 body {

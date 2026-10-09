@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from 'react-router'
-import { ArrowLeft, Check, Lock, Loader2, Mic, MicOff, Square } from 'lucide-react'
+import { ArrowLeft, Lock, Loader2, Mic, MicOff, Square } from 'lucide-react'
 import { api } from '@/api'
 import type { Category, Passage } from '@/api/types'
 import { useRecorder } from '@/audio/useRecorder'
@@ -27,27 +27,16 @@ function Processing() {
     const id = setInterval(() => setMs(Date.now() - started), 100)
     return () => clearInterval(id)
   }, [])
-  const stages = [t.stagePrep, t.stageAlign, t.stageScore]
-  const current = ms < 600 ? 0 : ms < 1400 ? 1 : 2
 
+  // The engine doesn't report its steps while scoring, so this shows only the real time spent waiting.
   return (
     <div className="flex flex-col items-center gap-6 py-12">
       <Tamaraw mood="thinking" size={180} />
       <p className="text-2xl font-black text-navy">{t.thinking(t.mascotName)}</p>
-      <div className="flex flex-col gap-3">
-        {stages.map((s, i) => (
-          <div key={s} className={`flex items-center gap-3 text-lg font-extrabold ${i <= current ? 'text-navy' : 'text-muted/60'}`}>
-            {i < current ? (
-              <Check className="size-6 text-teal" strokeWidth={3} aria-hidden />
-            ) : i === current ? (
-              <Loader2 className="size-6 animate-spin text-blue" aria-hidden />
-            ) : (
-              <span className="size-6 rounded-full ring-2 ring-line" aria-hidden />
-            )}
-            {s}
-          </div>
-        ))}
-      </div>
+      <p className="flex items-center gap-3 text-lg font-extrabold text-navy">
+        <Loader2 className="size-6 animate-spin text-blue" aria-hidden />
+        {t.stageScore} · <span className="tabular-nums">{Math.floor(ms / 1000)} s</span>
+      </p>
       {ms > 10_000 && <p className="font-semibold text-muted">{t.stageSlow}</p>}
     </div>
   )

@@ -1,8 +1,11 @@
 import type { Learner } from '@/api/types'
+import { localIso } from '@/strings'
 
 /** ISO date (YYYY-MM-DD) one week ago. */
 export function weekAgo(): string {
-  return new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10)
+  const d = new Date()
+  d.setDate(d.getDate() - 7)
+  return localIso(d)
 }
 
 /** A learner is due for a reading check if they haven't been checked in the last 7 days. */

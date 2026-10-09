@@ -4,9 +4,15 @@ const FIL_MONTHS = ['Ene', 'Peb', 'Mar', 'Abr', 'May', 'Hun', 'Hul', 'Ago', 'Set
 const EN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const shortDate = (iso: string, months: string[]) => `${months[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
 
+/** The laptop's calendar date (YYYY-MM-DD), the same day the engine uses. toISOString() would give the UTC day,
+ * which in Manila is still yesterday until 8 am. */
+export function localIso(d = new Date()): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 /** Whole days between an ISO date (YYYY-MM-DD) and today. */
 export function daysSince(iso: string): number {
-  return Math.round((Date.parse(new Date().toISOString().slice(0, 10)) - Date.parse(iso)) / 86_400_000)
+  return Math.round((Date.parse(localIso()) - Date.parse(iso)) / 86_400_000)
 }
 
 // All UI text lives here. Default is Filipino, with English where it's clearer for teachers.
@@ -18,11 +24,12 @@ const fil = {
   navBooks: 'Sulat',
   navSettings: 'Settings',
   statusLocal: 'Nasa laptop na ito',
+  engineMissingTitle: 'Hindi pa tumatakbo ang engine',
+  engineMissingText: 'Ang engine ang nagche-check ng pagbasa at nag-iingat ng resulta sa laptop na ito. Buksan ang app gamit ang:',
   statusNoInternet: 'Hindi kailangan ng internet',
   statusAligner: 'Aligner (MMS)',
   statusOllama: 'Ollama (group plans)',
   statusMic: 'Mikropono',
-  statusMock: 'Sample data muna: hindi pa konektado ang engine',
   statusReady: 'Handa',
   statusDown: 'Hindi available',
 
@@ -43,8 +50,6 @@ const fil = {
   micBlocked: 'Hindi magamit ang mikropono.',
   micBlockedFixWin: 'Windows: Settings → Privacy & security → Microphone → payagan ang desktop apps.',
   micBlockedFixLinux: 'Linux: tingnan kung naka-mute o napili ang tamang mikropono sa sound settings.',
-  stagePrep: 'Inihahanda ang audio',
-  stageAlign: 'Itinutugma ang mga salita',
   stageScore: 'Sinusuri ang pagbasa',
   stageSlow: 'Sandali lang… mas matagal sa lumang laptop.',
 
@@ -84,7 +89,6 @@ const fil = {
   language: 'Wika ng app',
   modelsTitle: 'Mga modelo (lahat ay tumatakbo sa laptop na ito)',
   comingSoon: 'Malapit na',
-  sampleData: 'Sample data',
   mascotName: 'Taw',
   mascotLines: ['Kumusta, Guro!', 'Tara, magbasa tayo!', 'Kaya natin ito!', 'Ako si Taw!'],
   kidHello: (n: string) => `Kumusta, ${n}! Handa ka na?`,
@@ -191,7 +195,6 @@ const fil = {
   pausePlayback: 'I-pause',
   restart: 'Ulitin',
   useInBasa: 'Gamitin sa Basahin',
-  sampleTiming: 'Sample na timing: wala pang totoong audio',
   stepWrite: 'Isulat',
   stepRecord: 'I-record',
   stepPreview: 'Silipin',
@@ -241,9 +244,10 @@ const en: Strings = {
   navCheck: 'Check',
   navBooks: 'Books',
   statusLocal: 'On this device',
+  engineMissingTitle: 'The engine is not running',
+  engineMissingText: 'The engine checks the reading and keeps the results on this laptop. Open the app with:',
   statusNoInternet: 'Internet not needed',
   statusMic: 'Microphone',
-  statusMock: 'Sample data: the engine is not connected yet',
   statusReady: 'Ready',
   statusDown: 'Unavailable',
   classTitle: 'Class',
@@ -260,8 +264,6 @@ const en: Strings = {
   micBlocked: "Can't use the microphone.",
   micBlockedFixWin: 'Windows: Settings → Privacy & security → Microphone → allow desktop apps.',
   micBlockedFixLinux: 'Linux: check the mic is not muted and is selected in sound settings.',
-  stagePrep: 'Preparing audio',
-  stageAlign: 'Lining up words',
   stageScore: 'Scoring the reading',
   stageSlow: 'Still working… older laptops take longer.',
   reviewTitle: 'Result',
@@ -296,7 +298,6 @@ const en: Strings = {
   language: 'App language',
   modelsTitle: 'Models (all run on this laptop)',
   comingSoon: 'Coming soon',
-  sampleData: 'Sample data',
   thinking: (n) => `${n} is thinking…`,
   mascotLines: ['Hello, Teacher!', "Let's read!", 'We can do this!', "I'm Taw!"],
   kidHello: (n) => `Hi, ${n}! Ready?`,
@@ -397,7 +398,6 @@ const en: Strings = {
   pausePlayback: 'Pause',
   restart: 'Restart',
   useInBasa: 'Use in a check',
-  sampleTiming: 'Sample timing: no real audio yet',
   stepWrite: 'Write',
   stepRecord: 'Record',
   stepPreview: 'Preview',
