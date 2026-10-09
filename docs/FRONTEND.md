@@ -74,25 +74,28 @@ Books: list → new book (type story → record model reading → preview) → u
 - **Privacy moments:** "audio deleted ✓", "nothing leaves this laptop".
 - The airplane-mode demo just works: the pill never shows "offline" as an error.
 
-## 6. Visual system (playful, BOOKR-inspired)
-Bright color-block cards, rounded type, a light-gray sidebar with a blue header and an overlapping avatar, and a white pill for the active nav item. It applies to the whole app; teacher screens use fewer big color blocks.
+## 6. Visual system (playful, BOOKR-inspired, with a Filipino touch)
+Bright color-block cards, rounded type, a warm sidebar with a blue header and an overlapping avatar, and a white pill for the active nav item. It applies to the whole app; teacher screens use fewer big color blocks. The Filipino touch (warm palette, banig weave, Filipino phrasing) keeps it from looking like a copy of BOOKR.
 
 - **Tokens** (CSS variables in `@theme`, `desktop/src/renderer/src/styles/app.css`):
 
   | Token | Value | Use |
   |---|---|---|
-  | blue | `#3D63E8` | Primary, sidebar header, "days in a row" card |
-  | coral | `#EE4466` | "Stars" card, Say-it button, misread accent |
-  | teal | `#12A08A` | "Time reading" card, correct/confirm |
-  | sun | `#FFC531` | Highlights and illustrations only |
+  | blue (dagat) | `#2D5BD3` | Primary, sidebar header, "days in a row" card |
+  | coral (gumamela) | `#D62F55` | "Stars" card, Say-it button, misread accent |
+  | teal (palay) | `#17885A` | "Time reading" card, correct/confirm |
+  | sun (mangga) | `#FFB627` | Highlights and illustrations only |
+  | banig / banig-soft | `#E9D3A6` / `#F7EEDC` | Weave texture and warm accents |
   | purple | `#7B3FF2` | Outline secondary buttons |
   | navy | `#1E2A5A` | Headings and text |
   | body | `#4A5578` | Body text |
-  | side | `#F2F1F6` | Sidebar |
-  | blue-soft / coral-soft / teal-soft / sun-soft | `#E4E9FF` / `#FFE3E9` / `#DDF5F0` / `#FFF2C9` | Tiles, word fills, chips |
-  | coral-ink / teal-ink | `#B3203F` / `#0B6E5F` | Small text on light tints |
+  | side | `#F5F1E8` | Sidebar (warm) |
+  | blue-soft / coral-soft / teal-soft / sun-soft | `#E3E9FB` / `#FFE1E7` / `#DCF3E6` / `#FFF0CC` | Tiles, word fills, chips |
+  | coral-ink / teal-ink | `#B3203F` / `#0B6A45` | Small text on light tints |
 
-- **Contrast rule (measured):** white text works at any size on blue (5.1:1) and purple (5.5:1). On coral (3.7:1) and teal (3.3:1), white text must be bold and at least 20px. Small text goes on tints, using the `-ink` colors.
+- **Contrast rule (measured):** white text works at any size on blue (5.9:1), coral (4.8:1) and purple (5.5:1). On teal (4.5:1) keep white text bold and at least 20px. Small text goes on tints, using the `-ink` colors.
+- **Banig weave:** `banig` (on color blocks: sidebar header, stat cards, score card), `banig-light` (kid-mode background) and `banig-band` (the colorful striped border on the sidebar header and learner cards). It's a generic woven-mat lattice, used across the Philippines. We deliberately don't use sacred IP textile motifs (e.g. T'nalak) without community consent.
+- **Filipino phrasing:** a time-based greeting ("Magandang umaga, Guro!"), and varied cheers in Sanay ("Galing!", "Ang husay!", "Kaya mo 'yan!", "Isa pa!"), with English equivalents.
 - **Type:** Nunito (rounded, bundled), weights 700–900 for headings. Scale: 14 / 16 / 20 / 28 / 40 / 56 / 120.
 - **Shape:** 20px radius on cards, 14px on tiles, pill buttons, a soft shadow plus a lift on hover.
 - **Illustrations:** Microsoft Fluent Emoji Flat SVGs (MIT), bundled in `assets/emoji/` and credited in Settings.

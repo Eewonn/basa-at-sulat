@@ -47,7 +47,7 @@ const fil = {
   nothingLeaves: 'Walang lumalabas sa laptop na ito.',
   confirm: 'I-confirm',
   reRecord: 'Ulitin',
-  savedToast: 'Na-save · na-delete ang audio ✓',
+  savedToast: 'Na-save na! Na-delete ang audio ✓',
   startPractice: (name: string) => `Simulan ang practice ni ${name}`,
   labelMatched: 'tama',
   labelMisread: 'mali ang basa',
@@ -63,8 +63,8 @@ const fil = {
   gotIt: 'Tama!',
   rereadTitle: 'Basahin ulit ang pangungusap',
   next: 'Susunod',
-  done: 'Ang galing!',
-  doneSub: 'Tapos na ang practice.',
+  done: 'Ang galing mo!',
+  doneSub: 'Tapos na ang practice. Ipagpatuloy mo lang!',
   backToClass: 'Bumalik sa Klase',
   holdToExit: 'Pindutin nang matagal para lumabas',
 
@@ -76,7 +76,7 @@ const fil = {
   comingSoon: 'Malapit na',
   sampleData: 'Sample data',
   mascotName: 'Taw',
-  thinking: (n: string) => `Nag-iisip si ${n}…`,
+  thinking: (n: string) => `Sandali lang, nag-iisip si ${n}…`,
   navProfile: 'Profile',
   back: 'Bumalik',
   statStars: 'Mga star na nakuha:',
@@ -97,7 +97,10 @@ const fil = {
   starsEarned: (n: number) => (n === 1 ? '1 star ang nakuha mo!' : `${n} star ang nakuha mo!`),
   creditsTitle: 'Mga larawan',
   creditsText: 'Microsoft Fluent Emoji (MIT License). Ang tamaraw ay orihinal na gawa ng team.',
-  learnersCount: (n: number) => `${n} learner`
+  learnersCount: (n: number) => `${n} learner`,
+  greeting: (h: number): string => (h < 12 ? 'Magandang umaga, Guro!' : h < 18 ? 'Magandang hapon, Guro!' : 'Magandang gabi, Guro!'),
+  cheersRight: ['Galing!', 'Ang husay!', 'Tama!', 'Sige pa!'],
+  cheersRetry: ["Kaya mo 'yan!", 'Isa pa!', 'Subukan ulit']
 }
 
 export type Strings = typeof fil
@@ -154,8 +157,8 @@ const en: Strings = {
   gotIt: 'Got it!',
   rereadTitle: 'Read the sentence again',
   next: 'Next',
-  done: 'Great job!',
-  doneSub: 'Practice finished.',
+  done: 'You did great!',
+  doneSub: 'Practice finished. Keep it up!',
   backToClass: 'Back to Class',
   holdToExit: 'Hold to exit',
   booksTitle: 'Books',
@@ -182,7 +185,10 @@ const en: Strings = {
   starsEarned: (n) => (n === 1 ? 'You earned 1 star!' : `You earned ${n} stars!`),
   creditsTitle: 'Illustrations',
   creditsText: 'Microsoft Fluent Emoji (MIT License). The tamaraw mascot is original work by the team.',
-  learnersCount: (n) => `${n} learners`
+  learnersCount: (n) => `${n} learners`,
+  greeting: (h) => (h < 12 ? 'Good morning, Teacher!' : h < 18 ? 'Good afternoon, Teacher!' : 'Good evening, Teacher!'),
+  cheersRight: ['Great job!', 'Awesome!', 'Correct!', 'Keep going!'],
+  cheersRetry: ['You can do it!', 'One more time!', 'Try again']
 }
 
 export const STRINGS = { fil, en }

@@ -181,7 +181,7 @@ export function CheckScreen() {
                 {rec.state === 'recording' ? <Square className="size-9 fill-current" /> : <Mic className="size-10" />}
               </button>
               <div className="min-w-0 flex-1">
-                <LiveWaveform analyser={rec.analyser} color="#3D63E8" />
+                <LiveWaveform analyser={rec.analyser} color="#2D5BD3" />
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span className="font-extrabold text-navy tabular-nums">
                     {rec.state === 'recording' ? `● ${elapsed.toFixed(1)} s` : t.recordStart}

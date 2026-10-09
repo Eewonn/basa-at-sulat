@@ -10,6 +10,8 @@ import { LiveWaveform } from '@/components/LiveWaveform'
 import { Tamaraw, type Mood } from '@/components/Tamaraw'
 import { useT } from '@/strings'
 
+const pick = (list: string[]) => list[Math.floor(Math.random() * list.length)]
+
 type Phase = 'ready' | 'hearing' | 'listening' | 'checking' | 'retry' | 'correct'
 
 const MOOD: Record<Phase, Mood> = {
@@ -61,6 +63,7 @@ export function PracticeScreen() {
   const [index, setIndex] = useState(0)
   const [phase, setPhase] = useState<Phase>('ready')
   const [earned, setEarned] = useState(0)
+  const [cheer, setCheer] = useState('')
   const [burst, setBurst] = useState(0)
   const [flight, setFlight] = useState<{ x: number; y: number; dx: number; dy: number } | null>(null)
   const counter = useRef<HTMLDivElement>(null)
@@ -95,6 +98,7 @@ export function PracticeScreen() {
       setPhase('checking')
       const { result } = await api.checkWord(audio, item.word, learnerId)
       if (result === 'match') {
+        setCheer(pick(t.cheersRight))
         setPhase('correct')
         setBurst((b) => b + 1)
         flyStar()
@@ -104,7 +108,10 @@ export function PracticeScreen() {
           setPhase('ready')
           setIndex((i) => i + 1)
         }, 1300)
-      } else setPhase('retry')
+      } else {
+        setCheer(pick(t.cheersRetry))
+        setPhase('retry')
+      }
     }, 1800)
   }
 
@@ -112,7 +119,7 @@ export function PracticeScreen() {
   const totalStars = stats?.stars ?? 0
 
   return (
-    <div className="relative flex h-full flex-col items-center justify-center gap-10 overflow-hidden bg-kid px-10">
+    <div className="relative flex h-full flex-col items-center justify-center gap-10 overflow-hidden bg-kid banig-light px-10">
       <HoldToExit onExit={() => navigate(`/learner/${learnerId}`)} label={t.holdToExit} />
 
       <div ref={counter} className="absolute top-5 left-5 flex items-center gap-2 rounded-full bg-white py-2 pr-5 pl-3 shadow-soft">
@@ -154,9 +161,9 @@ export function PracticeScreen() {
               {phase === 'correct' && <Confetti key={burst} />}
               <p className="text-[120px] leading-none font-black text-navy">{item.word}</p>
               <div className="mt-5 flex h-10 items-center">
-                {phase === 'retry' && <p className="text-2xl font-black text-coral-ink">{t.tryAgain}</p>}
-                {phase === 'correct' && <p className="animate-pop text-3xl font-black text-teal-ink">{t.gotIt}</p>}
-                {phase === 'listening' && <LiveWaveform analyser={rec.analyser} color="#3D63E8" height={40} />}
+                {phase === 'retry' && <p className="text-2xl font-black text-coral-ink">{cheer}</p>}
+                {phase === 'correct' && <p className="animate-pop text-3xl font-black text-teal-ink">{cheer}</p>}
+                {phase === 'listening' && <LiveWaveform analyser={rec.analyser} color="#2D5BD3" height={40} />}
                 {phase === 'checking' && <p className="text-xl font-black text-muted">…</p>}
               </div>
             </div>

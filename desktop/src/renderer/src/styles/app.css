@@ -1,28 +1,31 @@
 @import "tailwindcss";
 @import "@fontsource-variable/nunito";
 
-/* Playful, BOOKR-inspired system (docs/FRONTEND.md §6).
-   White text: any size on blue/purple; only bold ≥20px on coral/teal (contrast 3.7 / 3.3). */
+/* Playful, BOOKR-inspired system with a Filipino palette (docs/FRONTEND.md §6).
+   dagat blue, gumamela red, palay green, mangga yellow, banig tan.
+   White text: any size on blue (5.9), coral (4.8), purple (5.5); teal (4.5) only bold ≥20px. */
 @theme {
-  --color-blue: #3d63e8;
-  --color-blue-dark: #2f4fc4;
-  --color-blue-soft: #e4e9ff;
-  --color-coral: #ee4466;
+  --color-blue: #2d5bd3;
+  --color-blue-dark: #2349ad;
+  --color-blue-soft: #e3e9fb;
+  --color-coral: #d62f55;
   --color-coral-ink: #b3203f;
-  --color-coral-soft: #ffe3e9;
-  --color-teal: #12a08a;
-  --color-teal-ink: #0b6e5f;
-  --color-teal-soft: #ddf5f0;
-  --color-sun: #ffc531;
-  --color-sun-soft: #fff2c9;
+  --color-coral-soft: #ffe1e7;
+  --color-teal: #17885a;
+  --color-teal-ink: #0b6a45;
+  --color-teal-soft: #dcf3e6;
+  --color-sun: #ffb627;
+  --color-sun-soft: #fff0cc;
+  --color-banig: #e9d3a6;
+  --color-banig-soft: #f7eedc;
   --color-purple: #7b3ff2;
   --color-navy: #1e2a5a;
   --color-body: #4a5578;
   --color-muted: #6b7280;
-  --color-side: #f2f1f6;
-  --color-line: #e6e8f0;
+  --color-side: #f5f1e8;
+  --color-line: #e8e2d4;
   --color-page: #ffffff;
-  --color-kid: #f5f7ff;
+  --color-kid: #fbf6ec;
 
   --font-sans: "Nunito Variable", "Nunito", Arial, sans-serif;
 
@@ -54,8 +57,8 @@
     100% { opacity: 1; transform: scale(1); }
   }
   @keyframes ring {
-    0% { box-shadow: 0 0 0 0 rgba(238, 68, 102, 0.45); }
-    100% { box-shadow: 0 0 0 28px rgba(238, 68, 102, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(214, 47, 85, 0.45); }
+    100% { box-shadow: 0 0 0 28px rgba(214, 47, 85, 0); }
   }
   @keyframes bounce-soft {
     0%, 100% { transform: translateY(0); }
@@ -75,6 +78,22 @@
     0% { opacity: 1; transform: translate(0, 0) scale(1.4); }
     100% { opacity: 0.2; transform: translate(var(--dx), var(--dy)) scale(0.5); }
   }
+}
+
+/* Banig: a woven-mat lattice, pan-Filipino (not a specific IP group's motif). Subtle enough to keep text contrast. */
+@utility banig {
+  background-image:
+    repeating-linear-gradient(45deg, rgb(255 255 255 / 0.06) 0 9px, transparent 9px 18px),
+    repeating-linear-gradient(-45deg, rgb(0 0 0 / 0.05) 0 9px, transparent 9px 18px);
+}
+@utility banig-light {
+  background-image:
+    repeating-linear-gradient(45deg, rgb(233 211 166 / 0.16) 0 12px, transparent 12px 24px),
+    repeating-linear-gradient(-45deg, rgb(233 211 166 / 0.1) 0 12px, transparent 12px 24px);
+}
+/* The colorful striped border woven into many banig. */
+@utility banig-band {
+  background-image: repeating-linear-gradient(90deg, #d62f55 0 18px, #ffb627 18px 36px, #17885a 36px 54px, #2d5bd3 54px 72px, #e9d3a6 72px 90px);
 }
 
 html, body, #root { height: 100%; }

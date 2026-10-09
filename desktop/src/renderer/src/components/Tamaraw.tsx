@@ -67,14 +67,14 @@ export function Tamaraw({ mood = 'idle', size = 160, className = '' }: { mood?: 
       <ellipse cx="112" cy="134" rx="4.5" ry="3.5" fill={FUR_DARK} />
       <Mouth mood={mood} />
       {mood === 'thinking' && (
-        <g fill="#3D63E8">
+        <g fill="#2D5BD3">
           <circle cx="160" cy="44" r="6" />
           <circle cx="176" cy="30" r="8" />
           <circle cx="190" cy="12" r="10" />
         </g>
       )}
       {mood === 'happy' && (
-        <g fill="#FFC531">
+        <g fill="#FFB627">
           <path d="M28 40 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 l10 -4 z" />
           <path d="M172 40 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3 z" />
         </g>

@@ -8,10 +8,10 @@ export function Sparkline({ values, width = 320, height = 90 }: { values: number
   const [lx] = pts[pts.length - 1]
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden>
-      <path d={`${line} L${lx} ${height} L8 ${height} Z`} fill="#E4E9FF" />
-      <path d={line} fill="none" stroke="#3D63E8" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={`${line} L${lx} ${height} L8 ${height} Z`} fill="#E3E9FB" />
+      <path d={line} fill="none" stroke="#2D5BD3" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
       {pts.map(([x, y], i) => (
-        <circle key={i} cx={x} cy={y} r={i === pts.length - 1 ? 7 : 4} fill={i === pts.length - 1 ? '#EE4466' : '#3D63E8'} stroke="#fff" strokeWidth="2" />
+        <circle key={i} cx={x} cy={y} r={i === pts.length - 1 ? 7 : 4} fill={i === pts.length - 1 ? '#D62F55' : '#2D5BD3'} stroke="#fff" strokeWidth="2" />
       ))}
     </svg>
   )

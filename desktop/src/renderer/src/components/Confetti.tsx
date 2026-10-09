@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-const COLORS = ['#3D63E8', '#EE4466', '#12A08A', '#FFC531', '#7B3FF2']
+const COLORS = ['#2D5BD3', '#D62F55', '#17885A', '#FFB627', '#7B3FF2']
 
 // A one-shot burst. Re-mount (change `key`) to fire again.
 export function Confetti({ count = 28 }: { count?: number }) {

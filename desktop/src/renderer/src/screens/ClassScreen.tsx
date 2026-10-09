@@ -15,6 +15,7 @@ export function ClassScreen() {
     <div className="mx-auto max-w-6xl px-10 py-10">
       <header className="flex items-end justify-between">
         <div>
+          <p className="text-lg font-extrabold text-coral-ink">{t.greeting(new Date().getHours())}</p>
           <h1 className="text-[40px] leading-tight font-black text-navy">{t.classTitle}</h1>
           <p className="mt-1 font-semibold text-body">
             {t.classSubtitle}
@@ -27,7 +28,8 @@ export function ClassScreen() {
       <div className="mt-8 grid grid-cols-3 gap-6">
         {isLoading && Array.from({ length: 6 }, (_, i) => <div key={i} className="h-60 animate-pulse rounded-card bg-side" />)}
         {learners?.map((l, i) => (
-          <article key={l.id} className="flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift">
+          <article key={l.id} className="flex flex-col gap-4 overflow-hidden rounded-card bg-white p-5 pt-0 shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift">
+            <div className="banig-band -mx-5 mb-1 h-2" aria-hidden />
             <button onClick={() => navigate(`/learner/${l.id}`)} className="flex cursor-pointer items-center gap-4 text-left">
               <Avatar name={l.display_name} index={i} size={64} />
               <div className="min-w-0 flex-1">

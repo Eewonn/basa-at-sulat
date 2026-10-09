@@ -49,7 +49,7 @@ export function Avatar({ name, index = 0, size = 56, mascot = false }: { name: s
 export function StatCard({ title, value, emoji, color }: { title: string; value: string; emoji: EmojiName; color: 'coral' | 'blue' | 'teal' }) {
   const bg = { coral: 'bg-coral', blue: 'bg-blue', teal: 'bg-teal' }[color]
   return (
-    <div className={`relative flex h-52 flex-col overflow-hidden rounded-card p-6 text-white shadow-soft ${bg}`}>
+    <div className={`relative flex h-52 flex-col overflow-hidden rounded-card p-6 text-white shadow-soft banig ${bg}`}>
       <p className="text-xl font-extrabold">{title}</p>
       <p className="mt-1 text-[40px] leading-tight font-black">{value}</p>
       <Emoji name={emoji} size={104} className="absolute right-5 bottom-4 drop-shadow-md" />
