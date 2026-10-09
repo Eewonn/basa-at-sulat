@@ -3,19 +3,46 @@ export type TextSize = 'normal' | 'large'
 
 const ZOOM: Record<TextSize, string> = { normal: '1', large: '1.15' }
 
-export function getTextSize(): TextSize {
+function read(key: string): string | null {
   try {
-    return localStorage.getItem('textSize') === 'large' ? 'large' : 'normal'
+    return localStorage.getItem(key)
   } catch {
-    return 'normal'
+    return null
   }
 }
 
-export function applyTextSize(size: TextSize): void {
-  document.documentElement.style.zoom = ZOOM[size]
+function write(key: string, value: string): void {
   try {
-    localStorage.setItem('textSize', size)
+    localStorage.setItem(key, value)
   } catch {
-    // Size just won't persist across restarts.
+    // Setting just won't persist across restarts.
   }
+}
+
+export function getTextSize(): TextSize {
+  return read('textSize') === 'large' ? 'large' : 'normal'
+}
+
+export function applyTextSize(size: TextSize): void {
+  write('textSize', size)
+  if (!isPresentation()) document.documentElement.style.zoom = ZOOM[size]
+}
+
+// Presentation mode for demos (Ctrl+Shift+P): large text and no "sample data" badges.
+export function isPresentation(): boolean {
+  return read('presentation') === '1'
+}
+
+export function applyPresentation(on: boolean): void {
+  write('presentation', on ? '1' : '0')
+  document.documentElement.toggleAttribute('data-presentation', on)
+  document.documentElement.style.zoom = on ? ZOOM.large : ZOOM[getTextSize()]
+}
+
+export function isSetupDone(): boolean {
+  return read('setupDone') === '1'
+}
+
+export function markSetupDone(): void {
+  write('setupDone', '1')
 }

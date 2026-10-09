@@ -5,6 +5,7 @@ import { Mic } from 'lucide-react'
 import { api } from '@/api'
 import { Tamaraw } from '@/components/Tamaraw'
 import { Avatar, LevelChip } from '@/components/ui'
+import { isDue, weekAgo } from '@/lib/due'
 import { daysSince, useT } from '@/strings'
 
 // The Basa tab: who still needs a check this week, and what was checked recently.
@@ -14,10 +15,10 @@ export function BasaScreen() {
   const { data: learners } = useQuery({ queryKey: ['learners'], queryFn: () => api.learners() })
   const { data: recent } = useQuery({ queryKey: ['recent'], queryFn: () => api.recentChecks() })
 
-  const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10)
+  const since = weekAgo()
   const indexed = learners?.map((l, i) => ({ l, i })) ?? []
-  const due = indexed.filter(({ l }) => !l.last_check || l.last_check < weekAgo)
-  const done = indexed.filter(({ l }) => l.last_check && l.last_check >= weekAgo)
+  const due = indexed.filter(({ l }) => isDue(l, since))
+  const done = indexed.filter(({ l }) => !isDue(l, since))
 
   return (
     <div className="flex w-full max-w-[1680px] gap-8 px-10 py-10">

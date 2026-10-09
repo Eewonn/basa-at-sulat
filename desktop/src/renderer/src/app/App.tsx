@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { ToastProvider } from '@/components/ui'
@@ -13,6 +13,8 @@ import { BooksScreen } from '@/screens/BooksScreen'
 import { BookEditorScreen } from '@/screens/BookEditorScreen'
 import { BookPlayerScreen } from '@/screens/BookPlayerScreen'
 import { SettingsScreen } from '@/screens/SettingsScreen'
+import { WelcomeScreen } from '@/screens/WelcomeScreen'
+import { applyPresentation, isPresentation, isSetupDone } from '@/display'
 import { LangContext, type Lang } from '@/strings'
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } })
@@ -36,11 +38,23 @@ export function App() {
     }
   }
 
+  // Ctrl+Shift+P toggles presentation mode for demos.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.code === 'KeyP') {
+        e.preventDefault()
+        applyPresentation(!isPresentation())
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   return (
     <LangContext.Provider value={{ lang, setLang }}>
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
-          <MemoryRouter>
+          <MemoryRouter initialEntries={[isSetupDone() ? '/' : '/welcome']}>
             <Routes>
               <Route element={<AppShell />}>
                 <Route index element={<ClassScreen />} />
@@ -53,7 +67,8 @@ export function App() {
                 <Route path="books/:bookId" element={<BookPlayerScreen />} />
                 <Route path="settings" element={<SettingsScreen />} />
               </Route>
-              {/* Kid mode: full screen, no sidebar. */}
+              {/* Full screen, no sidebar: first run and kid mode. */}
+              <Route path="welcome" element={<WelcomeScreen />} />
               <Route path="practice/:learnerId" element={<PracticeScreen />} />
             </Routes>
           </MemoryRouter>

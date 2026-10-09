@@ -1,5 +1,6 @@
 import { useContext, useState, type CSSProperties, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router'
 import { Cpu, FolderOpen, Info, Pencil, Shield, Type, Users } from 'lucide-react'
 import { api } from '@/api'
 import { Tamaraw } from '@/components/Tamaraw'
@@ -37,6 +38,7 @@ function Segmented<T extends string>({ value, options, onChange }: { value: T; o
 
 export function SettingsScreen() {
   const t = useT()
+  const navigate = useNavigate()
   const toast = useToast()
   const qc = useQueryClient()
   const { lang, setLang } = useContext(LangContext)
@@ -226,6 +228,9 @@ export function SettingsScreen() {
               </p>
               <p className="font-semibold text-body">{t.aboutOffline}</p>
               <p className="text-sm font-semibold text-muted">{t.creditsText}</p>
+              <button onClick={() => navigate('/welcome')} className="mt-2 cursor-pointer rounded-full px-5 py-2 font-extrabold text-blue ring-2 ring-blue hover:bg-blue-soft">
+                {t.replayIntro}
+              </button>
             </div>
           </div>
         </Card>

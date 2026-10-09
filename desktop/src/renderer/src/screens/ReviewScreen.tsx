@@ -73,7 +73,7 @@ export function ReviewScreen() {
                     {t.pause} {pause.seconds.toFixed(1)} s
                   </span>
                 )}
-                <WordChip word={w} delayMs={w.i * 40} onFix={(label) => fix.mutate({ i: w.i, label })} />
+                <WordChip word={w} delayMs={w.i * 40} pauseBefore={pause?.seconds} onFix={(label) => fix.mutate({ i: w.i, label })} />
               </Fragment>
             )
           })}

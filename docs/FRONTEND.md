@@ -123,6 +123,12 @@ Bright color-block cards, rounded type, a warm sidebar with a blue header and an
 - **Light theme only** for this release.
 - **Language:** all UI text lives in one `strings.ts` with Filipino and English. Default: Filipino with English labels where clearer.
 
+## 6b. UX helpers added in the craft pass
+- **First run** (`screens/WelcomeScreen.tsx`, route `/welcome`): Taw introduces the app, the teacher enters their name and section, and the microphone is tested with a live meter (with the Windows/Linux fix-it text on failure). Shown until `localStorage.setupDone`; Settings → About can replay it.
+- **Klase:** search, filter chips (Lahat / Kailangan ng practice / Hindi pa na-check) and a **"Susunod na babasa"** button that opens the next learner due a check (never-checked first). The "due" rule lives in `lib/due.ts` and is shared with the Basa tab.
+- **"Bakit na-flag?"** in the Resulta word popover explains each flag in plain words (weak sound match with its %, almost no voice, pause length) and reminds the teacher they make the final call.
+- **Presentation mode** (`Ctrl+Shift+P`): large text, hides "Sample data" badges, and shows a "Presentation" chip in the status pill. For demos only.
+
 ## 7. Component inventory
 - **Layout:** `AppShell`, `Sidebar`, `StatusPill`, `KidModeShell` (with hold-to-exit)
 - **Reading:** `PassageText`, `WordChip` (label, selected, onFix), `WordFixPopover`, `PauseMarker`, `KaraokeText` (highlights by timings)
