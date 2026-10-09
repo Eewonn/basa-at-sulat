@@ -3,12 +3,16 @@ import { useId } from 'react'
 // The app's logo: Taw peeking over an open book, drawn like a children's-book illustration
 // (brown ink outlines, a slight hand-cut wobble, hatched blush) and cut out like a sticker.
 // The animated mascot used inside the app stays in Tamaraw.tsx.
-const INK = '#3B2A1F'
-const FUR = '#6B5140'
-const FUR_SHADE = '#553F31'
-const TUFT = '#46352A'
-const HORN = '#EADBB9'
-const MUZZLE = '#EBD6BC'
+// Shared with the animated mascot (Tamaraw.tsx) so both are the same Taw.
+export const TAW = {
+  ink: '#3B2A1F',
+  fur: '#6B5140',
+  furShade: '#553F31',
+  tuft: '#46352A',
+  horn: '#EADBB9',
+  muzzle: '#EBD6BC'
+}
+const { ink: INK, fur: FUR, furShade: FUR_SHADE, tuft: TUFT, horn: HORN, muzzle: MUZZLE } = TAW
 const PAGE = '#FBF3DF'
 
 export function TawLogo({ size = 240, className = '' }: { size?: number; className?: string }) {
