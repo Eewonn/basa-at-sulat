@@ -1,1 +1,18 @@
 recording_id,language,passage_id,word_index,expected,actual,error_type,reader,notes
+fil_016,fil,fil_g2_02,,,,none,KM,quiet
+fil_017,fil,fil_g2_02,4,maliit,malit,swap,KM,quiet
+fil_017,fil,fil_g2_02,18,ng,,skip,KM,quiet
+fil_018,fil,fil_g2_02,13,naglalaro,naglaro,swap,KM,fan noise
+fil_018,fil,fil_g2_02,23,na,,skip,KM,fan noise
+fil_019,fil,fil_g2_02,10,nito,,skip,KM,farther
+fil_019,fil,fil_g2_02,21,bola,bula,swap,KM,farther
+fil_019,fil,fil_g2_02,30,,malamig,insert,KM,farther
+fil_020,fil,fil_g2_03,,,,none,KM,fan noise
+fil_021,fil,fil_g2_03,2,palengke,palingke,swap,KM,quiet
+fil_021,fil,fil_g2_03,10,ng,,skip,KM,quiet
+fil_022,fil,fil_g2_03,18,bayong,bayon,swap,KM,faster pace
+fil_022,fil,fil_g2_03,21,ito,,skip,KM,faster pace
+fil_022,fil,fil_g2_03,26,umuwi,uuwi,swap,KM,faster pace
+fil_023,fil,fil_g2_03,11,,sariwang,insert,KM,fan noise
+fil_023,fil,fil_g2_03,14,mga,,skip,KM,fan noise
+fil_023,fil,fil_g2_03,24,Nakangiti,nakangisi,swap,KM,fan noise
