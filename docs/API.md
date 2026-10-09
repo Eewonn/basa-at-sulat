@@ -41,9 +41,9 @@ Returns:
 }
 ```
 
-`timings` is the processing time on this laptop, for the "scored in X s" line. Until `ai.score` reports alignment and scoring separately, `align_ms` covers the whole `ai.score` call and `score_ms` is `0`. `wcpm` and `level` are `null` until Backend 2 computes them (P1-BE2-2).
+`timings` is the processing time on this laptop, for the "scored in X s" line. `align_ms` and `score_ms` come from `ai.score`; if a scorer reports no split, `align_ms` is the whole call and `score_ms` is `0`. The result is stored as a draft, so the teacher can override words with `PATCH` right away. `wcpm` is computed by the engine; `level` is `null` until P1-BE2-2 settles the level names.
 
-Errors: `400` if the audio can't be read, `404` for an unknown `passage_id` or `learner_id`, `422` if a field is missing, `503` if the scoring model isn't installed on this engine, `500` if scoring fails. Scoring can take a while (about 0.6× the recording length on CPU, plus ~10 s for the first call unless the engine was started with `BASA_WARM_UP=1`), so the app should wait and show a progress state.
+Errors: `400` if the audio can't be read, `404` for an unknown `passage_id` or `learner_id`, `422` if a field is missing, `503` if the engine has no database yet (run `python -m app.seed` in `engine/`) or the scoring model isn't installed, `500` if scoring fails or the result can't be saved. Scoring can take a while (about 0.6× the recording length on CPU, plus ~10 s for the first call unless the engine was started with `BASA_WARM_UP=1`), so the app should wait and show a progress state.
 
 ### `PATCH /assessments/{id}/words/{i}`
 Body `{"label": "matched"}`. This is the teacher's override, and it returns the updated assessment (recomputed `wcpm`, `level`). Setting a word back to the AI's original label undoes the override.
@@ -58,7 +58,16 @@ Errors (body `{"detail": "<what went wrong>"}`):
 | `503` | The engine has no database yet (run `python -m app.seed` in `engine/`) |
 
 ### `POST /assessments/{id}/confirm`
-Marks the assessment final (`status: "confirmed"`) and deletes the audio unless `{"keep_audio": true}`.
+Marks the assessment final (`status: "confirmed"`) and deletes the child's audio unless the body is `{"keep_audio": true}`. An empty body means `keep_audio: false`. Returns the confirmed assessment.
+
+| Status | When |
+|---|---|
+| `404` | No assessment with that id |
+| `409` | Already confirmed. A client can treat this as "already saved", and a second call never deletes a kept recording |
+| `422` | `keep_audio` isn't `true` or `false` |
+| `500` | Confirmed, but the audio file could not be deleted (for example a locked file). The row stays confirmed with its audio path set, so the deletion is still owed. The engine retries it at its next start |
+
+A file that is already gone counts as deleted.
 
 ## Learners and passages
 - `GET /learners` → `[{"id", "display_name", "grade"}]` (display names are synthetic or initials only)

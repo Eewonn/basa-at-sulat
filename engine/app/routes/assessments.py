@@ -6,7 +6,7 @@ from contextlib import closing
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Path
-from pydantic import BaseModel
+from pydantic import BaseModel, StrictBool
 
 from app.assessments import (
     AssessmentConfirmedError,
@@ -14,6 +14,7 @@ from app.assessments import (
     override_word,
 )
 from app.db import connect, get_db_path
+from app.retention import AudioDeletionError, confirm_and_delete_audio
 
 router = APIRouter(prefix="/assessments", tags=["assessments"])
 
@@ -52,3 +53,24 @@ def patch_word(
         raise HTTPException(status_code=404, detail=str(err)) from None
     except AssessmentConfirmedError as err:
         raise HTTPException(status_code=409, detail=str(err)) from None
+
+
+class ConfirmBody(BaseModel):
+    keep_audio: StrictBool = False
+
+
+@router.post("/{assessment_id}/confirm")
+def confirm(assessment_id: str, body: ConfirmBody | None = None, conn=Depends(get_conn)) -> dict:
+    """Mark the assessment final and delete the child's audio unless keep_audio is true."""
+    keep = body.keep_audio if body else False
+    try:
+        return confirm_and_delete_audio(conn, assessment_id, keep)
+    except AssessmentNotFoundError as err:
+        raise HTTPException(status_code=404, detail=str(err)) from None
+    except AssessmentConfirmedError as err:
+        raise HTTPException(status_code=409, detail=str(err)) from None
+    except AudioDeletionError:
+        raise HTTPException(
+            status_code=500,
+            detail="confirmed, but the audio could not be deleted yet",
+        ) from None
