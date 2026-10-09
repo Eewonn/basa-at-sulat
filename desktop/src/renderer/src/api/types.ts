@@ -177,6 +177,7 @@ export interface Api {
   book(id: string): Promise<Book>
   createBook(book: NewBook, audio: Blob, durationSec: number): Promise<Book>
   deleteBook(id: string): Promise<void>
+  draftStory(topic: Category, language: string, idea: string): Promise<{ title: string; text: string }> // drafted by the local model
   classGroups(refresh?: boolean): Promise<ClassGroup[]>
   exportCsv(): Promise<Blob> // GET /class/export.csv
   storage(): Promise<Storage | null> // null until the engine reports it

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router'
-import { ArrowLeft, Check, Mic, Pause, Play, RotateCcw, Square } from 'lucide-react'
+import { ArrowLeft, Check, Loader2, Mic, Pause, Play, RotateCcw, Sparkles, Square } from 'lucide-react'
 import { api } from '@/api'
 import type { Book, Category } from '@/api/types'
 import { useRecorder } from '@/audio/useRecorder'
@@ -29,6 +29,7 @@ export function BookEditorScreen() {
   const [reader, setReader] = useState('')
   const [category, setCategory] = useState<Category>('bukid')
   const [text, setText] = useState('')
+  const [idea, setIdea] = useState('')
   const [elapsed, setElapsed] = useState(0)
   const [book, setBook] = useState<Book | null>(null)
   const [time, setTime] = useState(0)
@@ -44,6 +45,15 @@ export function BookEditorScreen() {
       qc.invalidateQueries({ queryKey: ['books'] })
       qc.invalidateQueries({ queryKey: ['passages'] })
     }
+  })
+
+  const draft = useMutation({
+    mutationFn: () => api.draftStory(category, language, idea.trim()),
+    onSuccess: (d) => {
+      setTitle(d.title)
+      setText(d.text)
+    },
+    onError: () => toast(t.aiDraftFailed)
   })
 
   useEffect(() => {
@@ -132,6 +142,21 @@ export function BookEditorScreen() {
                   <CategoryTile key={c} label={t.cat[c]} emoji={CATEGORY_EMOJI[c]} selected={category === c} onClick={() => setCategory(c)} />
                 ))}
               </div>
+            </div>
+            <div className="flex flex-col gap-3 rounded-card bg-blue-soft/50 p-5 ring-1 ring-blue/20">
+              <label className="flex flex-col gap-2">
+                <span className="font-extrabold text-navy">{t.aiIdea}</span>
+                <input className={FIELD} value={idea} onChange={(e) => setIdea(e.target.value)} placeholder={t.aiIdeaHint} />
+              </label>
+              <button
+                disabled={draft.isPending}
+                onClick={() => draft.mutate()}
+                className="flex cursor-pointer items-center gap-2 self-start rounded-full bg-blue px-6 py-3 font-black text-white transition hover:bg-blue-dark disabled:cursor-wait disabled:opacity-60"
+              >
+                {draft.isPending ? <Loader2 className="size-5 animate-spin" aria-hidden /> : <Sparkles className="size-5" aria-hidden />}
+                {draft.isPending ? t.aiDrafting : t.aiDraft}
+              </button>
+              <p className="text-sm font-semibold text-body">{t.aiDraftNote}</p>
             </div>
           </div>
           <label className="flex flex-col gap-2">

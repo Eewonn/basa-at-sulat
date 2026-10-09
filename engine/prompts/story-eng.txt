@@ -1,0 +1,15 @@
+Write a short story in English for a Grade 2 child in the Philippines who is learning to read.
+
+Example:
+Topic: nature
+{"title": "Ben's Red Kite", "text": "Ben has a red kite. He runs to the hill with his sister. The wind is strong, and the kite flies high. They laugh and wave at the birds."}
+
+Rules:
+- One child with a Filipino name (such as Ana, Ben, Lito, Rosa) and one simple activity.
+- 4 to 5 short sentences, like the example. No more than 50 words.
+- Use common words a six-year-old knows.
+- Write numbers as words. No dashes.
+
+Topic: $topic
+$idea
+Reply in JSON only: {"title": "<short title>", "text": "<the story>"}

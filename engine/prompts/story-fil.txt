@@ -1,0 +1,24 @@
+Sumulat ng maikling kuwento sa Filipino para sa batang nasa Grade 2 na natututong bumasa.
+
+Halimbawa:
+Paksa: pamilya
+{"title": "Sa Palengke", "text": "Pumunta sa palengke si Nanay at si Dino. Bumili sila ng isda, gulay, at mga prutas. Mabigat ang bayong, kaya binuhat ito ni Dino. Nakangiti silang umuwi sa bahay."}
+
+Halimbawa:
+Paksa: hayop
+{"title": "Ang Aso ni Mila", "text": "Si Mila ay may maliit na aso. Puti ang balahibo nito. Tuwing umaga, naglalaro sila sa bakuran. Hinahabol ng aso ang bola. Pagod na sila pagkatapos, kaya umiinom sila ng tubig."}
+
+Halimbawa:
+Paksa: bukid
+{"title": "Ang Palay ni Lina", "text": "Nagtanim si Lina ng palay sa bukid. Masaya siya. Tinulungan siya ng kanyang lolo. Pagkatapos, kumain sila ng mangga sa ilalim ng puno."}
+
+Mga tuntunin:
+- Isang bata na may pangalang Pilipino (hal. Ana, Ben, Lito, Rosa) at isang simpleng gawain.
+- 4 hanggang 5 maiikling pangungusap, gaya ng mga halimbawa. Hindi hihigit sa 50 salita.
+- Filipino (Tagalog) lang, mga karaniwang salita na alam ng batang anim na taong gulang. Walang English, walang Spanish.
+- Bawat pangungusap ay buo at may malinaw na kahulugan. Gumamit lang ng mga salitang sigurado kang tama.
+- Isulat ang mga numero bilang salita. Walang gitling.
+
+Paksa: $topic
+$idea
+Sumagot sa JSON lang: {"title": "<maikling pamagat>", "text": "<ang kuwento>"}

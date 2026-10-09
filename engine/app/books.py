@@ -7,11 +7,13 @@ import uuid
 import wave
 
 from fastapi.responses import FileResponse, Response
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, UploadFile
 
 from ai import word_timings
 from app.audio import AudioConversionError, convert_to_wav16k, cut_wav, storage_dir, stored_wav
+from app.plans import PlanError
 from app.routes.assessments import get_conn
+from app.story import draft_story
 
 log = logging.getLogger("engine.books")
 router = APIRouter(prefix="/books", tags=["books"])
@@ -74,6 +76,18 @@ def create_book(
     finally:
         upload_path.unlink(missing_ok=True)
     return {"id": book_id, "words": words}
+
+
+@router.post("/draft")
+def draft_book_story(topic: str = Body(...), language: str = Body(...), idea: str = Body("")):
+    """A short story the teacher can edit before recording it. Drafted by the local model; nothing is saved."""
+    try:
+        return draft_story(topic, language, idea)
+    except ValueError as err:
+        raise HTTPException(422, str(err)) from err
+    except PlanError as err:
+        log.warning("story draft failed: %s", err)
+        raise HTTPException(503, str(err)) from err
 
 
 def _time_the_words(wav_path, text: str, book_id: str) -> list[dict]:
