@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react'
 import { TawLogo } from './TawLogo'
+import { useEngineState } from './EngineGate'
 import { useT } from '@/strings'
 
-// Shown on every launch while the app loads behind it. A click or any key skips it.
+// Shown on every launch, and doubles as the loading screen: it stays until the engine answers /health.
+// Once the engine is up, a click or any key skips the rest of the intro.
 export function Splash({ onDone }: { onDone: () => void }) {
   const t = useT()
-  const [leaving, setLeaving] = useState(false)
+  const engine = useEngineState()
+  const [introDone, setIntroDone] = useState(false)
+  const [skipped, setSkipped] = useState(false)
+  const leaving = engine !== 'starting' && (introDone || skipped)
 
   useEffect(() => {
     const quick = matchMedia('(prefers-reduced-motion: reduce)').matches
-    const timer = setTimeout(() => setLeaving(true), quick ? 900 : 2300)
-    const skip = () => setLeaving(true)
+    const timer = setTimeout(() => setIntroDone(true), quick ? 900 : 2300)
+    const skip = () => setSkipped(true)
     window.addEventListener('keydown', skip)
     return () => {
       clearTimeout(timer)
@@ -26,7 +31,7 @@ export function Splash({ onDone }: { onDone: () => void }) {
 
   return (
     <div
-      onClick={() => setLeaving(true)}
+      onClick={() => setSkipped(true)}
       className={`paper fixed inset-0 z-[100] flex flex-col items-center justify-center bg-kid ${leaving ? 'animate-splash-out' : ''}`}
       role="status"
       aria-label={t.appName}
@@ -41,6 +46,7 @@ export function Splash({ onDone }: { onDone: () => void }) {
           <span key={c} className={`size-3 animate-dot rounded-full ${c}`} style={{ animationDelay: `${i * 160}ms` }} />
         ))}
       </div>
+      {introDone && engine === 'starting' && <p className="mt-4 animate-fade-in font-bold text-muted">{t.engineStartingTitle}</p>}
     </div>
   )
 }
