@@ -91,10 +91,6 @@
     repeating-linear-gradient(45deg, rgb(233 211 166 / 0.16) 0 12px, transparent 12px 24px),
     repeating-linear-gradient(-45deg, rgb(233 211 166 / 0.1) 0 12px, transparent 12px 24px);
 }
-/* The colorful striped border woven into many banig. */
-@utility banig-band {
-  background-image: repeating-linear-gradient(90deg, #d62f55 0 18px, #ffb627 18px 36px, #17885a 36px 54px, #2d5bd3 54px 72px, #e9d3a6 72px 90px);
-}
 
 html, body, #root { height: 100%; }
 body {

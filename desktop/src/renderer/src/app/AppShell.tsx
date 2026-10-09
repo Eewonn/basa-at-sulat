@@ -26,7 +26,6 @@ export function AppShell() {
     <div className="flex h-full">
       <aside className="flex w-64 shrink-0 flex-col overflow-y-auto bg-side">
         <div className="relative h-28 shrink-0 bg-blue banig">
-          <div className="banig-band absolute inset-x-0 bottom-0 h-2" aria-hidden />
           {learner && (
             <button onClick={() => navigate('/')} aria-label={t.back} className="absolute top-5 left-5 cursor-pointer text-white">
               <ArrowLeft className="size-8" strokeWidth={3} />

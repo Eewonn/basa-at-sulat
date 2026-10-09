@@ -94,7 +94,7 @@ Bright color-block cards, rounded type, a warm sidebar with a blue header and an
   | coral-ink / teal-ink | `#B3203F` / `#0B6A45` | Small text on light tints |
 
 - **Contrast rule (measured):** white text works at any size on blue (5.9:1), coral (4.8:1) and purple (5.5:1). On teal (4.5:1) keep white text bold and at least 20px. Small text goes on tints, using the `-ink` colors.
-- **Banig weave:** `banig` (on color blocks: sidebar header, stat cards, score card), `banig-light` (kid-mode background) and `banig-band` (the colorful striped border on the sidebar header and learner cards). It's a generic woven-mat lattice, used across the Philippines. We deliberately don't use sacred IP textile motifs (e.g. T'nalak) without community consent.
+- **Banig weave:** `banig` (on color blocks: sidebar header, stat cards, score card), `banig-light` (kid-mode background). Kept tonal (one color, low opacity) so screens stay calm; multicolor stripes were tried and dropped as too busy. It's a generic woven-mat lattice, used across the Philippines. We deliberately don't use sacred IP textile motifs (e.g. T'nalak) without community consent.
 - **Filipino phrasing:** a time-based greeting ("Magandang umaga, Guro!"), and varied cheers in Sanay ("Galing!", "Ang husay!", "Kaya mo 'yan!", "Isa pa!"), with English equivalents.
 - **Type:** Nunito (rounded, bundled), weights 700–900 for headings. Scale: 14 / 16 / 20 / 28 / 40 / 56 / 120.
 - **Shape:** 20px radius on cards, 14px on tiles, pill buttons, a soft shadow plus a lift on hover.

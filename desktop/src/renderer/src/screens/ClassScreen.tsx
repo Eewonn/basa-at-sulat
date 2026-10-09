@@ -28,8 +28,7 @@ export function ClassScreen() {
       <div className="mt-8 grid grid-cols-3 gap-6">
         {isLoading && Array.from({ length: 6 }, (_, i) => <div key={i} className="h-60 animate-pulse rounded-card bg-side" />)}
         {learners?.map((l, i) => (
-          <article key={l.id} className="flex flex-col gap-4 overflow-hidden rounded-card bg-white p-5 pt-0 shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift">
-            <div className="banig-band -mx-5 mb-1 h-2" aria-hidden />
+          <article key={l.id} className="flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift">
             <button onClick={() => navigate(`/learner/${l.id}`)} className="flex cursor-pointer items-center gap-4 text-left">
               <Avatar name={l.display_name} index={i} size={64} />
               <div className="min-w-0 flex-1">
