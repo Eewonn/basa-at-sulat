@@ -29,6 +29,7 @@ export function StatusPill() {
         <div className="mt-1 flex items-center gap-2 text-xs font-semibold text-body">
           <WifiOff className="size-3.5" aria-hidden />
           {t.statusNoInternet}
+          <span className="presentation-chip ml-auto rounded-full bg-purple px-2 py-0.5 text-[11px] font-extrabold text-white">{t.presentation}</span>
         </div>
       </Popover.Trigger>
       <Popover.Portal>
@@ -45,7 +46,7 @@ export function StatusPill() {
               </li>
             ))}
           </ul>
-          {api.mode === 'mock' && <p className="mt-3 rounded-lg bg-sun-soft px-3 py-2 text-xs font-bold text-[#6b4f00]">{t.statusMock}</p>}
+          {api.mode === 'mock' && <p className="sample-badge mt-3 rounded-lg bg-sun-soft px-3 py-2 text-xs font-bold text-[#6b4f00]">{t.statusMock}</p>}
           <Popover.Arrow className="fill-white" />
         </Popover.Content>
       </Popover.Portal>
