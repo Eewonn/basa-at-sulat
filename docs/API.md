@@ -14,7 +14,7 @@ Hesitations aren't a word label: they're reported in `pauses` (`before_word` ind
 
 `score` is 0–1 (higher means a better match). `start`/`end` are seconds into the recording, and can be `null` when the scorer found no timing for a word (for example, a skipped one).
 
-`wcpm` (words correct per minute) is a whole number: `matched` words ÷ the recording's minutes, computed by the engine from the final labels, so it follows teacher overrides. `level` is one of `Low Emerging`, `High Emerging`, `Developing`, `Transitioning`, `At Grade Level` (lowest first), computed from accuracy and `wcpm` and also following overrides. **It is an estimate from reading fluency, not an official CRLA profile**, because the app asks no comprehension questions. Label it that way in the UI (for example "Estimated level"). See `docs/DECISIONS.md` for the rules. Clients should still handle `null` for both fields: `/assess` returns `null` until it saves its result (P1-BE1-1).
+`wcpm` (words correct per minute) is a whole number: `matched` words ÷ the recording's minutes, computed by the engine from the final labels, so it follows teacher overrides. `level` is one of `Low Emerging`, `High Emerging`, `Developing`, `Transitioning`, `At Grade Level` (lowest first), computed from accuracy and `wcpm` and also following overrides. **It is an estimate from reading fluency, not an official CRLA profile**, because the app asks no comprehension questions. Label it that way in the UI (for example "Estimated level"). See `docs/DECISIONS.md` for the rules. A saved check always has both; the database allows `NULL`, so clients should still not crash on one.
 
 ## Basa: checks
 
@@ -41,9 +41,9 @@ Returns:
 }
 ```
 
-`timings` is the processing time on this laptop, for the "scored in X s" line. Until `ai.score` reports alignment and scoring separately, `align_ms` covers the whole `ai.score` call and `score_ms` is `0`. `wcpm` and `level` are `null` until `/assess` saves its result through Backend 2's store, which computes both.
+`timings` is the processing time on this laptop, for the "scored in X s" line. `align_ms` and `score_ms` come from `ai.score`; if a scorer reports no split, `align_ms` is the whole call and `score_ms` is `0`. The result is stored as a draft, so the teacher can override words with `PATCH` right away. `wcpm` and `level` are computed by the engine when the result is saved.
 
-Errors: `400` if the audio can't be read, `404` for an unknown `passage_id` or `learner_id`, `422` if a field is missing, `503` if the scoring model isn't installed on this engine, `500` if scoring fails. Scoring can take a while (about 0.6× the recording length on CPU, plus ~10 s for the first call unless the engine was started with `BASA_WARM_UP=1`), so the app should wait and show a progress state.
+Errors: `400` if the audio can't be read, `404` for an unknown `passage_id` or `learner_id`, `422` if a field is missing, `503` if the engine has no database yet (run `python -m app.seed` in `engine/`) or the scoring model isn't installed, `500` if scoring fails or the result can't be saved. Scoring can take a while (about 0.6× the recording length on CPU, plus ~10 s for the first call unless the engine was started with `BASA_WARM_UP=1`), so the app should wait and show a progress state.
 
 ### `PATCH /assessments/{id}/words/{i}`
 Body `{"label": "matched"}`. This is the teacher's override, and it returns the updated assessment (recomputed `wcpm`, `level`). Setting a word back to the AI's original label undoes the override.
@@ -58,7 +58,16 @@ Errors (body `{"detail": "<what went wrong>"}`):
 | `503` | The engine has no database yet (run `python -m app.seed` in `engine/`) |
 
 ### `POST /assessments/{id}/confirm`
-Marks the assessment final (`status: "confirmed"`) and deletes the audio unless `{"keep_audio": true}`.
+Marks the assessment final (`status: "confirmed"`) and deletes the child's audio unless the body is `{"keep_audio": true}`. An empty body means `keep_audio: false`. Returns the confirmed assessment.
+
+| Status | When |
+|---|---|
+| `404` | No assessment with that id |
+| `409` | Already confirmed. A client can treat this as "already saved", and a second call never deletes a kept recording |
+| `422` | `keep_audio` isn't `true` or `false` |
+| `500` | Confirmed, but the audio file could not be deleted (for example a locked file). The row stays confirmed with its audio path set, so the deletion is still owed. The engine retries it at its next start |
+
+A file that is already gone counts as deleted.
 
 ## Learners and passages
 - `GET /learners` → `[{"id", "display_name", "grade"}]` (display names are synthetic or initials only)
@@ -96,7 +105,7 @@ These support the learner profile and story categories. Until the engine impleme
 ### 2026-10-10 · backend-2 (P1-BE2-2)
 - `level` is now computed for every saved check. It is one of `Low Emerging`, `High Emerging`, `Developing`, `Transitioning`, `At Grade Level`. It is a **fluency-based estimate** using CRLA's names, not an official CRLA result (see `docs/DECISIONS.md`).
 - An override can change `level` as well as `wcpm`.
-- **Frontend:** show it as an estimate, map the five names to colors, and keep handling `null` (from `/assess` until it saves).
+- **Frontend:** show it as an estimate, and map the five names to colors.
 
 ### 2026-10-10 · backend-2 (P1-BE2-1)
 - `PATCH /assessments/{id}/words/{i}` now lists its error responses (404, 409, 422, 503).

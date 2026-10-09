@@ -6,10 +6,12 @@ import time
 import uuid
 import wave
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
+from app.assessments import InvalidAssessmentError, save_assessment
 from app.audio import AudioConversionError, convert_to_wav16k, storage_dir
-from app.db import ENGINE_DIR, connect
+from app.db import ENGINE_DIR
+from app.routes.assessments import get_conn
 
 # `ai` is a sibling package at the repo root, not under engine/.
 REPO_ROOT = ENGINE_DIR.parent
@@ -25,12 +27,8 @@ def _ms(start: float) -> float:
     return round((time.perf_counter() - start) * 1000, 1)
 
 
-def _lookup(table: str, row_id: str, columns: str):
-    conn = connect()
-    try:
-        return conn.execute(f"SELECT {columns} FROM {table} WHERE id = ?", (row_id,)).fetchone()
-    finally:
-        conn.close()
+def _lookup(conn, table: str, row_id: str, columns: str):
+    return conn.execute(f"SELECT {columns} FROM {table} WHERE id = ?", (row_id,)).fetchone()
 
 
 @router.post("/assess")
@@ -38,13 +36,14 @@ def assess(
     audio: UploadFile = File(...),
     passage_id: str = Form(...),
     learner_id: str = Form(...),
+    conn=Depends(get_conn),
 ):
     started = time.perf_counter()
 
-    passage = _lookup("passages", passage_id, "text")
+    passage = _lookup(conn, "passages", passage_id, "text")
     if passage is None:
         raise HTTPException(404, f"unknown passage_id: {passage_id}")
-    if _lookup("learners", learner_id, "id") is None:
+    if _lookup(conn, "learners", learner_id, "id") is None:
         raise HTTPException(404, f"unknown learner_id: {learner_id}")
 
     assessment_id = f"a_{uuid.uuid4().hex[:8]}"
@@ -83,25 +82,32 @@ def assess(
         wav_path.unlink(missing_ok=True)
         log.exception("scoring failed for %s", assessment_id)
         raise HTTPException(500, "scoring failed") from err
-    # ai.score does alignment and scoring in one call, so align_ms covers both.
-    align_ms = _ms(t)
+    call_ms = _ms(t)
+    # Older scorers return no split; then the whole call is reported as alignment.
+    split = scored.get("timings", {"align_ms": call_ms, "score_ms": 0.0})
 
     total_ms = _ms(started)
     log.info(
         "assess %s passage=%s learner=%s audio=%.1fs convert=%.0fms score=%.0fms total=%.0fms",
-        assessment_id, passage_id, learner_id, duration_sec, convert_ms, align_ms, total_ms,
+        assessment_id, passage_id, learner_id, duration_sec, convert_ms, call_ms, total_ms,
     )
 
-    return {
+    result = {
         "assessment_id": assessment_id,
         "learner_id": learner_id,
         "passage_id": passage_id,
         "duration_sec": duration_sec,
         "words": scored["words"],
         "pauses": scored["pauses"],
-        # Computed from the final results by Backend 2 (P1-BE2-2).
-        "wcpm": None,
-        "level": None,
-        "status": "draft",
-        "timings": {"convert_ms": convert_ms, "align_ms": align_ms, "score_ms": 0.0},
+    }
+    try:
+        saved = save_assessment(conn, result, audio_path=f"audio/{assessment_id}.wav")
+    except InvalidAssessmentError as err:
+        wav_path.unlink(missing_ok=True)
+        log.error("could not save %s: %s", assessment_id, err)
+        raise HTTPException(500, "could not save the result") from err
+
+    return {
+        **saved,
+        "timings": {"convert_ms": convert_ms, **split},
     }
