@@ -47,7 +47,7 @@ Nobody waits on the result. The AI engineer runs the test while everyone else bu
 - [x] **P2-BE1-1** · Sulat alignment endpoint — owner: backend-1 · depends: P2-AI-1 · done when: `POST /books` stores a story, its model reading and word timings
 - [x] **P2-BE1-2** · Word clips — owner: backend-1 · depends: P2-BE1-1 · done when: `GET /books/{id}/clips/{i}` returns that word's audio cut from the model reading
 - [x] **P2-BE2-1** · Practice-set builder — owner: backend-2 · depends: P1-BE2-1 · done when: `GET /learners/{id}/practice` returns the child's missed words from their latest check, each with its sentence and clip
-- [ ] **P2-BE2-2** · Progress tracking — owner: backend-2 · depends: P2-BE2-1 · done when: `GET /learners/{id}/progress` compares two checks word by word and returns the change in reading speed
+- [x] **P2-BE2-2** · Progress tracking — owner: backend-2 · depends: P2-BE2-1 · done when: `GET /learners/{id}/progress` compares two checks word by word and returns the change in reading speed
 - [ ] **P2-BE2-3** · Class view data, plans and export — owner: backend-2 · depends: P0-BE2-3, P1-BE2-2 · done when: `GET /class` returns learners grouped by level with an Ollama draft plan per group, and `GET /class/export.csv` downloads results
 - [ ] **P2-FE-1** · Sanay practice screen — owner: frontend · depends: P2-BE2-1, P2-BE1-2 · done when: a child can Hear it, Say it (with a try-again or got-it result) and reread the sentence for each missed word
 - [ ] **P2-FE-2** · Sulat book maker and player — owner: frontend · depends: P2-BE1-1 · done when: a teacher can type a story and record a model reading, and playback highlights each word as it's spoken

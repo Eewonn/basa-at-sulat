@@ -99,7 +99,11 @@ A file that is already gone counts as deleted.
   - `book_id` / `word_index` point at the first timed occurrence of the word in a Sulat book of the same language, for `GET /books/{id}/clips/{i}`. Both are `null` when no book has the word.
   - `{"items": []}` when the learner has no confirmed check (drafts are not practised). `404` for an unknown learner.
 - `POST /practice/check`: multipart form with `audio` and `word`. Returns `{"word", "result": "match" | "no_match", "score"}`
-- `GET /learners/{id}/progress` → `{"checks": [...], "words": [{"text", "before", "after"}], "wcpm_before", "wcpm_after"}`
+- `GET /learners/{id}/progress` → `{"checks": [{"assessment_id", "passage_id", "confirmed_at", "wcpm", "level"}, ...], "words": [{"i", "text", "before", "after"}], "wcpm_before", "wcpm_after", "wcpm_change"}`
+  - Compares the learner's latest two **confirmed** checks **on the same passage**: the newest check that has an earlier one on its passage, and the newest of those earlier ones. `checks` is `[before, after]`. If the newest check is on a passage read only once, an older pair is used, so `after` is not always the learner's latest check.
+  - `words` lists every passage word in passage order, one per position (repeats are not merged), with `text` as written (punctuation kept). `before`/`after` are the teacher's final labels (`matched`, `misread`, `skipped`), or `null` if that check has no result for the word.
+  - `wcpm_change` is `wcpm_after - wcpm_before` and can be negative.
+  - With no same-passage pair (fewer than two confirmed checks, or checks on different passages): `200` with `{"checks": [], "words": [], "wcpm_before": null, "wcpm_after": null, "wcpm_change": null}`. Drafts are ignored. `404` for an unknown learner.
 
 ## Class view
 - `GET /class` → `{"groups": [{"level", "learner_ids", "common_missed_words", "draft_plan"}]}`
@@ -123,6 +127,12 @@ These support the learner profile and story categories. Until the engine impleme
   - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up`, `down` or `unknown`. The engine reports `not_loaded` until the aligner is in memory (after the first `/assess`, or at startup with `BASA_WARM_UP=1`), and `unknown` for Ollama until it is wired in.
 
 ## Contract changes
+
+### 2026-10-10 · backend-2 (P2-BE2-2)
+- `GET /learners/{id}/progress` is live. **Additions to the old one-line contract:** `i` on each word (its passage index), the `checks` item fields, and `wcpm_change`.
+- Only checks on the **same passage** are compared, because a word-by-word comparison needs the same text. **Frontend:** `after` may not be the learner's latest check (see above), so label the pair with its `confirmed_at` dates.
+- `before`/`after` can be `null` for a word a check has no result for. To show only what changed, filter on `before != after`.
+- Practice attempts are not included yet.
 
 ### 2026-10-10 · backend-2 (P2-BE2-1)
 - `GET /learners/{id}/practice` is live. `book_id` and `word_index` can be `null` (no book has the word yet). **Frontend:** `PracticeItem` in `desktop/src/renderer/src/api/types.ts` needs `book_id: string | null` and `word_index: number | null`, and "Hear it" should be hidden or disabled when they are `null`.

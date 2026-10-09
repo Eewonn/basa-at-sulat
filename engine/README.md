@@ -147,3 +147,9 @@ It writes nothing unless every word group gets a model sentence (here, unlike in
 - **Clip:** passages and books aren't linked, so the clip is the first timed occurrence of the same word in a book of the same language (oldest book first). Words are compared with `ai.text.normalize_word`, the aligner's rule, and words with zero-length timings are skipped. No match means `book_id` and `word_index` are `null`.
 - The set is not capped (up to 18 words in the demo seed). How many a child sees per session is left to frontend; see the P2-BE2-1 entry in `docs/API.md`.
 - Clips play once backend-1's `GET /books/{id}/clips/{i}` (P2-BE1-2) lands; the references don't change.
+
+## Update: progress (P2-BE2-2)
+- `GET /learners/{id}/progress` (`app/routes/learners.py`, logic in `app/progress.py`) compares two confirmed checks word by word, using the teacher's final labels, and returns the WCPM change.
+- **Which pair:** the newest confirmed check that has an earlier confirmed check on the same passage, and the newest of those. Checks on different passages are never paired. Order is `confirmed_at`, then `created_at`, then `id`, the same as the practice set's "latest check".
+- **Words** come from the passage text, not from `word_results`, because a check may not cover every word. A word a check has no result for is `null` on that side.
+- No pair gives a `200` with empty lists and nulls. Practice attempts aren't part of the response yet.
