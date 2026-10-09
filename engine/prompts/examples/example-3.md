@@ -1,7 +1,7 @@
 # Example 3: strong group
 
 ## Input
-- Level: Grade Level Ready (provisional: names are checked against CRLA in P1-BE2-2)
+- Level: At Grade Level
 - Learners: 3
 - Missed words: none
 - Language: fil
