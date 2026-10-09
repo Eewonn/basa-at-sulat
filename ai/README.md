@@ -14,16 +14,23 @@ word_timings(audio_path: str, text: str) -> list[dict]   # Sulat: a fluent speak
 check_word(audio_path: str, word: str) -> dict           # Sanay "Say it": {"result": "match"|"no_match", "score"}
 ```
 
-**Status:** the three functions are importable stubs (`from ai import score`). They return the contract shape with every word `matched`, so the engine can wire against them now. The real alignment replaces the bodies in P1-AI-1; the signatures won't change.
+**Status:** `score()` is real (MMS forced alignment). `word_timings()` and `check_word()` are still stubs that return the contract shape (P2-AI-1, P2-AI-2). **The thresholds in `scoring.py` are untuned starting values**: P1-AI-1 isn't done until they're tuned on real recordings in `eval/`.
 
-Run the interface tests from `ai/`: `python -m pytest`.
+Run the tests from `ai/`: `python -m pytest`. The model-backed tests skip if the weights aren't downloaded.
 
 ## Approach (to validate in P0-AI-1)
-1. Normalize and romanize the passage (lowercase, uroman), keeping a map back to the original words.
-2. Run Meta's MMS aligner (`torchaudio.pipelines.MMS_FA`, or the Hugging Face port) on 16 kHz mono audio, giving per-frame character probabilities.
-3. Force-align to the known text, with a `<star>` token so extra speech doesn't break the alignment.
-4. Score each word, e.g. the average log-probability of its aligned characters compared with the best free choice per frame (a goodness-of-pronunciation-style score), plus duration and the gap before the word.
-5. Apply thresholds: misread / skipped / pause. Tune them on `eval/`, never on demo recordings.
+1. `text.py` normalizes each passage word to what the aligner knows: lowercase `a-z` and the apostrophe. `ñ` becomes `ny`, accents and punctuation go, and **hyphens are removed** (token 0 is the CTC blank, so `mag-aral` would corrupt the alignment). The original word and its index are kept for the output.
+2. `aligner.py` runs Meta's MMS aligner (`torchaudio.pipelines.MMS_FA`) on 16 kHz mono audio and force-aligns the known letters, with a `*` wildcard **only before and after the text** so chatter at either end doesn't land on the first or last word. Never between words: `*` costs nothing at any frame and would swallow real speech.
+3. `scoring.py` turns each word into a score: the mean probability of its letters at their aligned frames (0 to 1), plus its frames per letter.
+4. Labels: score ≥ 0.6 → `matched`; below that, `skipped` if the word was squeezed to about one frame per letter (the aligner still has to put every letter somewhere), otherwise `misread`. A gap of 1 s or more before a word is a pause.
+5. Tune the cutoffs on `eval/`, never on demo recordings.
+
+**Known limits**
+- A swap to a similar-sounding word that shares letters (kite → bike) scores middling and is the hardest case.
+- Words with no aligner letters (digits, dashes) can't be checked and come back `matched`. Keep digits out of passages.
+- Audio too short to hold the text comes back all `skipped`.
+- Speed: about 6.5 s to score 10.5 s of audio on an 8-core CPU laptop (after a one-time ~10 s model load), roughly 0.6× real time.
+- `torchaudio.functional.forced_align` is deprecated and **removed in torchaudio 2.9**, so `requirements.txt` stays on 2.8.x. If we ever need to move, the replacements are the standalone `ctc-forced-aligner` package or our own CTC alignment over the Hugging Face MMS model.
 
 **Fallback (P1-AI-2):** Whisper prompted with the passage, for Filipino and English only.
 
