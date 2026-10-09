@@ -43,13 +43,15 @@ def find_check_pair(conn: sqlite3.Connection, learner_id: str):
     the pair falls back to an older passage, so `after` isn't always the
     learner's latest check.
     """
-    newest_on_passage: dict[str, sqlite3.Row] = {}
-    for check in _confirmed_checks(conn, learner_id):
-        later = newest_on_passage.get(check["passage_id"])
-        if later is not None:
-            # Rows come newest first, so the first repeat of a passage closes the newest pair.
-            return check, later
-        newest_on_passage[check["passage_id"]] = check
+    checks = _confirmed_checks(conn, learner_id)  # newest first
+    # Pick `after` first: the newest check with any earlier one on its passage.
+    # Stopping at the first passage seen twice would instead pick the pair whose
+    # `before` is newest, which loses to a nested re-read (B1, A0, A1, B2 -> A0, A1).
+    # A learner has only a handful of checks, so the nested loop is cheap.
+    for k, after in enumerate(checks):
+        for before in checks[k + 1:]:
+            if before["passage_id"] == after["passage_id"]:
+                return before, after
     return None
 
 

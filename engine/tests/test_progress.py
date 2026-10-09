@@ -188,6 +188,20 @@ def test_the_newest_pair_wins_across_passages(conn):
     assert [w["text"] for w in progress["words"]] == passage_text(conn, "fil_g2_02").split()
 
 
+def test_a_nested_pair_does_not_beat_the_newest_check(conn):
+    # fil_g2_02 on 09-01 and 10-01, with a fil_g2_01 re-read (09-05, 09-10) in between.
+    # b_2 is the newest check and has an earlier one on its passage, so b_1 -> b_2 wins.
+    save_other_passage_check(conn, "b_1")
+    set_times(conn, "b_1", "2026-09-01T00:00:00.000Z")
+    save_check(conn, "a_0")
+    set_times(conn, "a_0", "2026-09-05T00:00:00.000Z")
+    save_check(conn, "a_1")
+    set_times(conn, "a_1", "2026-09-10T00:00:00.000Z")
+    save_other_passage_check(conn, "b_2")
+    set_times(conn, "b_2", "2026-10-01T00:00:00.000Z")
+    assert pair_ids(conn) == ("b_1", "b_2")
+
+
 def test_drafts_are_ignored(conn):
     save_check(conn, "a_1")
     save_check(conn, "a_2", confirm=False)
