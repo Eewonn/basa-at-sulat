@@ -25,7 +25,7 @@ Nobody waits on the result. The AI engineer runs the test while everyone else bu
 - [ ] **P0-BE2-3** · Group-plan prompt — owner: backend-2 · depends: none · done when: Ollama with qwen2.5:3b turns group stats (level, common missed words) into a short draft activity in Filipino or English, with 3 saved example outputs in `engine/prompts/`
 - [ ] **P0-FE-1** · Desktop scaffold — owner: frontend · depends: none · done when: Electron + Vite + React + TypeScript + Tailwind v4 runs in `desktop/` on Linux and Windows, with design tokens, bundled fonts, the app shell, the status pill and one file holding all UI text (Filipino and English)
 - [ ] **P0-FE-2** · Browser recorder — owner: frontend · depends: P0-FE-1 · done when: a recorder component captures microphone audio on localhost and uploads it to `/assess`
-- [ ] **P0-FE-3** · Review screen on mock data — owner: frontend · depends: P0-FE-1 · done when: the screen renders `docs/api/assess.example.json` with color-coded words (each label also shown as text), tap-to-fix, words correct per minute, level, Confirm and Re-record
+- [x] **P0-FE-3** · Review screen on mock data — owner: frontend · depends: P0-FE-1 · done when: the screen renders `docs/api/assess.example.json` with color-coded words (each label also shown as text), tap-to-fix, words correct per minute, level, Confirm and Re-record
 - [ ] **P0-ALL-2** · Go/no-go meeting — owner: everyone · depends: P0-AI-1 · done when: the team has decided between the full plan and the fallback (Whisper for Filipino and English, timing-only checks for IP languages), and the decision is logged in `docs/DECISIONS.md`
 
 ## Phase 1: the core Basa flow (record, score, review)

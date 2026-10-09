@@ -35,3 +35,6 @@ engine/storage/
 # Scratch
 spike/
 .DS_Store
+
+# Playwright screenshots from UI checks
+.playwright-mcp/

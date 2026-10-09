@@ -1,0 +1,74 @@
+@import "tailwindcss";
+@import "@fontsource/domine/400.css";
+@import "@fontsource/domine/700.css";
+@import "@fontsource-variable/nunito-sans";
+
+/* Design tokens: same palette as the team deck (docs/FRONTEND.md §6). */
+@theme {
+  --color-ink: #1e2740;
+  --color-ink-2: #26314f;
+  --color-ink-3: #3a4870;
+  --color-paper: #faf6ee;
+  --color-paper-2: #f1eadb;
+  --color-card: #fffdf8;
+  --color-line: #e6dcc8;
+  --color-accent: #b4521a;
+  --color-accent-light: #f0a35e;
+  --color-accent-bg: #fbe3cf;
+  --color-correct: #1f6f6b;
+  --color-correct-light: #6cc3bc;
+  --color-correct-bg: #e3f1ef;
+  --color-muted: #6b7280;
+  --color-body: #3d4559;
+
+  --font-display: "Domine", Georgia, serif;
+  --font-sans: "Nunito Sans Variable", Arial, sans-serif;
+
+  --radius-card: 12px;
+  --shadow-soft: 0 12px 32px rgba(30, 39, 64, 0.12);
+
+  --animate-word-in: word-in 320ms ease-out both;
+  --animate-shake: shake 360ms ease-in-out;
+  --animate-pop: pop 420ms ease-out both;
+  --animate-ring: ring 1.4s ease-out infinite;
+
+  @keyframes word-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+  @keyframes pop {
+    0% { opacity: 0; transform: scale(0.6); }
+    60% { opacity: 1; transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  @keyframes ring {
+    0% { box-shadow: 0 0 0 0 rgba(180, 82, 26, 0.45); }
+    100% { box-shadow: 0 0 0 28px rgba(180, 82, 26, 0); }
+  }
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+input, textarea { user-select: text; }
+:focus-visible { outline: 3px solid var(--color-accent-light); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
