@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 import { Mic, Sparkles } from 'lucide-react'
 import { api } from '@/api'
 import { Emoji } from '@/components/Emoji'
-import { Avatar, LevelChip, SampleBadge } from '@/components/ui'
+import { Avatar, LevelChip, SampleBadge, StatCard } from '@/components/ui'
 import { useT } from '@/strings'
 
 export function ClassScreen() {
@@ -11,8 +11,15 @@ export function ClassScreen() {
   const navigate = useNavigate()
   const { data: learners, isLoading } = useQuery({ queryKey: ['learners'], queryFn: () => api.learners() })
 
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10)
+  const checked = learners?.filter((l) => l.last_check && l.last_check >= weekAgo).length ?? 0
+  const needPractice = learners?.filter((l) => l.needs_practice).length ?? 0
+  const stars = learners?.reduce((sum, l) => sum + (l.stars ?? 0), 0) ?? 0
+  const wcpms = learners?.flatMap((l) => (l.latest_wcpm === undefined ? [] : [l.latest_wcpm])) ?? []
+  const avgWcpm = wcpms.length ? Math.round(wcpms.reduce((a, b) => a + b, 0) / wcpms.length) : 0
+
   return (
-    <div className="mx-auto max-w-6xl px-10 py-10">
+    <div className="w-full max-w-[1680px] px-10 py-10">
       <header className="flex items-end justify-between">
         <div>
           <p className="text-lg font-extrabold text-coral-ink">{t.greeting(new Date().getHours())}</p>
@@ -25,7 +32,16 @@ export function ClassScreen() {
         {api.mode === 'mock' && <SampleBadge label={t.sampleData} />}
       </header>
 
-      <div className="mt-8 grid grid-cols-3 gap-6">
+      {learners && (
+        <div className="mt-6 grid grid-cols-4 gap-5">
+          <StatCard compact color="blue" title={t.sumChecked} value={`${checked}/${learners.length}`} emoji="microphone" />
+          <StatCard compact color="coral" title={t.sumPractice} value={String(needPractice)} emoji="books" />
+          <StatCard compact color="teal" title={t.sumWcpm} value={String(avgWcpm)} emoji="chart" />
+          <StatCard compact color="purple" title={t.sumStars} value={String(stars)} emoji="star" />
+        </div>
+      )}
+
+      <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6">
         {isLoading && Array.from({ length: 6 }, (_, i) => <div key={i} className="h-60 animate-pulse rounded-card bg-side" />)}
         {learners?.map((l, i) => (
           <article key={l.id} className="flex flex-col gap-4 rounded-card bg-white p-5 shadow-soft ring-1 ring-line transition hover:-translate-y-1 hover:shadow-lift">

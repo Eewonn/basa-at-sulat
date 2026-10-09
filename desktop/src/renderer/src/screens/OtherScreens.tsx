@@ -13,9 +13,9 @@ export function CheckIndexScreen() {
   const navigate = useNavigate()
   const { data: learners } = useQuery({ queryKey: ['learners'], queryFn: () => api.learners() })
   return (
-    <div className="mx-auto max-w-5xl px-10 py-10">
+    <div className="w-full max-w-[1680px] px-10 py-10">
       <h1 className="text-[40px] leading-tight font-black text-navy">{t.navCheck}</h1>
-      <div className="mt-8 grid grid-cols-3 gap-4">
+      <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4">
         {learners?.map((l, i) => (
           <button
             key={l.id}
@@ -34,7 +34,7 @@ export function CheckIndexScreen() {
 export function BooksScreen() {
   const t = useT()
   return (
-    <div className="mx-auto max-w-4xl px-10 py-10">
+    <div className="w-full max-w-[1680px] px-10 py-10">
       <h1 className="text-[40px] leading-tight font-black text-navy">{t.booksTitle}</h1>
       <div className="mt-8 flex items-center gap-6 rounded-card bg-blue-soft p-8">
         <Emoji name="books" size={96} />
@@ -57,9 +57,10 @@ export function SettingsScreen() {
   const t = useT()
   const { lang, setLang } = useContext(LangContext)
   return (
-    <div className="mx-auto max-w-3xl px-10 py-10">
+    <div className="w-full max-w-[1680px] px-10 py-10">
       <h1 className="text-[40px] leading-tight font-black text-navy">{t.settingsTitle}</h1>
-      <section className="mt-8 rounded-card bg-white p-6 shadow-soft ring-1 ring-line">
+      <div className="mt-8 grid items-start gap-5 xl:grid-cols-2">
+      <section className="rounded-card bg-white p-6 shadow-soft ring-1 ring-line">
         <h2 className="text-xl font-extrabold text-navy">{t.language}</h2>
         <div className="mt-3 inline-flex rounded-full bg-side p-1">
           {(['fil', 'en'] as const).map((l) => (
@@ -73,7 +74,7 @@ export function SettingsScreen() {
           ))}
         </div>
       </section>
-      <section className="mt-5 rounded-card bg-white p-6 shadow-soft ring-1 ring-line">
+      <section className="rounded-card bg-white p-6 shadow-soft ring-1 ring-line">
         <h2 className="flex items-center gap-2 text-xl font-extrabold text-navy">
           <Cpu className="size-5 text-teal-ink" aria-hidden /> {t.modelsTitle}
         </h2>
@@ -89,6 +90,7 @@ export function SettingsScreen() {
           ))}
         </ul>
       </section>
+      </div>
       <section className="mt-5 flex items-center gap-4 rounded-card bg-white p-6 shadow-soft ring-1 ring-line">
         <Tamaraw size={72} />
         <div>

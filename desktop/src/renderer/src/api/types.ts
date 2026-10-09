@@ -39,6 +39,7 @@ export interface Learner {
   needs_practice?: boolean
   stars?: number
   streak_days?: number
+  latest_wcpm?: number
 }
 
 // Proposed in docs/API.md: GET /learners/{id}/stats

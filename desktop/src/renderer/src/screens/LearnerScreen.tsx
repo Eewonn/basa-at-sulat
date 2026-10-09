@@ -20,7 +20,7 @@ export function LearnerScreen() {
   const latest = history.at(-1)?.wcpm
 
   return (
-    <div className="mx-auto max-w-6xl px-10 py-10">
+    <div className="w-full max-w-[1680px] px-10 py-10">
       <div className="flex items-center gap-4">
         <h1 className="text-[40px] leading-tight font-black text-navy">{learner?.display_name}</h1>
         <LevelChip level={learner?.level} />

@@ -100,7 +100,11 @@ const fil = {
   learnersCount: (n: number) => `${n} learner`,
   greeting: (h: number): string => (h < 12 ? 'Magandang umaga, Guro!' : h < 18 ? 'Magandang hapon, Guro!' : 'Magandang gabi, Guro!'),
   cheersRight: ['Galing!', 'Ang husay!', 'Tama!', 'Sige pa!'],
-  cheersRetry: ["Kaya mo 'yan!", 'Isa pa!', 'Subukan ulit']
+  cheersRetry: ["Kaya mo 'yan!", 'Isa pa!', 'Subukan ulit'],
+  sumChecked: 'Na-check ngayong linggo',
+  sumPractice: 'Kailangan ng practice',
+  sumWcpm: 'Average na words/min',
+  sumStars: 'Mga star ng klase'
 }
 
 export type Strings = typeof fil
@@ -188,7 +192,11 @@ const en: Strings = {
   learnersCount: (n) => `${n} learners`,
   greeting: (h) => (h < 12 ? 'Good morning, Teacher!' : h < 18 ? 'Good afternoon, Teacher!' : 'Good evening, Teacher!'),
   cheersRight: ['Great job!', 'Awesome!', 'Correct!', 'Keep going!'],
-  cheersRetry: ['You can do it!', 'One more time!', 'Try again']
+  cheersRetry: ['You can do it!', 'One more time!', 'Try again'],
+  sumChecked: 'Checked this week',
+  sumPractice: 'Need practice',
+  sumWcpm: 'Average words/min',
+  sumStars: 'Class stars'
 }
 
 export const STRINGS = { fil, en }

@@ -102,7 +102,7 @@ export function CheckScreen() {
   })
 
   return (
-    <div className="mx-auto max-w-5xl px-10 py-10">
+    <div className="w-full max-w-[1680px] px-10 py-10">
       <button
         onClick={() => (passage ? setPassage(null) : navigate(`/learner/${learnerId}`))}
         className="flex cursor-pointer items-center gap-2 font-extrabold text-blue hover:text-blue-dark"
@@ -125,7 +125,7 @@ export function CheckScreen() {
               {t.showAll}
             </button>
           </div>
-          <div className="mt-8 grid grid-cols-2 gap-5">
+          <div className="mt-8 grid grid-cols-[repeat(auto-fill,minmax(440px,1fr))] gap-5">
             {shown?.map((p) => (
               <button
                 key={p.id}
@@ -154,7 +154,7 @@ export function CheckScreen() {
       {passage && assess.isPending && <Processing />}
 
       {passage && !assess.isPending && (
-        <div className="mt-3 flex flex-col gap-8">
+        <div className="mt-3 flex max-w-5xl flex-col gap-8">
           <div>
             <h1 className="text-[40px] leading-tight font-black text-navy">{t.recordTitle}</h1>
             <p className="mt-1 font-semibold text-body">{t.recordHint}</p>

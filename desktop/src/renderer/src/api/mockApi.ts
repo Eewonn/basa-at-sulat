@@ -52,12 +52,17 @@ const PASSAGES: Passage[] = [
   }
 ]
 
+// Sample check dates are relative to today so "this week" stays meaningful in demos.
+function daysAgo(n: number): string {
+  return new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10)
+}
+
 const LEARNERS: Learner[] = [
-  { id: 'l_01', display_name: 'Lina', grade: 2, level: 'Developing', last_check: '2026-10-02', needs_practice: true },
-  { id: 'l_02', display_name: 'Paolo', grade: 2, level: 'Transitioning', last_check: '2026-10-02' },
-  { id: 'l_03', display_name: 'Mika', grade: 2, level: 'Grade level', last_check: '2026-10-01' },
-  { id: 'l_04', display_name: 'Josie', grade: 2, level: 'Emerging', last_check: '2026-09-30', needs_practice: true },
-  { id: 'l_05', display_name: 'Ramon', grade: 2, level: 'Developing', last_check: '2026-09-30', needs_practice: true },
+  { id: 'l_01', display_name: 'Lina', grade: 2, level: 'Developing', last_check: daysAgo(1), needs_practice: true },
+  { id: 'l_02', display_name: 'Paolo', grade: 2, level: 'Transitioning', last_check: daysAgo(1) },
+  { id: 'l_03', display_name: 'Mika', grade: 2, level: 'Grade level', last_check: daysAgo(2) },
+  { id: 'l_04', display_name: 'Josie', grade: 2, level: 'Emerging', last_check: daysAgo(4), needs_practice: true },
+  { id: 'l_05', display_name: 'Ramon', grade: 2, level: 'Developing', last_check: daysAgo(9), needs_practice: true },
   { id: 'l_06', display_name: 'Ana', grade: 2 }
 ]
 
@@ -150,7 +155,12 @@ export const mockApi: Api = {
   },
   async learners() {
     await sleep(250)
-    return LEARNERS.map((l) => ({ ...l, stars: STATS[l.id]?.stars, streak_days: STATS[l.id]?.streak_days }))
+    return LEARNERS.map((l) => ({
+      ...l,
+      stars: STATS[l.id]?.stars,
+      streak_days: STATS[l.id]?.streak_days,
+      latest_wcpm: STATS[l.id]?.wcpm_history.at(-1)?.wcpm
+    }))
   },
   async passages() {
     await sleep(200)

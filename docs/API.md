@@ -66,7 +66,7 @@ Marks the assessment final (`status: "confirmed"`) and deletes the audio unless 
 ## Proposed by frontend (needs team agreement)
 These support the learner profile and story categories. Until the engine implements them, the app uses sample data for them.
 - `category` on every passage: `"bukid" | "pamilya" | "hayop" | "kalikasan" | "paaralan"`
-- `GET /learners` items also include `stars` and `streak_days`
+- `GET /learners` items also include `stars`, `streak_days` and `latest_wcpm` (for the class summary cards)
 - `GET /learners/{id}/stats` → `{"stars", "streak_days", "minutes_read", "wcpm_history": [{"date", "wcpm"}], "practicing": ["palay", ...]}`
   - stars = words gotten right in Sanay; streak = consecutive days with a check or practice; minutes = recording time
 - `POST /practice/check` also takes `learner_id`, so a correct word can earn a star

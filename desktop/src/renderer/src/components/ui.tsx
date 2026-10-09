@@ -46,13 +46,25 @@ export function Avatar({ name, index = 0, size = 56, mascot = false }: { name: s
 }
 
 // BOOKR-style color block: title, big value, illustration.
-export function StatCard({ title, value, emoji, color }: { title: string; value: string; emoji: EmojiName; color: 'coral' | 'blue' | 'teal' }) {
-  const bg = { coral: 'bg-coral', blue: 'bg-blue', teal: 'bg-teal' }[color]
+export function StatCard({
+  title,
+  value,
+  emoji,
+  color,
+  compact = false
+}: {
+  title: string
+  value: string
+  emoji: EmojiName
+  color: 'coral' | 'blue' | 'teal' | 'purple'
+  compact?: boolean
+}) {
+  const bg = { coral: 'bg-coral', blue: 'bg-blue', teal: 'bg-teal', purple: 'bg-purple' }[color]
   return (
-    <div className={`relative flex h-52 flex-col overflow-hidden rounded-card p-6 text-white shadow-soft banig ${bg}`}>
-      <p className="text-xl font-extrabold">{title}</p>
+    <div className={`relative flex flex-col overflow-hidden rounded-card text-white shadow-soft banig ${bg} ${compact ? 'h-36 p-5' : 'h-52 p-6'}`}>
+      <p className={`font-extrabold ${compact ? 'pr-16 text-lg leading-snug' : 'text-xl'}`}>{title}</p>
       <p className="mt-1 text-[40px] leading-tight font-black">{value}</p>
-      <Emoji name={emoji} size={104} className="absolute right-5 bottom-4 drop-shadow-md" />
+      <Emoji name={emoji} size={compact ? 72 : 104} className={`absolute drop-shadow-md ${compact ? 'right-4 bottom-3' : 'right-5 bottom-4'}`} />
     </div>
   )
 }
