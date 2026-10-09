@@ -1,4 +1,4 @@
-import type { Api, Assessment, Book, BookWord, ClassSettings, Learner, LearnerStats, Passage, PracticeItem, RecentCheck, Word, WordLabel } from './types'
+import type { Api, Assessment, Book, BookWord, ClassSettings, Learner, LearnerStats, Level, Passage, PracticeItem, RecentCheck, Word, WordLabel } from './types'
 
 // Sample data only: synthetic learners, team-written passages (the first two match data/passages/passages.json).
 const PASSAGES: Passage[] = [
@@ -60,9 +60,9 @@ function daysAgo(n: number): string {
 const LEARNERS: Learner[] = [
   { id: 'l_01', display_name: 'Lina', grade: 2, level: 'Developing', last_check: daysAgo(1), needs_practice: true },
   { id: 'l_02', display_name: 'Paolo', grade: 2, level: 'Transitioning', last_check: daysAgo(1) },
-  { id: 'l_03', display_name: 'Mika', grade: 2, level: 'Grade level', last_check: daysAgo(2) },
-  { id: 'l_04', display_name: 'Josie', grade: 2, level: 'Emerging', last_check: daysAgo(4), needs_practice: true },
-  { id: 'l_05', display_name: 'Ramon', grade: 2, level: 'Developing', last_check: daysAgo(9), needs_practice: true },
+  { id: 'l_03', display_name: 'Mika', grade: 2, level: 'At Grade Level', last_check: daysAgo(2) },
+  { id: 'l_04', display_name: 'Josie', grade: 2, level: 'Low Emerging', last_check: daysAgo(4), needs_practice: true },
+  { id: 'l_05', display_name: 'Ramon', grade: 2, level: 'High Emerging', last_check: daysAgo(9), needs_practice: true },
   { id: 'l_06', display_name: 'Ana', grade: 2 }
 ]
 
@@ -82,27 +82,29 @@ function series(values: number[]) {
   return values.map((wcpm, i) => ({ date: `2026-09-${String(8 + i * 6).padStart(2, '0')}`, wcpm }))
 }
 
-// Planted results: which words come back flagged, and what was "heard".
-const PLANTED: Record<string, { i: number; label: WordLabel; heard?: string }[]> = {
+// Planted results: which words come back flagged.
+const PLANTED: Record<string, { i: number; label: WordLabel }[]> = {
   fil_g2_01: [
     { i: 3, label: 'skipped' },
-    { i: 4, label: 'misread', heard: 'pala' }
+    { i: 4, label: 'misread' }
   ],
   eng_g2_01: [
-    { i: 4, label: 'misread', heard: 'kit' },
+    { i: 4, label: 'misread' },
     { i: 11, label: 'skipped' }
   ]
 }
 const DEFAULT_PLANTED = [
-  { i: 4, label: 'misread' as const, heard: undefined },
+  { i: 4, label: 'misread' as const },
   { i: 8, label: 'skipped' as const }
 ]
 
-export function levelFor(wcpm: number): string {
-  if (wcpm < 30) return 'Emerging'
-  if (wcpm < 55) return 'Developing'
+// Sample cut-offs only; the engine's real rules (accuracy + wcpm) are in docs/DECISIONS.md.
+export function levelFor(wcpm: number): Level {
+  if (wcpm < 30) return 'Low Emerging'
+  if (wcpm < 50) return 'High Emerging'
+  if (wcpm < 60) return 'Developing'
   if (wcpm < 75) return 'Transitioning'
-  return 'Grade level'
+  return 'At Grade Level'
 }
 
 function recompute(a: Assessment): Assessment {
@@ -128,8 +130,7 @@ function buildAssessment(learnerId: string, passage: Passage): Assessment {
       label: p?.label ?? 'matched',
       score: p?.label === 'skipped' ? 0.08 : p?.label === 'misread' ? 0.31 : 0.86 + (i % 5) * 0.02,
       start: +t.toFixed(2),
-      end: +(t + len).toFixed(2),
-      heard: p?.label === 'misread' ? p.heard ?? clean(text).slice(0, -1) : undefined
+      end: +(t + len).toFixed(2)
     }
     t += len + (i === 2 ? 1.8 : 0.12)
     return w
@@ -142,7 +143,7 @@ function buildAssessment(learnerId: string, passage: Passage): Assessment {
     words,
     pauses: [{ before_word: 3, seconds: 1.8 }],
     wcpm: 0,
-    level: '',
+    level: null,
     status: 'draft',
     timings: { convert_ms: 180, align_ms: 1650, score_ms: 240 }
   })

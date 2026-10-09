@@ -28,18 +28,12 @@ export function WordChip({ word, delayMs, onFix, pauseBefore }: { word: Word; de
           >
             {word.label === 'misread' ? <TriangleAlert className="size-3.5" aria-hidden /> : <CircleDashed className="size-3.5" aria-hidden />}
             {labelText[word.label]}
-            {word.heard && ` · “${word.heard}”`}
           </span>
         )}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Content sideOffset={8} className="z-50 w-64 rounded-tile bg-white p-3 shadow-lift">
           <p className="text-2xl font-black text-navy">{word.text}</p>
-          {word.heard && (
-            <p className="mt-1 text-sm text-body">
-              {t.heard}: <b className="text-coral-ink">“{word.heard}”</b>
-            </p>
-          )}
           {(word.label !== 'matched' || pauseBefore) && (
             <div className="mt-3 rounded-lg bg-sun-soft px-3 py-2 text-sm text-navy">
               <p className="font-extrabold">{t.whyTitle}</p>

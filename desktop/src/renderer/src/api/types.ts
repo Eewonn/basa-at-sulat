@@ -2,6 +2,9 @@
 
 export type WordLabel = 'matched' | 'misread' | 'skipped'
 
+// CRLA's names, lowest first. Our level is an estimate from reading fluency, not an official CRLA result.
+export type Level = 'Low Emerging' | 'High Emerging' | 'Developing' | 'Transitioning' | 'At Grade Level'
+
 export interface Word {
   i: number
   text: string
@@ -9,7 +12,6 @@ export interface Word {
   score: number
   start: number | null // null when the aligner couldn't time the word (usually a skipped one)
   end: number | null
-  heard?: string
 }
 
 export interface Pause {
@@ -25,7 +27,7 @@ export interface Assessment {
   words: Word[]
   pauses: Pause[]
   wcpm: number | null // null from /assess for now; saved checks always have a number
-  level: string | null // null until P1-BE2-2 maps levels to CRLA profiles
+  level: Level | null // a saved check always has one, but the database allows NULL
   status: 'draft' | 'confirmed'
   timings?: { convert_ms: number; align_ms: number; score_ms: number }
 }
@@ -34,7 +36,7 @@ export interface Learner {
   id: string
   display_name: string
   grade: number
-  level?: string
+  level?: Level
   last_check?: string
   needs_practice?: boolean
   stars?: number

@@ -87,6 +87,7 @@ export function ReviewScreen() {
           </p>
           <p className="text-sm font-bold">{t.wcpmLabel}</p>
           <LevelChip level={a.level} onDark />
+          {a.level && <p className="text-xs leading-snug font-semibold">{t.levelEstNote}</p>}
         </div>
         <p className={`rounded-tile px-4 py-3 font-extrabold ${flagged ? 'bg-coral-soft text-coral-ink' : 'bg-teal-soft text-teal-ink'}`}>
           {flagged ? t.needsCheck(flagged) : t.allClear}
