@@ -56,7 +56,7 @@ P0-BE2-1 lists six tables. These choices go further. Please read them if your co
 - The API's `label` field is `final_label`.
 
 ### 4. `wcpm` and `level` can be empty, and `level` is free text
-Both stay `NULL` until P1-BE2-2 computes them. `level` is not restricted to a fixed list yet, because the names still have to be checked against DepEd's current CRLA profiles. Once they are, we can add a `CHECK`.
+Both columns allow `NULL`. Since P1-BE2-1, `app.assessments` fills `wcpm` whenever a check is saved or a word is overridden (see `app/levels.py`), so in practice only `level` is `NULL`, and it stays that way until P1-BE2-2 computes it. `level` is not restricted to a fixed list yet, because the names still have to be checked against DepEd's current CRLA profiles. Once they are, we can add a `CHECK`.
 
 ### 5. Assessment status rules
 - `status` is `draft` (the default) or `confirmed`.

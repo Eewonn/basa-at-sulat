@@ -70,3 +70,21 @@ Then Backend 1 does **P1-BE1-1** (real `/assess`: convert audio, call `ai.score`
 - `BASA_WARM_UP=1 python -m app` loads the aligner at startup (about 10 s; needs `ai/requirements.txt` and the weights). It is off by default, so tests and machines without torch are unaffected. If warm-up fails the engine still starts.
 - `delete_audio(audio_path)` in `app/audio.py` deletes a recording (path relative to `engine/storage/`; a missing file is fine; paths outside `engine/storage/` are refused). Backend 2's confirm route will call it.
 - Tests replace `score`, so they never load the 1.2 GB model.
+
+## Status and handoff (Backend 2)
+
+### Results and overrides (P1-BE2-1)
+Built against `docs/api/assess.example.json`, ahead of the real `/assess`.
+
+**What exists**
+- `app/assessments.py` is the assessments store. Functions take a connection from `app.db.connect()` and return the API shape:
+  - `save_assessment(conn, result, audio_path=None)` stores an `/assess` result as a draft in one transaction. It checks the learner and passage exist and that every word sits at its index in the passage, and raises `InvalidAssessmentError` otherwise.
+  - `get_assessment(conn, id)` returns the stored check.
+  - `override_word(conn, id, i, label)` saves the teacher's label and recomputes the score.
+  - `confirm_assessment(conn, id, keep_audio=False)` marks a draft as final.
+- `PATCH /assessments/{id}/words/{i}` lives in `app/routes/assessments.py`, wired into `main.py` with one `include_router` line. Error codes are in `docs/API.md`.
+- `app/levels.py` computes `wcpm` from the final labels. **`level` is always `None` (null in the API) until P1-BE2-2.**
+
+**For Backend 1**
+- **P1-BE1-1:** after `ai.score`, call `save_assessment(conn, result, audio_path=...)` and return what it gives back. It ignores any `wcpm`/`level` in the result and computes them itself.
+- **P1-BE1-2 (proposed split for confirm, needs Backend 1's OK):** Backend 2 owns the data side, `confirm_assessment()`. Backend 1 owns the `POST /assessments/{id}/confirm` route and the audio. Call `confirm_assessment()` first and delete the file only if it succeeds: it raises `AssessmentNotFoundError` (404) or `AssessmentConfirmedError` (409). Then clear `audio_path` unless `keep_audio` is set. `confirm_assessment()` doesn't touch the file or `audio_path`.

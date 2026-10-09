@@ -12,7 +12,9 @@ The app talks to the engine (`engine/`, FastAPI) on `http://localhost:8000` by d
 
 Hesitations aren't a word label: they're reported in `pauses` (`before_word` index plus `seconds`), because a child can pause and then read the word correctly.
 
-`score` is 0–1 (higher means a better match). `start`/`end` are seconds into the recording.
+`score` is 0–1 (higher means a better match). `start`/`end` are seconds into the recording, and can be `null` when the scorer found no timing for a word (for example, a skipped one).
+
+`wcpm` (words correct per minute) is a whole number: `matched` words ÷ the recording's minutes, computed by the engine from the final labels, so it follows teacher overrides. **`level` is `null` until P1-BE2-2** checks the level names against DepEd's current CRLA profiles, so clients must handle a missing level.
 
 ## Basa: checks
 
@@ -44,7 +46,16 @@ Returns:
 Errors: `400` if the audio can't be read, `404` for an unknown `passage_id` or `learner_id`, `422` if a field is missing, `503` if the scoring model isn't installed on this engine, `500` if scoring fails. Scoring can take a while (about 0.6× the recording length on CPU, plus ~10 s for the first call unless the engine was started with `BASA_WARM_UP=1`), so the app should wait and show a progress state.
 
 ### `PATCH /assessments/{id}/words/{i}`
-Body `{"label": "matched"}`. This is the teacher's override, and it returns the updated assessment (recomputed `wcpm`, `level`).
+Body `{"label": "matched"}`. This is the teacher's override, and it returns the updated assessment (recomputed `wcpm`, `level`). Setting a word back to the AI's original label undoes the override.
+
+Errors (body `{"detail": "<what went wrong>"}`):
+
+| Status | When |
+|---|---|
+| `404` | No assessment with that id, or it has no word `i` |
+| `409` | The assessment is already confirmed, so its results are final |
+| `422` | `label` isn't `matched`, `misread` or `skipped`, or `i` isn't a whole number from 0 |
+| `503` | The engine has no database yet (run `python -m app.seed` in `engine/`) |
 
 ### `POST /assessments/{id}/confirm`
 Marks the assessment final (`status: "confirmed"`) and deletes the audio unless `{"keep_audio": true}`.
@@ -79,3 +90,11 @@ These support the learner profile and story categories. Until the engine impleme
 ## Health
 - `GET /health` → `{"ok": true, "models": {"aligner": "loaded", "ollama": "up"}}`
   - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up`, `down` or `unknown`. The engine reports `not_loaded` until the aligner is in memory (after the first `/assess`, or at startup with `BASA_WARM_UP=1`), and `unknown` for Ollama until it is wired in.
+
+## Contract changes
+
+### 2026-10-10 · backend-2 (P1-BE2-1)
+- `PATCH /assessments/{id}/words/{i}` now lists its error responses (404, 409, 422, 503).
+- `level` is `null` until P1-BE2-2. **Frontend:** `desktop/src/renderer/src/api/types.ts` types it as `string`; it should be `string | null`.
+- `wcpm` is defined (whole number, `matched` words per minute, from the final labels).
+- `start`/`end` can be `null` for a word with no timing (the database already allowed this). **Frontend:** `Word.start`/`Word.end` should be `number | null`.
