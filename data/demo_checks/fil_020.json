@@ -1,0 +1,240 @@
+{
+ "recording_id": "fil_020",
+ "passage_id": "fil_g2_03",
+ "duration_sec": 14.59,
+ "words": [
+  {
+   "i": 0,
+   "text": "Pumunta",
+   "label": "matched",
+   "score": 0.78,
+   "start": 1.06,
+   "end": 1.5
+  },
+  {
+   "i": 1,
+   "text": "sa",
+   "label": "matched",
+   "score": 1.0,
+   "start": 1.62,
+   "end": 1.7
+  },
+  {
+   "i": 2,
+   "text": "palengke",
+   "label": "matched",
+   "score": 0.74,
+   "start": 1.76,
+   "end": 2.24
+  },
+  {
+   "i": 3,
+   "text": "si",
+   "label": "matched",
+   "score": 1.0,
+   "start": 2.4,
+   "end": 2.5
+  },
+  {
+   "i": 4,
+   "text": "Nanay",
+   "label": "matched",
+   "score": 1.0,
+   "start": 2.58,
+   "end": 2.96
+  },
+  {
+   "i": 5,
+   "text": "at",
+   "label": "matched",
+   "score": 1.0,
+   "start": 3.06,
+   "end": 3.16
+  },
+  {
+   "i": 6,
+   "text": "si",
+   "label": "matched",
+   "score": 0.99,
+   "start": 3.22,
+   "end": 3.3
+  },
+  {
+   "i": 7,
+   "text": "Dino.",
+   "label": "matched",
+   "score": 0.9,
+   "start": 3.38,
+   "end": 3.66
+  },
+  {
+   "i": 8,
+   "text": "Bumili",
+   "label": "matched",
+   "score": 1.0,
+   "start": 4.32,
+   "end": 4.66
+  },
+  {
+   "i": 9,
+   "text": "sila",
+   "label": "matched",
+   "score": 0.99,
+   "start": 4.76,
+   "end": 4.98
+  },
+  {
+   "i": 10,
+   "text": "ng",
+   "label": "matched",
+   "score": 0.99,
+   "start": 5.06,
+   "end": 5.18
+  },
+  {
+   "i": 11,
+   "text": "isda,",
+   "label": "matched",
+   "score": 0.98,
+   "start": 5.22,
+   "end": 5.52
+  },
+  {
+   "i": 12,
+   "text": "gulay,",
+   "label": "matched",
+   "score": 1.0,
+   "start": 6.12,
+   "end": 6.46
+  },
+  {
+   "i": 13,
+   "text": "at",
+   "label": "matched",
+   "score": 1.0,
+   "start": 6.7,
+   "end": 6.78
+  },
+  {
+   "i": 14,
+   "text": "mga",
+   "label": "matched",
+   "score": 0.99,
+   "start": 6.84,
+   "end": 7.02
+  },
+  {
+   "i": 15,
+   "text": "prutas.",
+   "label": "matched",
+   "score": 0.99,
+   "start": 7.08,
+   "end": 7.52
+  },
+  {
+   "i": 16,
+   "text": "Mabigat",
+   "label": "matched",
+   "score": 0.99,
+   "start": 8.26,
+   "end": 8.7
+  },
+  {
+   "i": 17,
+   "text": "ang",
+   "label": "matched",
+   "score": 1.0,
+   "start": 8.8,
+   "end": 8.9
+  },
+  {
+   "i": 18,
+   "text": "bayong,",
+   "label": "matched",
+   "score": 0.98,
+   "start": 8.94,
+   "end": 9.28
+  },
+  {
+   "i": 19,
+   "text": "kaya",
+   "label": "matched",
+   "score": 1.0,
+   "start": 9.98,
+   "end": 10.16
+  },
+  {
+   "i": 20,
+   "text": "binuhat",
+   "label": "matched",
+   "score": 0.62,
+   "start": 10.24,
+   "end": 10.68
+  },
+  {
+   "i": 21,
+   "text": "ito",
+   "label": "matched",
+   "score": 1.0,
+   "start": 10.8,
+   "end": 10.94
+  },
+  {
+   "i": 22,
+   "text": "ni",
+   "label": "matched",
+   "score": 1.0,
+   "start": 11.04,
+   "end": 11.12
+  },
+  {
+   "i": 23,
+   "text": "Dino.",
+   "label": "matched",
+   "score": 0.87,
+   "start": 11.18,
+   "end": 11.48
+  },
+  {
+   "i": 24,
+   "text": "Nakangiti",
+   "label": "matched",
+   "score": 0.99,
+   "start": 12.37,
+   "end": 12.87
+  },
+  {
+   "i": 25,
+   "text": "silang",
+   "label": "matched",
+   "score": 0.99,
+   "start": 12.95,
+   "end": 13.23
+  },
+  {
+   "i": 26,
+   "text": "umuwi",
+   "label": "matched",
+   "score": 0.99,
+   "start": 13.27,
+   "end": 13.59
+  },
+  {
+   "i": 27,
+   "text": "sa",
+   "label": "matched",
+   "score": 1.0,
+   "start": 13.69,
+   "end": 13.77
+  },
+  {
+   "i": 28,
+   "text": "bahay.",
+   "label": "matched",
+   "score": 1.0,
+   "start": 13.83,
+   "end": 14.21
+  }
+ ],
+ "pauses": []
+}
