@@ -261,7 +261,7 @@ def test_cli_seeds_and_reports_counts(db_path, capsys):
     assert seed_cli.main(["--path", str(db_path)]) == 0
     out = capsys.readouterr().out
     assert "Learners: 10 added" in out
-    assert "Passages: 2 added" in out
+    assert f"Passages: {len(load_entries(DEFAULT_PASSAGES_PATH))} added" in out  # grows as passages are added
 
 
 def test_cli_rerun_succeeds(db_path):
