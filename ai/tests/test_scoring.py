@@ -111,6 +111,27 @@ def test_empty_or_letterless_passages_never_touch_the_model(monkeypatch):
         raise AssertionError("the aligner should not run")
 
     monkeypatch.setattr(aligner, "align", boom)
-    assert scoring.score("any.wav", "") == {"words": [], "pauses": []}
+    empty = scoring.score("any.wav", "")
+    assert (empty["words"], empty["pauses"]) == ([], [])
     only_digits = scoring.score("any.wav", "2026 —")
     assert [w["label"] for w in only_digits["words"]] == ["matched", "matched"]
+
+
+def test_timings_split_alignment_from_labelling(monkeypatch):
+    def slow_align(path, words):
+        import time
+        time.sleep(0.05)
+        return canned()
+
+    monkeypatch.setattr(aligner, "align", slow_align)
+    timings = scoring.score("any.wav", PASSAGE)["timings"]
+    assert set(timings) == {"align_ms", "score_ms"}
+    assert timings["align_ms"] >= 50  # the aligner's time lands in align_ms...
+    assert timings["score_ms"] < 50  # ...not in score_ms
+
+
+def test_every_return_path_has_timings(monkeypatch):
+    monkeypatch.setattr(aligner, "align", lambda path, words: None)  # too short
+    assert set(scoring.score("any.wav", "Ben kite")["timings"]) == {"align_ms", "score_ms"}
+    assert set(scoring.score("any.wav", "")["timings"]) == {"align_ms", "score_ms"}
+    assert set(scoring.score("any.wav", "2026")["timings"]) == {"align_ms", "score_ms"}

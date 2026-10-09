@@ -21,7 +21,9 @@ LABELS = {"matched", "misread", "skipped"}
 
 def check_contract(result, text, duration):
     expected_keys = set(EXAMPLE["words"][0])
-    assert set(result) == {"words", "pauses"}
+    assert set(result) == {"words", "pauses", "timings"}
+    assert set(result["timings"]) == {"align_ms", "score_ms"}
+    assert all(isinstance(v, int) and v >= 0 for v in result["timings"].values())
     words = result["words"]
     assert [w["i"] for w in words] == list(range(len(text.split())))
     assert [w["text"] for w in words] == text.split()
@@ -65,3 +67,15 @@ def test_check_word_stub_shape(make_wav):
     assert set(result) == {"result", "score"}
     assert result["result"] in {"match", "no_match"}
     assert 0 <= result["score"] <= 1
+
+
+@requires_model
+def test_warm_up_loads_the_model_once():
+    from ai import aligner
+
+    aligner._load.cache_clear()
+    assert not ai.model_loaded()
+    ai.warm_up()
+    assert ai.model_loaded()
+    ai.warm_up()  # second call is free: same cached model
+    assert aligner._load.cache_info().misses == 1
