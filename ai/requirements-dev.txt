@@ -1,4 +1,6 @@
-# Everything needed to run the ai/ and eval/ tests: the runtime pins plus pytest.
+# Everything needed to run the ai/ and eval/ tests: the runtime pins plus pytest, and psutil for the
+# memory line in eval/REPORT.md.
 # pytest matches the version pinned in engine/requirements.txt.
 -r requirements.txt
 pytest==9.1.1
+psutil==7.2.2

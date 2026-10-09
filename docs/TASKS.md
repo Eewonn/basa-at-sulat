@@ -55,7 +55,7 @@ Nobody waits on the result. The AI engineer runs the test while everyone else bu
 
 ## Phase 3: numbers, polish and submission
 
-- [ ] **P3-AI-1** · Accuracy and speed report — owner: ai · depends: P1-AI-1 · done when: `eval/REPORT.md` has precision, recall and F1 per language, reading-speed error versus a human scorer, and CPU processing time and memory on our laptops
+- [x] **P3-AI-1** · Accuracy and speed report — owner: ai · depends: P1-AI-1 · done when: `eval/REPORT.md` has precision, recall and F1 per language, reading-speed error versus a human scorer, and CPU processing time and memory on our laptops
 - [x] **P3-AI-2** · Model disclosures — owner: ai · depends: none · done when: every model's name, version, license (MMS is CC-BY-NC-4.0) and source is listed in the README
 - [x] **P3-BE1-1** · One-command offline start — owner: backend-1 · depends: P1-BE1-1 · done when: `scripts/start.sh` starts the engine, Ollama and the web app with models already downloaded, and a separate script downloads all models once
 - [ ] **P3-BE1-2** · Airplane-mode run — owner: backend-1 · depends: P3-BE1-1 · done when: the full Sulat, Basa, Sanay flow works with Wi-Fi off on a clean laptop

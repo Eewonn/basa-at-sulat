@@ -1,0 +1,9 @@
+recording_id,passage_id,passage_words,reading_seconds,words_correct,notes
+fil_001,fil_g2_01,23,9.9,23,heard 0 mistakes
+fil_002,fil_g2_01,23,10.2,21,heard 2 mistakes
+fil_010,fil_g2_01,23,7.7,22,heard 1 mistake: Tinutulungan for Tinulungan (rechecked)
+fil_011,fil_g2_01,23,8.6,20,"heard 3 mistakes: pala, missing ng, ibabaw (rechecked)"
+fil_013,fil_g2_01,23,13.2,21,"heard 2 mistakes: malungkot, missing ng (rechecked)"
+fil_015,fil_g2_01,23,11,23,heard 0 mistakes (rechecked)
+fil_016,fil_g2_02,31,15.4,31,heard 0 mistakes
+fil_022,fil_g2_03,29,10.4,28,heard 1 mistake
