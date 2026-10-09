@@ -56,3 +56,17 @@ Then Backend 1 does **P1-BE1-1** (real `/assess`: convert audio, call `ai.score`
 **Needs agreeing with Backend 2 before P1-BE1-2:** who owns the assessments store and the `POST /assessments/{id}/confirm` handler. Backend 2's P1-BE2-1 stores assessments, and audio deletion hooks into confirm.
 
 **AI engineer:** please tell Backend 1 when `ai.score` lands on a branch.
+
+## Update: real /assess (P1-BE1-1)
+`POST /assess` now validates the passage and learner against the database, converts the upload to 16 kHz mono WAV, calls `ai.score(wav, passage_text)`, and returns the contract shape plus `timings`. It logs the per-request processing time (`engine.assess` logger). The converted WAV is kept at `engine/storage/audio/<assessment_id>.wav` (git-ignored) for the confirm step (P1-BE1-2).
+
+- `ai.score` is still the stub from #4 (every word "matched"). The route needs no change when the real scorer lands.
+- `wcpm` and `level` are `null` until Backend 2's P1-BE2-2. Results are **not** saved by `/assess`; storing them is P1-BE2-1.
+- Start with `python -m app` from `engine/`. Port is `$PORT`, default 8000. Tests need ffmpeg.
+
+## Update: robustness (while Backend 2 finishes P1-BE2-1)
+- `/assess` returns `503` if the scoring model isn't installed and `500` if scoring fails; either way the converted WAV is deleted and the engine keeps running.
+- `GET /health` reports `aligner: loaded` once the model is in memory.
+- `BASA_WARM_UP=1 python -m app` loads the aligner at startup (about 10 s; needs `ai/requirements.txt` and the weights). It is off by default, so tests and machines without torch are unaffected. If warm-up fails the engine still starts.
+- `delete_audio(audio_path)` in `app/audio.py` deletes a recording (path relative to `engine/storage/`; a missing file is fine; paths outside `engine/storage/` are refused). Backend 2's confirm route will call it.
+- Tests replace `score`, so they never load the 1.2 GB model.

@@ -4,9 +4,9 @@ import subprocess
 
 import pytest
 
-from app.audio import AudioConversionError, convert_to_wav16k
+from app.audio import AudioConversionError, convert_to_wav16k, delete_audio
 
-pytestmark = pytest.mark.skipif(
+needs_ffmpeg = pytest.mark.skipif(
     not (shutil.which("ffmpeg") and shutil.which("ffprobe")), reason="ffmpeg/ffprobe not installed"
 )
 
@@ -28,6 +28,7 @@ def make_input(tmp_path, ext):
     return src
 
 
+@needs_ffmpeg
 @pytest.mark.parametrize("ext", INPUTS)
 def test_converts_to_16k_mono_wav(tmp_path, ext):
     dst = convert_to_wav16k(make_input(tmp_path, ext), tmp_path / "out.wav")
@@ -43,6 +44,7 @@ def test_converts_to_16k_mono_wav(tmp_path, ext):
     assert stream["channels"] == 1
 
 
+@needs_ffmpeg
 def test_empty_file_raises(tmp_path):
     src = tmp_path / "empty.webm"
     src.write_bytes(b"")
@@ -50,8 +52,51 @@ def test_empty_file_raises(tmp_path):
         convert_to_wav16k(src, tmp_path / "out.wav")
 
 
+@needs_ffmpeg
 def test_corrupt_file_raises(tmp_path):
     src = tmp_path / "bad.ogg"
     src.write_bytes(b"not audio at all")
     with pytest.raises(AudioConversionError):
         convert_to_wav16k(src, tmp_path / "out.wav")
+
+
+@pytest.fixture
+def storage(tmp_path, monkeypatch):
+    monkeypatch.setenv("BASA_STORAGE_DIR", str(tmp_path / "storage"))
+    (tmp_path / "storage" / "audio").mkdir(parents=True)
+    return tmp_path / "storage"
+
+
+def test_delete_audio_removes_the_file(storage):
+    f = storage / "audio" / "a_1.wav"
+    f.write_bytes(b"RIFF")
+    delete_audio("audio/a_1.wav")
+    assert not f.exists()
+
+
+def test_delete_audio_missing_file_is_success(storage):
+    delete_audio("audio/a_gone.wav")
+
+
+@pytest.mark.parametrize("bad", ["../outside.wav", "audio/../../outside.wav", "/etc/passwd", "", "."])
+def test_delete_audio_refuses_paths_outside_storage(storage, bad):
+    outside = storage.parent / "outside.wav"
+    outside.write_bytes(b"keep me")
+    with pytest.raises(ValueError):
+        delete_audio(bad)
+    assert outside.exists()
+
+
+def test_delete_audio_refuses_a_symlink_that_escapes(storage):
+    outside = storage.parent / "secret.wav"
+    outside.write_bytes(b"keep me")
+    (storage / "audio" / "link.wav").symlink_to(outside)
+    with pytest.raises(ValueError):
+        delete_audio("audio/link.wav")
+    assert outside.exists()
+
+
+def test_delete_audio_raises_on_real_io_errors(storage):
+    (storage / "audio" / "a_dir.wav").mkdir()
+    with pytest.raises(OSError):
+        delete_audio("audio/a_dir.wav")

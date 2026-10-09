@@ -32,7 +32,7 @@ Nobody waits on the result. The AI engineer runs the test while everyone else bu
 
 - [ ] **P1-AI-1** · Scoring module — owner: ai · depends: P0-AI-1 · done when: `ai.score(audio_path, passage_text)` returns the `words[]` (matched, misread, skipped) and `pauses[]` lists from `docs/API.md` with thresholds tuned on the test set
 - [ ] **P1-AI-2** · Whisper fallback (only if the gate is weak) — owner: ai · depends: P0-ALL-2 · done when: Filipino and English passages are scored with Whisper prompted with the passage text, behind the same `score()` interface
-- [ ] **P1-BE1-1** · Real /assess — owner: backend-1 · depends: P1-AI-1, P0-BE1-2 · done when: `POST /assess` runs the audio pipeline and `ai.score`, returns the contract shape, and logs processing time per request
+- [x] **P1-BE1-1** · Real /assess — owner: backend-1 · depends: P1-AI-1, P0-BE1-2 · done when: `POST /assess` runs the audio pipeline and `ai.score`, returns the contract shape, and logs processing time per request
 - [ ] **P1-BE1-2** · Audio retention — owner: backend-1 · depends: P1-BE1-1 · done when: a child's audio is deleted when the teacher confirms, unless a keep flag is set, with a test proving the file is gone
 - [ ] **P1-BE2-1** · Save results and overrides — owner: backend-2 · depends: P0-BE2-1, P1-BE1-1 · done when: assessments and word results are stored, and `PATCH /assessments/{id}/words/{i}` records teacher overrides and recomputes the score
 - [ ] **P1-BE2-2** · Reading speed and level — owner: backend-2 · depends: P1-BE2-1 · done when: words correct per minute and a reading level are computed from final (overridden) results, with level names checked against DepEd's current CRLA profiles
