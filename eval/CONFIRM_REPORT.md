@@ -15,7 +15,7 @@ A word counts as flagged when `ai.score` labels it `misread` or `skipped`. Preci
 | Language | Setting | Precision | Recall | F1 |
 |---|---|---|---|---|
 | fil | labels from `score()` | 0.71 | 0.77 | 0.74 |
-| fil | best score cutoff (≤ 0.45), tuned on this set | 0.75 | 0.92 | 0.83 |
+| fil | best score cutoff (≤ 0.51), tuned on this set | 0.75 | 0.92 | 0.83 |
 | fil | cutoff chosen on half, tested on the other half | 0.73 | 0.85 | 0.79 |
 
 ## Go / no-go
@@ -40,22 +40,22 @@ Processing time per minute of audio, on the machine that ran this.
 
 | Language | Audio (s) | Processing (s) | Seconds per audio minute |
 |---|---|---|---|
-| fil | 124.4 | 89.9 | 43.4 |
+| fil | 124.4 | 33.5 | 16.2 |
 
 ## Misses and false alarms at the tuned cutoff
 
 Up to 12 of each per language. Read these before trusting any number above.
 
-### fil (cutoff ≤ 0.45)
+### fil (cutoff ≤ 0.51)
 
 Missed planted mistakes (1):
-- fil_022 word 21 `ito` score 0.97 (skip)
+- fil_022 word 21 `ito` score 0.99 (skip)
 
 False alarms (4):
 - fil_019 word 11 `Tuwing` score 0.00
 - fil_019 word 30 `tubig.` score 0.00
-- fil_022 word 2 `palengke` score 0.15
-- fil_023 word 15 `prutas.` score 0.00
+- fil_022 word 2 `palengke` score 0.16
+- fil_023 word 15 `prutas.` score 0.14
 
 ## Caveats
 

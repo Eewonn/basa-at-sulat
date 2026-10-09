@@ -31,7 +31,7 @@
    "i": 3,
    "text": "ng",
    "label": "matched",
-   "score": 0.98,
+   "score": 0.96,
    "start": 2.1,
    "end": 2.24
   },
@@ -55,7 +55,7 @@
    "i": 6,
    "text": "bukid.",
    "label": "matched",
-   "score": 0.59,
+   "score": 0.65,
    "start": 2.82,
    "end": 3.14
   },
@@ -63,7 +63,7 @@
    "i": 7,
    "text": "Masaya",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 3.62,
    "end": 3.98
   },
@@ -71,7 +71,7 @@
    "i": 8,
    "text": "siya.",
    "label": "matched",
-   "score": 0.99,
+   "score": 0.98,
    "start": 4.08,
    "end": 4.24
   },
@@ -79,7 +79,7 @@
    "i": 9,
    "text": "Tinulungan",
    "label": "matched",
-   "score": 0.87,
+   "score": 0.91,
    "start": 5.14,
    "end": 5.84
   },
@@ -87,15 +87,15 @@
    "i": 10,
    "text": "siya",
    "label": "matched",
-   "score": 0.99,
+   "score": 1.0,
    "start": 6.06,
-   "end": 6.22
+   "end": 6.2
   },
   {
    "i": 11,
    "text": "ng",
    "label": "misread",
-   "score": 0.21,
+   "score": 0.2,
    "start": 6.44,
    "end": 6.56
   },
@@ -103,7 +103,7 @@
    "i": 12,
    "text": "kanyang",
    "label": "matched",
-   "score": 0.99,
+   "score": 0.98,
    "start": 6.56,
    "end": 7.0
   },
@@ -127,7 +127,7 @@
    "i": 15,
    "text": "kumain",
    "label": "matched",
-   "score": 0.95,
+   "score": 0.93,
    "start": 9.47,
    "end": 9.91
   },
@@ -136,7 +136,7 @@
    "text": "sila",
    "label": "misread",
    "score": 0.0,
-   "start": 10.01,
+   "start": 9.99,
    "end": 10.15
   },
   {
@@ -151,7 +151,7 @@
    "i": 18,
    "text": "mangga",
    "label": "matched",
-   "score": 0.99,
+   "score": 0.98,
    "start": 10.47,
    "end": 10.83
   },
@@ -161,13 +161,13 @@
    "label": "matched",
    "score": 1.0,
    "start": 11.07,
-   "end": 11.17
+   "end": 11.15
   },
   {
    "i": 20,
    "text": "ilalim",
    "label": "matched",
-   "score": 0.97,
+   "score": 0.94,
    "start": 11.21,
    "end": 11.59
   },
@@ -175,15 +175,15 @@
    "i": 21,
    "text": "ng",
    "label": "matched",
-   "score": 0.97,
-   "start": 11.65,
-   "end": 11.77
+   "score": 0.9,
+   "start": 11.63,
+   "end": 11.79
   },
   {
    "i": 22,
    "text": "puno.",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 11.83,
    "end": 12.13
   }

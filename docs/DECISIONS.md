@@ -2,6 +2,15 @@
 
 Newest first. Each entry: what we decided, and why.
 
+## 2026-10-10: Score with int8 weights (2.5x faster); keep "Say it" at full precision
+Nearly all scoring time is the MMS network; the alignment itself takes hundredths of a second. For `score()` and `word_timings()` we now use **int8 weights** for the network's Linear layers and **every hardware thread** (torch defaults to one per core). On a Ryzen 5 7520U laptop that took scoring from about **40 s to 16 s per minute of audio**: a 40-second reading now takes about 11 s instead of 26 s.
+
+**Accuracy cost, measured on eval/:** the confirmation set didn't change (F1 0.74, no label changed). The tuning set gained one borderline false alarm (labels F1 0.78 → 0.76; held-out F1 unchanged at 0.76). Scores moved by about 0.01–0.02 on average.
+
+**Why `check_word()` stays at full precision:** with int8 the model "heard" a frame of speech in silence, and Sanay's nothing-said check relies on silence being all blank, so one silent clip passed. "Say it" clips are short (0.6 s per check at full precision), so speed doesn't matter there. Keeping both models in memory costs about 0.9 GB (3.1 GB in total) and warm-up takes about 15 s once.
+
+**Risk:** `torch.ao.quantization` is deprecated and removed in torch 2.10; we're pinned to 2.8 (which `forced_align` needs anyway), and scoring falls back to full precision if it's ever missing.
+
 ## 2026-10-10: "Silid-aralan craft": make it look made for Filipino classrooms, not AI-made
 Stock emoji, a sparkles icon and dashboard stat cards made the app look generated. We replaced them with our own illustrations in Taw's style and borrowed real classroom objects: the teacher's violet "VG / Very Good!" stamp, manila-paper flashcards with ruled lines, a reading card with a stamp per day, marker lettering for kid headings, a faint paper grain, the teacher's name and section in the greeting, and natural dates. Each signature element appears in one or two places so screens stay calm.
 
@@ -52,7 +61,7 @@ The Phase 0 gate passed (P0-ALL-2). We keep the full plan, Meta's MMS forced ali
 - **One adult reader.** Accuracy for other voices, and for children, is unknown. Two or three readings from another teammate would cover other voices.
 - **Misses:** e/i and o/u swaps (Lina → "Lena", bola → "bula", palengke → "palingke") and a syllable added inside a word (kumain → "kumakain"). Open question for a teacher: do e/i and o/u swaps count as misreadings in everyday Filipino?
 - **False alarms:** mostly the word next to a skip or an insert (still the right spot for the teacher), plus some `ng` before an m-word and sentence-final words under fan noise.
-- **Speed:** about 40 s of processing per minute of audio on an 8-core CPU laptop, so a 40-second reading takes about 26 s. The pitch's "in seconds" needs the measured number (P3-ALL-1).
+- **Speed:** about 40 s of processing per minute of audio on an 8-core CPU laptop at the time, so a 40-second reading took about 26 s (now about 11 s: see the int8 entry above). The pitch's "in seconds" needs the measured number (P3-ALL-1).
 
 ## 2026-10-10: Group plans are templates plus one model sentence from Qwen 2.5 7B, in Filipino first
 A draft group plan (P0-BE2-3, P2-BE2-3) is a **teacher-style activity template** (`engine/prompts/activities-fil.json`) filled with the group's missed words, plus **one example sentence** written by **qwen2.5:7b** running locally in Ollama (offline, laptop CPU). The sentence is kept only if it passes checks (one line, 3 to 20 words, not repetitive, Latin letters only, no English or Spanish words from a short blocklist, uses a missed word). A rejected sentence is retried with up to 3 fixed seeds. If Ollama is down or every try is rejected, the plan is the template alone, and the reason is logged. Plans are **Filipino only for now**; English and regional languages come later. Prompt instructions are in English, with a firm rule to reply in Filipino. A native speaker reviews the templates and saved examples before the task is ticked.

@@ -14,8 +14,8 @@ A word counts as flagged when `ai.score` labels it `misread` or `skipped`. Preci
 
 | Language | Setting | Precision | Recall | F1 |
 |---|---|---|---|---|
-| fil | labels from `score()` | 0.70 | 0.86 | 0.78 |
-| fil | best score cutoff (≤ 0.00), tuned on this set | 0.84 | 0.73 | 0.78 |
+| fil | labels from `score()` | 0.68 | 0.86 | 0.76 |
+| fil | best score cutoff (≤ 0.20), tuned on this set | 0.70 | 0.86 | 0.78 |
 | fil | cutoff chosen on half, tested on the other half | 0.74 | 0.77 | 0.76 |
 
 ## Go / no-go
@@ -40,26 +40,28 @@ Processing time per minute of audio, on the machine that ran this.
 
 | Language | Audio (s) | Processing (s) | Seconds per audio minute |
 |---|---|---|---|
-| fil | 178.6 | 120.7 | 40.6 |
+| fil | 178.6 | 46.6 | 15.6 |
 
 ## Misses and false alarms at the tuned cutoff
 
 Up to 12 of each per language. Read these before trusting any number above.
 
-### fil (cutoff ≤ 0.00)
+### fil (cutoff ≤ 0.20)
 
-Missed planted mistakes (6):
-- fil_003 word 15 `kumain` score 0.98 (swap)
-- fil_004 word 2 `Lina` score 0.36 (swap)
-- fil_006 word 9 `Tinulungan` score 0.87 (swap)
-- fil_009 word 11 `ng` score 0.21 (skip)
-- fil_011 word 17 `ng` score 0.12 (skip)
-- fil_012 word 13 `lolo.` score 0.09 (swap)
+Missed planted mistakes (3):
+- fil_003 word 15 `kumain` score 0.99 (swap)
+- fil_004 word 2 `Lina` score 0.33 (swap)
+- fil_006 word 9 `Tinulungan` score 0.86 (swap)
 
-False alarms (3):
+False alarms (8):
+- fil_001 word 17 `ng` score 0.09 (clean reading)
+- fil_002 word 6 `bukid.` score 0.16
 - fil_002 word 11 `ng` score 0.00
 - fil_003 word 22 `puno.` score 0.00
+- fil_005 word 6 `bukid.` score 0.15 (clean reading)
 - fil_006 word 6 `bukid.` score 0.00
+- fil_006 word 17 `ng` score 0.04
+- fil_013 word 17 `ng` score 0.00
 
 ## Caveats
 

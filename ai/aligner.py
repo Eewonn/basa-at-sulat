@@ -8,6 +8,7 @@ known letters and ask how well each word fits. A word the reader skipped or said
 up well, and the aligner can't quietly "correct" it the way a speech recogniser would.
 """
 import os
+import warnings
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -53,7 +54,7 @@ def fit_gap(audio_path: str, words: list):
     import torch
     import torchaudio.functional as F
 
-    bundle, model, tokenizer, _ = _load()
+    bundle, model, tokenizer, _ = _load(False)  # full precision: see QUANTIZE
     with torch.inference_mode():
         emission, _ = model(load_audio(audio_path))
     log_probs = emission[0, :, : bundle.get_dict()["*"]].contiguous()  # drop the wildcard column
@@ -76,26 +77,49 @@ def weights_cached() -> bool:
 
 
 def warm_up() -> None:
-    """Load the model now (about 10 s), so the first score() call isn't the slow one.
+    """Load the models now (a few seconds), so the first score() or check_word() call isn't the slow one.
 
     Call it once at engine startup. Downloads the weights first if they aren't cached, so on an
     offline laptop they must already be in models/torch/.
     """
-    _load()
+    _load(QUANTIZE)
+    _load(False)
 
 
 def model_loaded() -> bool:
-    """True once the model is in memory (for GET /health: "loaded" / "not_loaded")."""
+    """True once the scoring model is in memory (for GET /health: "loaded" / "not_loaded")."""
     return _load.cache_info().currsize > 0
 
 
-@lru_cache(maxsize=1)
-def _load():
+# Speed (P3-AI-1). Nearly all of the time is the network; alignment itself takes hundredths of a second.
+# For score() and word_timings(), int8 weights in its Linear layers plus every hardware thread (instead of
+# torch's default of one per core) took scoring from about 40 s to 16 s per minute of audio on our CPU
+# laptop (Ryzen 5 7520U). On eval/ the confirmation set didn't change and the tuning set gained one
+# borderline false alarm. check_word() keeps full precision: with int8 the model "heard" a frame of speech
+# in silence, which its nothing-said check relies on, and its clips are short, so speed doesn't matter there.
+# Set BASA_FULL_PRECISION=1 to run everything at full precision.
+QUANTIZE = os.environ.get("BASA_FULL_PRECISION") != "1"
+
+
+@lru_cache(maxsize=2)
+def _load(quantized: bool):
+    """(bundle, model, tokenizer, aligner); `quantized` gives the int8 model. Cached per kind."""
+    import torch
     import torchaudio
 
+    torch.set_num_threads(os.cpu_count() or torch.get_num_threads())
     bundle = torchaudio.pipelines.MMS_FA
     model = bundle.get_model()
     model.eval()
+    if quantized:
+        # torch.ao.quantization is deprecated (removed in torch 2.10); requirements.txt pins 2.8, which
+        # forced_align needs anyway. If it's ever missing, run at full precision rather than fail.
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", DeprecationWarning)
+                model = torch.ao.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
+        except (AttributeError, ImportError, RuntimeError) as err:
+            warnings.warn(f"int8 quantization unavailable ({err}); scoring at full precision, about 1.4x slower")
     return bundle, model, bundle.get_tokenizer(), bundle.get_aligner()
 
 
@@ -122,7 +146,7 @@ def align(audio_path: str, words: list, star_at_ends: bool = True):
     """
     import torch
 
-    bundle, model, tokenizer, aligner = _load()
+    bundle, model, tokenizer, aligner = _load(QUANTIZE)
     wav = load_audio(audio_path)
     with torch.inference_mode():
         emission, _ = model(wav)
