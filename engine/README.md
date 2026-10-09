@@ -88,3 +88,23 @@ Built against `docs/api/assess.example.json`, ahead of the real `/assess`.
 **For Backend 1**
 - **P1-BE1-1:** after `ai.score`, call `save_assessment(conn, result, audio_path=...)` and return what it gives back. It ignores any `wcpm`/`level` in the result and computes them itself.
 - **P1-BE1-2 (proposed split for confirm, needs Backend 1's OK):** Backend 2 owns the data side, `confirm_assessment()`. Backend 1 owns the `POST /assessments/{id}/confirm` route and the audio. Call `confirm_assessment()` first and delete the file only if it succeeds: it raises `AssessmentNotFoundError` (404) or `AssessmentConfirmedError` (409). Then clear `audio_path` unless `keep_audio` is set. `confirm_assessment()` doesn't touch the file or `audio_path`.
+
+### Group plans (P0-BE2-3)
+`app/plans.py` turns one group's stats into a draft activity in Filipino. The activity is a template from `prompts/activities-fil.json` filled with the group's missed words. **qwen2.5:7b** in Ollama adds one example sentence (`prompts/sentence-fil.txt`, or `prompts/sentence-small-words-fil.txt` when every missed word is a function word like *ng* or *sa*). The sentence is checked and retried with up to 3 seeds; if it still fails, the plan is the template alone. See `docs/DECISIONS.md` for why, and for the license (Apache 2.0).
+
+**One-time setup, while online:** install Ollama from ollama.com, then run `ollama pull qwen2.5:7b` (about 4.7 GB; it needs about 5 GB of free RAM while running).
+
+**Regenerate the saved examples** (`prompts/examples/example-1.md` to `-3.md`, from `prompts/examples/inputs.json`):
+```
+cd engine
+python -m app.plan_examples
+```
+It writes nothing unless every word group gets a model sentence (here, unlike in the app, a fallback is an error). After regenerating, a native Filipino speaker fills in the review section of each file.
+
+**For P2-BE2-3:** `generate_plan(GroupStats(level, learner_count, common_missed_words))` returns the `draft_plan` string. Model problems (Ollama not running, model not pulled, timeout, every sentence rejected) never raise: the plan comes back as the template alone and the reason is logged as a warning. It raises `PlanError` only for bad input (unsupported language, empty level, bad learner count) or a broken template file. `generate_plan_result` returns the same text plus how it was made (`fallback_reason`, `tries`, Ollama's timings).
+
+| Setting | Default |
+|---|---|
+| `OLLAMA_MODEL` | `qwen2.5:7b` |
+| `OLLAMA_URL` | `http://127.0.0.1:11434` |
+| `OLLAMA_TIMEOUT` | `120` seconds |
