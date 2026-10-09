@@ -3,6 +3,7 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.assess import router as assess_router
 from app.books import router as books_router
@@ -30,6 +31,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Basa at Sulat engine", lifespan=lifespan)
+
+# The desktop app's dev server (http://localhost:<port>) calls the engine from another origin, which a
+# browser blocks unless the engine says it may. Only pages on this laptop are allowed, never a website;
+# a packaged app loaded from file:// doesn't need this. The pattern must match the whole origin.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1):\d+",
+    allow_methods=["GET", "POST", "PATCH"],
+    allow_headers=["content-type"],
+)
 app.include_router(assess_router)
 app.include_router(books_router)
 app.include_router(assessments_router)

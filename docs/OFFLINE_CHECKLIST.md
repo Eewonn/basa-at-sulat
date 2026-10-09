@@ -9,6 +9,7 @@ The tests for `scripts/` and the engine command line need no internet, Ollama, `
 - [ ] `python scripts/download_models.py` downloads the aligner (about 1.2 GB into `models/torch/`) and pulls `qwen2.5:7b`. Running it again says "already downloaded" for both.
 - [ ] `scripts/start.sh --check` shows no `[MISSING]` item.
 - [ ] `scripts/start.sh` opens the desktop app, the status pill shows the aligner as loaded, and a first reading is scored (the first start takes longer while the aligner loads).
+- [ ] **The app's screens show data from the engine, not mock data.** Open the app that `start.sh` launched and check that the learner and passage lists come from the database. A browser enforces CORS and the automated tests do not run one, so this is the only check that proves the page can call the engine.
 - [ ] Closing the app leaves no `python -m app` and no `ollama serve` that `start.sh` started (check the process list).
 - [ ] A fresh clone gets a database with the synthetic learners and passages on its first start.
 
