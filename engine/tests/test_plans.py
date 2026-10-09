@@ -516,7 +516,7 @@ def test_generator_writes_one_file_per_group(ollama, tmp_path):
     inputs = write_inputs(tmp_path / "inputs.json", [
         {"name": "a", "level": "Developing", "learner_count": 2,
          "common_missed_words": ["palay."]},
-        {"level": "Grade Level Ready", "learner_count": 3, "common_missed_words": []},
+        {"level": "At Grade Level", "learner_count": 3, "common_missed_words": []},
     ])
     paths = plan_examples.generate_examples(inputs, tmp_path / "out", SETTINGS)
     assert [path.name for path in paths] == ["example-1.md", "example-2.md"]

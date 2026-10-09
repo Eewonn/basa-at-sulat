@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { ToastProvider } from '@/components/ui'
+import { Splash } from '@/components/Splash'
 import { AppShell } from './AppShell'
 import { ClassScreen } from '@/screens/ClassScreen'
 import { CheckScreen } from '@/screens/CheckScreen'
@@ -29,6 +30,7 @@ function savedLang(): Lang {
 
 export function App() {
   const [lang, setLangState] = useState<Lang>(savedLang)
+  const [splash, setSplash] = useState(true)
   const setLang = (l: Lang) => {
     setLangState(l)
     try {
@@ -72,6 +74,7 @@ export function App() {
               <Route path="practice/:learnerId" element={<PracticeScreen />} />
             </Routes>
           </MemoryRouter>
+          {splash && <Splash onDone={() => setSplash(false)} />}
         </ToastProvider>
       </QueryClientProvider>
     </LangContext.Provider>

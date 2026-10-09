@@ -38,6 +38,7 @@ export function ReviewScreen() {
       save(next)
       setConfirmed(true)
       qc.invalidateQueries({ queryKey: ['stats', next.learner_id] })
+      qc.invalidateQueries({ queryKey: ['progress', next.learner_id] })
       toast(t.savedToast)
     }
   })

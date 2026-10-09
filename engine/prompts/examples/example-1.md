@@ -1,7 +1,7 @@
 # Example 1: struggling group
 
 ## Input
-- Level: Low Emerging (provisional: names are checked against CRLA in P1-BE2-2)
+- Level: Low Emerging
 - Learners: 4
 - Missed words: ng, mga, sa, siya
 - Language: fil

@@ -23,7 +23,7 @@
    "i": 2,
    "text": "ay",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 1.64,
    "end": 1.74
   },
@@ -63,7 +63,7 @@
    "i": 7,
    "text": "Puti",
    "label": "matched",
-   "score": 0.79,
+   "score": 0.61,
    "start": 3.72,
    "end": 4.0
   },
@@ -143,7 +143,7 @@
    "i": 17,
    "text": "Hinahabol",
    "label": "matched",
-   "score": 0.95,
+   "score": 0.81,
    "start": 9.61,
    "end": 10.21
   },
@@ -175,7 +175,7 @@
    "i": 21,
    "text": "bola.",
    "label": "matched",
-   "score": 0.99,
+   "score": 1.0,
    "start": 11.01,
    "end": 11.29
   },
@@ -183,9 +183,9 @@
    "i": 22,
    "text": "Pagod",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 12.01,
-   "end": 12.33
+   "end": 12.35
   },
   {
    "i": 23,
@@ -193,7 +193,7 @@
    "label": "misread",
    "score": 0.0,
    "start": 12.35,
-   "end": 12.43
+   "end": 12.45
   },
   {
    "i": 24,
@@ -207,7 +207,7 @@
    "i": 25,
    "text": "pagkatapos,",
    "label": "matched",
-   "score": 0.97,
+   "score": 0.95,
    "start": 12.83,
    "end": 13.53
   },
@@ -247,7 +247,7 @@
    "i": 30,
    "text": "tubig.",
    "label": "matched",
-   "score": 1.0,
+   "score": 0.99,
    "start": 15.66,
    "end": 16.0
   }

@@ -1,7 +1,6 @@
 """Public interface of the ai package.
 
-score() and word_timings() are real (MMS forced alignment, see aligner.py). check_word() is still a STUB
-that returns the docs/API.md shape so the engine can wire against it (P2-AI-2 replaces it).
+score(), word_timings() and check_word() all use MMS forced alignment (see aligner.py).
 """
 import math
 import time
@@ -22,6 +21,10 @@ PAUSE_SEC = 1.0  # a gap between two words at least this long is reported as a h
 # widened by these pads, but never past the midpoint to its neighbour, so clips never overlap. Inside a
 # sentence words nearly touch (median gap 0.06 s in our clean readings), so their clips meet at the midpoint;
 # at a sentence break (up to 0.8 s) the silence is left out. Starting values: check by ear (P2-AI-1).
+# check_word(): a word matches when its fit is less than this far (in total log-probability) below the model's
+# own best guess. Chosen on clips from the tuning readings (best balanced accuracy at 8.93, rounded) and
+# checked on clips from the confirmation readings; see eval/check_word_eval.py.
+MATCH_GAP_LIMIT = 9.0
 PAD_BEFORE_SEC = 0.10
 PAD_AFTER_SEC = 0.15
 
@@ -151,14 +154,31 @@ def word_timings(audio_path: str, text_: str) -> list[dict]:
     return out
 
 
-# --- stub (P2-AI-2) -----------------------------------------------------------
-
-_STUB_SCORE = 0.9
-
-
 def check_word(audio_path: str, word: str) -> dict:
-    """Sanay "Say it": did the child say this one word?
+    """Sanay "Say it": did the child say this word?
 
-    Returns {"result": "match" | "no_match", "score": 0-1}. STUB: always a match.
+    Returns {"result": "match" | "no_match", "score": 0-1}, matching when score > 0.5.
+
+    Not Basa's weakest-letter rule: a lone word isn't pinned between neighbours, so its letters can always
+    find some frames that fit a little, and silence or a different word passed that rule 75-100% of the
+    time. Instead, the fit to the word is compared with the model's own best guess (aligner.fit_gap):
+    score = 1 + gap / (2 * MATCH_GAP_LIMIT), clipped to 0-1.
+
+    On clips cut from the eval readings (eval/check_word_eval.py): correct words match 87-100% of the time
+    except with TV or other people talking in the background (26%), other words are rejected about 80% of
+    the time and silence is rejected, but a near-miss (bola -> "bula") still passes about 40% of the time.
+    So it's encouragement for practice, not an assessment.
+
+    - Several words ("mga bata") are checked together.
+    - A word with no letters the aligner knows (digits, dashes) can't be checked: "match", score 1.0.
+    - Nothing said (the model hears only silence) or audio too short to hold the word: "no_match", score 0.0.
+    - Raises if the audio file can't be read: convert to wav first.
     """
-    return {"result": "match", "score": _STUB_SCORE}
+    normalised = [n for n in (text.normalize_word(w) for w in text.split_words(word)) if n]
+    if not normalised:
+        return {"result": "match", "score": 1.0}
+    fit = aligner.fit_gap(audio_path, normalised)
+    if fit is None or fit.speech_frames == 0:  # too short, or nothing was said
+        return {"result": "no_match", "score": 0.0}
+    score = max(0.0, min(1.0, 1 + fit.gap / (2 * MATCH_GAP_LIMIT)))
+    return {"result": "match" if score > 0.5 else "no_match", "score": round(score, 2)}

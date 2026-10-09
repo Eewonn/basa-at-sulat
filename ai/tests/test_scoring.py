@@ -222,3 +222,51 @@ def test_word_timings_without_letters_never_touches_the_model(monkeypatch):
     assert scoring.word_timings("any.wav", "") == []
     assert scoring.word_timings("any.wav", "2026 —") == [
         {"i": 0, "text": "2026", "start": 0.0, "end": 0.0}, {"i": 1, "text": "—", "start": 0.0, "end": 0.0}]
+
+
+# --- check_word() with a canned fit gap ---------------------------------------------
+
+@pytest.mark.parametrize(
+    "gap, result, score",
+    [
+        (0.0, "match", 1.0),  # fits as well as the model's own best guess
+        (-8.9, "match", 0.51),
+        (-9.0, "no_match", 0.5),  # exactly at the limit is not a match
+        (-15.0, "no_match", 0.17),
+        (-40.0, "no_match", 0.0),  # clipped at 0
+    ],
+)
+def test_check_word_maps_the_fit_gap_to_a_score(monkeypatch, gap, result, score):
+    monkeypatch.setattr(aligner, "fit_gap", lambda path, words: aligner.Fit(gap=gap, speech_frames=5))
+    assert scoring.check_word("any.wav", "palay") == {"result": result, "score": score}
+
+
+def test_check_word_with_nothing_said_is_no_match_however_well_it_fits(monkeypatch):
+    # a two-letter word can't fall far behind in silence, so "nothing said" has to be checked on its own
+    monkeypatch.setattr(aligner, "fit_gap", lambda path, words: aligner.Fit(gap=-3.0, speech_frames=0))
+    assert scoring.check_word("any.wav", "si") == {"result": "no_match", "score": 0.0}
+
+
+def test_check_word_too_short_is_no_match(monkeypatch):
+    monkeypatch.setattr(aligner, "fit_gap", lambda path, words: None)
+    assert scoring.check_word("any.wav", "Tinulungan") == {"result": "no_match", "score": 0.0}
+
+
+def test_check_word_normalises_and_checks_several_words_together(monkeypatch):
+    seen = {}
+
+    def spy(path, words):
+        seen["words"] = words
+        return aligner.Fit(gap=-1.0, speech_frames=4)
+
+    monkeypatch.setattr(aligner, "fit_gap", spy)
+    assert scoring.check_word("any.wav", "Mga mag-aral,")["result"] == "match"
+    assert seen["words"] == ["mga", "magaral"]
+
+
+def test_check_word_without_letters_never_touches_the_model(monkeypatch):
+    def boom(*_):
+        raise AssertionError("the aligner should not run")
+
+    monkeypatch.setattr(aligner, "fit_gap", boom)
+    assert scoring.check_word("any.wav", "2026") == {"result": "match", "score": 1.0}
