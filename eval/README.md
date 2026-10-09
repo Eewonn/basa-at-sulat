@@ -66,3 +66,12 @@ python eval/run_eval.py --ground-truth eval/confirm_ground_truth.csv --out eval/
 ```
 
 For this set the number that counts is the **"labels from `score()`" F1** (the thresholds fixed in advance), not the tuned or held-out rows. F1 of 0.6 or better confirms the go.
+
+## Demo seed export (for Backend 2)
+`--export-dir` also writes one JSON per scored recording: `recording_id`, `passage_id`, `duration_sec`, and `score()`'s `words` (i, text, label, score, start, end) and `pauses`. No audio, no reader initials, no machine timings.
+
+```bash
+python eval/run_eval.py --reuse --export-dir eval/out/demo_checks   # from the last run's saved scores
+```
+
+These are adult test readings: fine to display, **not** evidence of accuracy, and adult speed (about 80–155 WCPM) puts every check at the top level unless `duration_sec` is set synthetically.
