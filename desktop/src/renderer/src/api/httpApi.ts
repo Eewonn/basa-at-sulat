@@ -94,6 +94,7 @@ export function createHttpApi(port: number): Api {
         body: JSON.stringify({ label })
       }),
     confirm: (id) => json<Assessment>(`/assessments/${id}/confirm`, { method: 'POST' }),
+    wordClipUrl: (assessmentId, i) => `${base}/assessments/${assessmentId}/clips/${i}`,
     learnerStats: (learnerId) => json(`/learners/${learnerId}/stats`),
     practice: async (learnerId) => (await json<{ items: PracticeItem[] }>(`/learners/${learnerId}/practice`)).items,
     clipUrl: (bookId, wordIndex) => `${base}/books/${bookId}/clips/${wordIndex}`,

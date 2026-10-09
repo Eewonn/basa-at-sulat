@@ -167,6 +167,7 @@ export interface Api {
   assess(audio: Blob, learnerId: string, passageId: string): Promise<Assessment>
   overrideWord(id: string, i: number, label: WordLabel): Promise<Assessment>
   confirm(id: string): Promise<Assessment>
+  wordClipUrl(assessmentId: string, i: number): string // the child's reading of one word, while the recording exists
   learnerStats(learnerId: string): Promise<LearnerStats>
   practice(learnerId: string): Promise<PracticeItem[]>
   clipUrl(bookId: string, wordIndex: number): string
