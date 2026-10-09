@@ -1,12 +1,35 @@
 import { spawn, spawnSync, type ChildProcess } from 'node:child_process'
 import { existsSync, mkdirSync } from 'node:fs'
-import { createServer } from 'node:net'
+import { connect, createServer } from 'node:net'
 import { join, resolve } from 'node:path'
 import { app } from 'electron'
 
-// Starts the engine (engine/, FastAPI) when the app opens, the same way scripts/launch.py does,
-// and stops it when the app quits. Settings, all optional: BASA_PYTHON, BASA_ENGINE_DIR, BASA_DATA_DIR.
+// Starts Ollama (for group plans) and the engine (engine/, FastAPI) when the app opens, the same way
+// scripts/launch.py does, and stops them when the app quits. Settings, all optional: BASA_PYTHON,
+// BASA_ENGINE_DIR, BASA_DATA_DIR, OLLAMA_URL.
 let engine: ChildProcess | null = null
+let ollama: ChildProcess | null = null // only set when we started it; an Ollama that was already running isn't ours to stop
+
+function isListening(host: string, port: number): Promise<boolean> {
+  return new Promise((done) => {
+    const socket = connect({ host, port, timeout: 1000 })
+    socket.once('connect', () => (socket.destroy(), done(true)))
+    socket.once('error', () => done(false))
+    socket.once('timeout', () => (socket.destroy(), done(false)))
+  })
+}
+
+// Without Ollama, plans still come back as the activity template, just without an example sentence.
+async function startOllama(): Promise<void> {
+  const url = new URL(process.env['OLLAMA_URL'] ?? 'http://127.0.0.1:11434')
+  const host = url.hostname
+  const port = Number(url.port || 11434)
+  if (await isListening(host, port)) return
+  const proc = spawn('ollama', ['serve'], { stdio: 'ignore', env: { ...process.env, OLLAMA_HOST: `${host}:${port}` } })
+  proc.once('error', () => console.error('[ollama] not installed: group plans will use templates'))
+  proc.once('spawn', () => (ollama = proc))
+  proc.once('exit', () => (ollama = null))
+}
 
 const engineDir = (): string => resolve(process.env['BASA_ENGINE_DIR'] ?? join(app.getAppPath(), '..', 'engine'))
 
@@ -51,6 +74,7 @@ export async function startEngine(): Promise<number | null> {
     console.error(`[engine] no engine at ${dir}; set BASA_ENGINE_DIR`)
     return null
   }
+  void startOllama()
   const python = findPython(dir)
   const dataDir = resolve(process.env['BASA_DATA_DIR'] ?? join(dir, 'storage'))
   if (!prepareDatabase(python, dir, dataDir)) return null
@@ -73,4 +97,6 @@ export async function startEngine(): Promise<number | null> {
 export function stopEngine(): void {
   engine?.kill()
   engine = null
+  ollama?.kill()
+  ollama = null
 }
