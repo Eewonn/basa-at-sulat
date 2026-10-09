@@ -14,6 +14,10 @@ word_timings(audio_path: str, text: str) -> list[dict]   # Sulat: a fluent speak
 check_word(audio_path: str, word: str) -> dict           # Sanay "Say it": {"result": "match"|"no_match", "score"}
 ```
 
+**Status:** the three functions are importable stubs (`from ai import score`). They return the contract shape with every word `matched`, so the engine can wire against them now. The real alignment replaces the bodies in P1-AI-1; the signatures won't change.
+
+Run the interface tests from `ai/`: `python -m pytest`.
+
 ## Approach (to validate in P0-AI-1)
 1. Normalize and romanize the passage (lowercase, uroman), keeping a map back to the original words.
 2. Run Meta's MMS aligner (`torchaudio.pipelines.MMS_FA`, or the Hugging Face port) on 16 kHz mono audio, giving per-frame character probabilities.
