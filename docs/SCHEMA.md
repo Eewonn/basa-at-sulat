@@ -87,7 +87,7 @@ Bad data fails at insert time with `sqlite3.IntegrityError` instead of breaking 
 
 | File | What it holds |
 |---|---|
-| [`data/learners/learners.json`](../data/learners/learners.json) | 10 synthetic learners, `l_01`–`l_10`, **initials only**, grades 1–3 |
+| [`data/learners/learners.json`](../data/learners/learners.json) | 10 synthetic learners, `l_01`–`l_10`, **made-up first names**, grades 1–3 |
 | [`data/passages/passages.json`](../data/passages/passages.json) | Basa passages (see [its README](../data/passages/README.md)) |
 
 ### How a run works

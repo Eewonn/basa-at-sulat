@@ -58,7 +58,7 @@ No recordings or learner data leave the device.
 - Pretrained MMS aligner weights (Meta AI) and Qwen 2.5 weights (Alibaba's Qwen team)
 - Open-source libraries: lucide-react icons, Radix UI primitives, and the Nunito and Patrick Hand fonts (through Fontsource)
 - Passages `fil_g2_01` and `eng_g2_01` were written by the team. `fil_g2_02` and `fil_g2_03` were drafted by Claude and checked by a native Filipino speaker on the team.
-- Seed learners are synthetic (initials only). Demo checks start from real scores on adult test readings, and some were relabelled by hand to show lower reading levels. They are for display only, not evidence of accuracy.
+- Seed learners are synthetic (made-up first names). Demo checks start from real scores on adult test readings, and some were relabelled by hand to show lower reading levels. They are for display only, not evidence of accuracy.
 - We used no children's recordings. The test audio is 23 Filipino readings by one adult team member with planted mistakes.
 
 **AI development tools:** Claude Code (Anthropic) as a coding assistant. Claude also drafted two of the test passages, which a team member then reviewed.

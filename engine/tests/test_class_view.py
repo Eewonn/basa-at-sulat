@@ -287,13 +287,13 @@ def test_export_has_a_row_for_every_learner(conn):
 
     assert len(rows) == 10
     assert rows[0] == {
-        "learner_id": "l_01", "display_name": "A.R.", "latest_check_date": "2026-10-05",
+        "learner_id": "l_01", "display_name": "Lina", "latest_check_date": "2026-10-05",
         "passage_title": rows[0]["passage_title"], "wcpm": rows[0]["wcpm"],
         "level": "Developing", "missed_count": 2,
     }
     assert rows[0]["passage_title"]
     assert rows[1] == {
-        "learner_id": "l_02", "display_name": "B.T.", "latest_check_date": None,
+        "learner_id": "l_02", "display_name": "Paolo", "latest_check_date": None,
         "passage_title": None, "wcpm": None, "level": None, "missed_count": None,
     }
 
