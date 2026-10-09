@@ -33,7 +33,7 @@ In a reading check **we already know the text**. So we only need to *line up* th
 desktop/ (Electron) ──HTTP──► engine/  (FastAPI, Python, started by the app)
  recorder, review,            ├─ ai/      MMS aligner + word scoring (PyTorch, CPU)
  Sanay, Sulat, class view     ├─ SQLite   learners, passages, results, books
-                              └─ Ollama   qwen2.5:3b for group plans
+                              └─ Ollama   qwen2.5:7b for group plans
 Everything runs on one laptop. No internet after setup.
 ```
 
@@ -79,4 +79,4 @@ python3 scripts/create_issues.py             # creates labels + issues via gh
 Planning is done and Phase 0 (the aligner test) is next. No app code exists yet.
 
 ## Disclosures (to complete before submission)
-Models and tools: Meta MMS forced aligner (**CC-BY-NC-4.0, non-commercial**), Qwen 2.5 3B via Ollama, Whisper (fallback only, if used), PyTorch, FastAPI, Electron, React, SQLite. Internet is needed only to download models once. Test audio is recorded by adult team members with planted mistakes. No children's recordings are used.
+Models and tools: Meta MMS forced aligner (**CC-BY-NC-4.0, non-commercial**), Qwen 2.5 7B Instruct via Ollama (Apache 2.0), Whisper (fallback only, if used), PyTorch, FastAPI, Electron, React, SQLite. Internet is needed only to download models once. Test audio is recorded by adult team members with planted mistakes. No children's recordings are used.

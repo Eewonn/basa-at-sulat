@@ -1,0 +1,31 @@
+{
+  "_review": "DRAFT, not yet reviewed by a native Filipino speaker. Fix the wording here; no code change is needed. $words is filled with the group's missed words.",
+  "word_practice": {
+    "title": "Hanapin ang Salita",
+    "materials": "mga kard na may nakasulat na salita, pisara",
+    "steps": [
+      "Isulat sa pisara ang mga salitang $words. Basahin ang bawat isa nang malakas at ipaulit sa mga bata.",
+      "Ilatag ang mga kard sa mesa. Sabihin ang isang salita at ipahanap ito sa isang bata.",
+      "Ipabasa sa bata ang kard na nakuha niya, at ipagamit ito sa isang maikling pangungusap."
+    ],
+    "check": "Ituro ang mga salita sa pisara nang wala sa ayos at ipabasa sa bawat bata."
+  },
+  "fluency": {
+    "title": "Sabayang Pagbasa",
+    "materials": "ang kuwentong binasa ng grupo, pisara",
+    "steps": [
+      "Basahin nang malakas ang kuwento habang sinusundan ng mga bata ang bawat salita.",
+      "Sabay-sabay na basahin ng grupo ang kuwento. Pagkatapos, pabasahin ang bawat bata ng isang pangungusap.",
+      "Magtanong tungkol sa kuwento: Sino ang tauhan? Ano ang nangyari? Ano ang paborito mong bahagi?"
+    ],
+    "check": "Ipakuwento sa bawat bata, sa sarili niyang salita, ang nangyari sa kuwento."
+  },
+  "labels": {
+    "title": "Pamagat",
+    "materials": "Kailangan",
+    "steps": "Mga Hakbang",
+    "check": "Pagsusuri",
+    "sentence": "Halimbawang pangungusap (basahin nang malakas)",
+    "and": "at"
+  }
+}

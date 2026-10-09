@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.assess import router as assess_router
+from app.routes.assessments import router as assessments_router
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
 log = logging.getLogger("engine")
@@ -26,6 +27,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Basa at Sulat engine", lifespan=lifespan)
 app.include_router(assess_router)
+app.include_router(assessments_router)
 
 
 def aligner_status() -> str:
