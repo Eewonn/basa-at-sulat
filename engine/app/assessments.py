@@ -134,6 +134,14 @@ def _check_result(conn: sqlite3.Connection, result) -> int:
     return len(passage_words)
 
 
+def validate_result(conn: sqlite3.Connection, result) -> None:
+    """Run save_assessment's checks without saving, or raise InvalidAssessmentError.
+
+    For callers that save several checks and want every one checked first.
+    """
+    _check_result(conn, result)
+
+
 # --- Reading and writing ---------------------------------------------------
 
 def get_assessment(conn: sqlite3.Connection, assessment_id: str) -> dict:

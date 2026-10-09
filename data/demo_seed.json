@@ -1,0 +1,99 @@
+{
+  "about": "Demo Basa checks for python -m app.seed --demo (see engine/app/demo_seed.py and docs/SCHEMA.md, 'Demo checks'). Each check starts from a real score() result in data/demo_checks/ (adult readers, tuning recordings), slowed to a child's pace with target_wcpm or duration_sec. Checks with 'relabel' have words changed BY HAND to reach the lower levels: they are synthetic, not model output. Display only, never accuracy evidence.",
+  "checks": [
+    {
+      "id": "demo_l01_a", "source": "fil_015", "learner_id": "l_01", "checked_at": "2026-10-05T01:10:00Z",
+      "duration_sec": 45,
+      "relabel": {
+        "misread": [0, 1, 2],
+        "skipped": [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+      },
+      "expected_level": "Low Emerging"
+    },
+    {
+      "id": "demo_l02_a", "source": "fil_001", "learner_id": "l_02", "checked_at": "2026-10-05T01:20:00Z",
+      "target_wcpm": 15,
+      "relabel": {
+        "misread": [4, 6, 8, 11, 13, 15],
+        "skipped": [12, 14, 16, 18, 19, 20, 21, 22]
+      },
+      "expected_level": "High Emerging"
+    },
+    {
+      "id": "demo_l03_a", "source": "fil_005", "learner_id": "l_03", "checked_at": "2026-09-07T01:30:00Z",
+      "target_wcpm": 18,
+      "relabel": {
+        "misread": [2, 9, 11, 14, 17],
+        "skipped": [15, 16, 18, 19, 20, 21, 22]
+      },
+      "expected_level": "High Emerging"
+    },
+    {
+      "id": "demo_l03_b", "source": "fil_008", "learner_id": "l_03", "checked_at": "2026-10-05T01:30:00Z",
+      "target_wcpm": 28,
+      "relabel": {
+        "misread": [4, 11, 14, 17],
+        "skipped": [19, 21, 22]
+      },
+      "expected_level": "Developing"
+    },
+    {
+      "id": "demo_l04_a", "source": "fil_017", "learner_id": "l_04", "checked_at": "2026-10-05T02:10:00Z",
+      "target_wcpm": 35,
+      "relabel": {
+        "misread": [7, 12, 15, 22, 27],
+        "skipped": [25, 28, 29, 30]
+      },
+      "expected_level": "Developing"
+    },
+    {
+      "id": "demo_l05_a", "source": "fil_021", "learner_id": "l_05", "checked_at": "2026-10-05T02:20:00Z",
+      "target_wcpm": 22,
+      "relabel": {
+        "misread": [3, 5, 13, 16, 20],
+        "skipped": [12, 14, 18, 21, 22, 23, 24, 25, 26, 27, 28]
+      },
+      "expected_level": "High Emerging"
+    },
+    {
+      "id": "demo_l06_a", "source": "fil_020", "learner_id": "l_06", "checked_at": "2026-10-05T02:30:00Z",
+      "target_wcpm": 32,
+      "expected_level": "Transitioning"
+    },
+    {
+      "id": "demo_l07_a", "source": "fil_011", "learner_id": "l_07", "checked_at": "2026-09-07T02:40:00Z",
+      "target_wcpm": 45,
+      "expected_level": "Transitioning"
+    },
+    {
+      "id": "demo_l07_b", "source": "fil_010", "learner_id": "l_07", "checked_at": "2026-10-05T02:40:00Z",
+      "target_wcpm": 55,
+      "expected_level": "At Grade Level"
+    },
+    {
+      "id": "demo_l08_a", "source": "fil_019", "learner_id": "l_08", "checked_at": "2026-10-05T03:10:00Z",
+      "target_wcpm": 62,
+      "expected_level": "Transitioning"
+    },
+    {
+      "id": "demo_l09_a", "source": "fil_018", "learner_id": "l_09", "checked_at": "2026-09-07T03:20:00Z",
+      "target_wcpm": 58,
+      "expected_level": "Transitioning"
+    },
+    {
+      "id": "demo_l09_b", "source": "fil_016", "learner_id": "l_09", "checked_at": "2026-10-05T03:20:00Z",
+      "target_wcpm": 70,
+      "expected_level": "At Grade Level"
+    },
+    {
+      "id": "demo_l10_a", "source": "fil_012", "learner_id": "l_10", "checked_at": "2026-09-07T03:30:00Z",
+      "target_wcpm": 60,
+      "expected_level": "Transitioning"
+    },
+    {
+      "id": "demo_l10_b", "source": "fil_004", "learner_id": "l_10", "checked_at": "2026-10-05T03:30:00Z",
+      "target_wcpm": 75,
+      "expected_level": "At Grade Level"
+    }
+  ]
+}

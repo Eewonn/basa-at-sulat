@@ -36,6 +36,7 @@ Nobody waits on the result. The AI engineer runs the test while everyone else bu
 - [x] **P1-BE1-2** · Audio retention — owner: backend-1 · depends: P1-BE1-1 · done when: a child's audio is deleted when the teacher confirms, unless a keep flag is set, with a test proving the file is gone
 - [x] **P1-BE2-1** · Save results and overrides — owner: backend-2 · depends: P0-BE2-1, P1-BE1-1 · done when: assessments and word results are stored, and `PATCH /assessments/{id}/words/{i}` records teacher overrides and recomputes the score
 - [x] **P1-BE2-2** · Reading speed and level — owner: backend-2 · depends: P1-BE2-1 · done when: words correct per minute and a reading level are computed from final (overridden) results, with level names checked against DepEd's current CRLA profiles
+- [ ] **P1-BE2-3** · Demo checks seed — owner: backend-2 · depends: P1-BE2-2 · done when: `python -m app.seed --demo` loads confirmed demo checks from `data/demo_checks/` (PR #16) mapped to the synthetic learners, with every reading level and at least one before-and-after pair shown, ids prefixed `demo_` and hand-edited checks documented as synthetic
 - [ ] **P1-FE-1** · Review screen on the real API — owner: frontend · depends: P0-FE-3, P1-BE1-1 · done when: the review screen works end-to-end against the engine, including overrides and confirmation
 - [ ] **P1-FE-2** · Learner and passage pickers — owner: frontend · depends: P0-BE2-2 · done when: the teacher can pick a learner and a passage before recording
 
