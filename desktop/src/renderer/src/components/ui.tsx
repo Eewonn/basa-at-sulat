@@ -30,9 +30,6 @@ export function LevelChip({ level, onDark = false }: { level?: Level | null; onD
   )
 }
 
-export function SampleBadge({ label }: { label: string }) {
-  return <span className="sample-badge rounded-full bg-side px-3 py-1 text-xs font-bold text-muted">{label}</span>
-}
 
 const AVATAR_COLORS = ['bg-blue', 'bg-coral', 'bg-teal', 'bg-purple']
 

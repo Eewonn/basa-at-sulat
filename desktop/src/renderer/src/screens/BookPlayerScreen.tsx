@@ -9,7 +9,7 @@ import { useT } from '@/strings'
 import { CATEGORY_EMOJI } from './CheckScreen'
 import { COVER } from './BooksScreen'
 
-// Plays a book with word highlighting. Books without real audio run on a simulated clock.
+// Plays a book with word highlighting that follows its model reading.
 export function BookPlayerScreen() {
   const t = useT()
   const navigate = useNavigate()
@@ -18,43 +18,28 @@ export function BookPlayerScreen() {
   const [playing, setPlaying] = useState(false)
   const [time, setTime] = useState(0)
   const audio = useRef<HTMLAudioElement>(null)
-  const clock = useRef<{ startedAt: number; offset: number }>({ startedAt: 0, offset: 0 })
 
+  // The highlight follows the real model reading's playback position.
   useEffect(() => {
     if (!playing) return
     let raf = 0
-    clock.current.startedAt = performance.now()
     const tick = () => {
-      const now = audio.current && book?.audio_url ? audio.current.currentTime : clock.current.offset + (performance.now() - clock.current.startedAt) / 1000
-      setTime(now)
-      if (!book?.audio_url && book?.duration_sec && now >= book.duration_sec) {
-        // Reset the simulated clock so the next Play starts from the beginning.
-        clock.current.offset = 0
-        clock.current.startedAt = performance.now()
-        setPlaying(false)
-        return
-      }
+      if (audio.current) setTime(audio.current.currentTime)
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
-    return () => {
-      cancelAnimationFrame(raf)
-      clock.current.offset += (performance.now() - clock.current.startedAt) / 1000
-    }
-  }, [playing, book])
+    return () => cancelAnimationFrame(raf)
+  }, [playing])
 
   if (!book) return null
 
   const toggle = () => {
-    if (book.audio_url && audio.current) {
-      if (playing) audio.current.pause()
-      else void audio.current.play()
-    }
+    if (!audio.current) return
+    if (playing) audio.current.pause()
+    else void audio.current.play()
     setPlaying(!playing)
   }
   const seek = (s: number) => {
-    clock.current.offset = s
-    clock.current.startedAt = performance.now()
     if (audio.current) audio.current.currentTime = s
     setTime(s)
   }
@@ -83,7 +68,7 @@ export function BookPlayerScreen() {
       {book.audio_url && <audio ref={audio} src={book.audio_url} onEnded={() => setPlaying(false)} />}
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        {book.has_recording && (
+        {book.audio_url && (
           <>
             <button
               onClick={toggle}
@@ -106,8 +91,7 @@ export function BookPlayerScreen() {
         >
           <Mic className="size-5" aria-hidden /> {t.useInBasa}
         </button>
-        {book.has_recording && !book.audio_url && <span className="text-sm font-semibold text-muted">{t.sampleTiming}</span>}
-        {!book.has_recording && <span className="rounded-full bg-sun-soft px-3 py-1 text-sm font-extrabold text-[#6b4f00]">{t.noRecording}</span>}
+        {!book.audio_url && <span className="rounded-full bg-sun-soft px-3 py-1 text-sm font-extrabold text-[#6b4f00]">{t.noRecording}</span>}
       </div>
     </div>
   )

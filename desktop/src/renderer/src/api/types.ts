@@ -161,7 +161,6 @@ export interface ClassGroup {
 }
 
 export interface Api {
-  mode: 'mock' | 'engine'
   health(): Promise<Health>
   learners(): Promise<Learner[]>
   passages(): Promise<Passage[]>
@@ -170,7 +169,7 @@ export interface Api {
   confirm(id: string): Promise<Assessment>
   learnerStats(learnerId: string): Promise<LearnerStats>
   practice(learnerId: string): Promise<PracticeItem[]>
-  clipUrl(bookId: string, wordIndex: number): string | null
+  clipUrl(bookId: string, wordIndex: number): string
   progress(learnerId: string): Promise<Progress>
   checkWord(audio: Blob, word: string, learnerId: string): Promise<{ result: 'match' | 'no_match' }>
   recentChecks(): Promise<RecentCheck[]>
@@ -178,7 +177,7 @@ export interface Api {
   book(id: string): Promise<Book>
   createBook(book: NewBook, audio: Blob, durationSec: number): Promise<Book>
   classGroups(refresh?: boolean): Promise<ClassGroup[]>
-  exportCsv: (() => Promise<Blob>) | null // GET /class/export.csv; null with sample data
+  exportCsv(): Promise<Blob> // GET /class/export.csv
   storage(): Promise<Storage | null> // null until the engine reports it
   deleteAllAudio(): Promise<{ deleted: number }>
   addLearner(name: string): Promise<Learner>

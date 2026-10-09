@@ -23,11 +23,10 @@ Frontend work is defined by `docs/API.md` (the contract) and the mockups in the 
 
 **Frontend-owned Electron main process (small):** open the window (minimum 1280×720), allow the microphone for our own page only, block navigation to the outside, start the engine with a free port and pass the port to the interface through preload, and stop the engine on quit. Backend 1 provides the engine start command; the main process just calls it.
 
-## 2. Mock-first workflow (never blocked on the backend)
-- `src/renderer/api/` holds one interface with **two implementations**: `mockApi` (reads `docs/api/assess.example.json` plus fixtures, with fake delays) and `httpApi` (the real engine).
-- A switch picks between them: `VITE_API=mock|real`, or automatically "mock if the engine isn't reachable" in dev.
-- Fixtures cover every state: a perfect reading, many mistakes, a silent recording, an engine error, and a slow response (to test loading).
-- **Result:** every screen gets built and polished before the backend exists, and swapping to real is one setting.
+## 2. Real data only
+- `src/renderer/src/api/` holds one interface and one implementation, `httpApi` (the engine). The early sample-data client was removed on 2026-10-10: the app shows only what the engine computed or the teacher entered.
+- Without an engine port the app shows an "engine not running" screen. For demo data, run `python -m app.seed --demo` in `engine/` (its hand-relabeled checks are synthetic; see `data/demo_seed.json`).
+- A route that is still a proposal in `docs/API.md` hides its feature until the engine has it. Never fill it with a default or placeholder value.
 
 ## 3. Information architecture
 **Teacher mode** has a sidebar with:
@@ -127,7 +126,7 @@ Bright color-block cards, rounded type, a warm sidebar with a blue header and an
 - **First run** (`screens/WelcomeScreen.tsx`, route `/welcome`): Taw introduces the app, the teacher enters their name and section, and the microphone is tested with a live meter (with the Windows/Linux fix-it text on failure). Shown until `localStorage.setupDone`; Settings → About can replay it.
 - **Klase:** search, filter chips (Lahat / Kailangan ng practice / Hindi pa na-check) and a **"Susunod na babasa"** button that opens the next learner due a check (never-checked first). The "due" rule lives in `lib/due.ts` and is shared with the Basa tab.
 - **"Bakit na-flag?"** in the Resulta word popover explains each flag in plain words (weak sound match with its %, almost no voice, pause length) and reminds the teacher they make the final call.
-- **Presentation mode** (`Ctrl+Shift+P`): large text, hides "Sample data" badges, and shows a "Presentation" chip in the status pill. For demos only.
+- **Presentation mode** (`Ctrl+Shift+P`): large text and a "Presentation" chip in the status pill. For demos only.
 
 ## 7. Component inventory
 - **Layout:** `AppShell`, `Sidebar`, `StatusPill`, `KidModeShell` (with hold-to-exit)

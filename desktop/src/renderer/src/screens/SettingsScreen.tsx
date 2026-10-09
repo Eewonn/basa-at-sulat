@@ -10,7 +10,7 @@ import { LangContext, useT } from '@/strings'
 
 const MODELS = [
   { name: 'Meta MMS forced aligner', role: 'Basa · Sanay · Sulat', license: 'CC-BY-NC-4.0' },
-  { name: 'Qwen 2.5 3B (Ollama)', role: 'Group plans', license: 'See model card' }
+  { name: 'Qwen 2.5 7B Instruct (Ollama qwen2.5:7b)', role: 'Group plans', license: 'Apache-2.0' }
 ]
 
 function Card({ title, icon, children, index = 0 }: { title: string; icon: ReactNode; children: ReactNode; index?: number }) {

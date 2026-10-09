@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { ToastProvider } from '@/components/ui'
 import { Splash } from '@/components/Splash'
+import { EngineGate } from '@/components/EngineGate'
 import { AppShell } from './AppShell'
 import { ClassScreen } from '@/screens/ClassScreen'
 import { CheckScreen } from '@/screens/CheckScreen'
@@ -56,24 +57,26 @@ export function App() {
     <LangContext.Provider value={{ lang, setLang }}>
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
-          <MemoryRouter initialEntries={[isSetupDone() ? '/' : '/welcome']}>
-            <Routes>
-              <Route element={<AppShell />}>
-                <Route index element={<ClassScreen />} />
-                <Route path="learner/:learnerId" element={<LearnerScreen />} />
-                <Route path="check" element={<BasaScreen />} />
-                <Route path="check/:learnerId" element={<CheckScreen />} />
-                <Route path="review/:assessmentId" element={<ReviewScreen />} />
-                <Route path="books" element={<BooksScreen />} />
-                <Route path="books/new" element={<BookEditorScreen />} />
-                <Route path="books/:bookId" element={<BookPlayerScreen />} />
-                <Route path="settings" element={<SettingsScreen />} />
-              </Route>
-              {/* Full screen, no sidebar: first run and kid mode. */}
-              <Route path="welcome" element={<WelcomeScreen />} />
-              <Route path="practice/:learnerId" element={<PracticeScreen />} />
-            </Routes>
-          </MemoryRouter>
+          <EngineGate>
+            <MemoryRouter initialEntries={[isSetupDone() ? '/' : '/welcome']}>
+              <Routes>
+                <Route element={<AppShell />}>
+                  <Route index element={<ClassScreen />} />
+                  <Route path="learner/:learnerId" element={<LearnerScreen />} />
+                  <Route path="check" element={<BasaScreen />} />
+                  <Route path="check/:learnerId" element={<CheckScreen />} />
+                  <Route path="review/:assessmentId" element={<ReviewScreen />} />
+                  <Route path="books" element={<BooksScreen />} />
+                  <Route path="books/new" element={<BookEditorScreen />} />
+                  <Route path="books/:bookId" element={<BookPlayerScreen />} />
+                  <Route path="settings" element={<SettingsScreen />} />
+                </Route>
+                {/* Full screen, no sidebar: first run and kid mode. */}
+                <Route path="welcome" element={<WelcomeScreen />} />
+                <Route path="practice/:learnerId" element={<PracticeScreen />} />
+              </Routes>
+            </MemoryRouter>
+          </EngineGate>
           {splash && <Splash onDone={() => setSplash(false)} />}
         </ToastProvider>
       </QueryClientProvider>

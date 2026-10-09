@@ -10,17 +10,18 @@ import { Emoji } from '@/components/Emoji'
 import { Sparkline } from '@/components/Sparkline'
 import { Tamaraw } from '@/components/Tamaraw'
 import { LevelChip, StatCard } from '@/components/ui'
-import { daysSince, useT } from '@/strings'
+import { daysSince, localIso, useT } from '@/strings'
 
 const INK = '#6B3FA0'
 
 // A loyalty-card style grid of the last 14 days: a violet stamp for every day the child read.
 function ReadingCard({ name, days, streak }: { name: string; days: string[]; streak: number }) {
   const t = useT()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = localIso()
   const cells = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(Date.now() - (13 - i) * 86_400_000)
-    const iso = d.toISOString().slice(0, 10)
+    const d = new Date()
+    d.setDate(d.getDate() - (13 - i))
+    const iso = localIso(d)
     return { iso, day: d.getDate(), read: days.includes(iso), today: iso === today }
   })
   return (

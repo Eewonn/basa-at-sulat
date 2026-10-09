@@ -192,12 +192,6 @@ export function PracticeScreen() {
     if (item.book_id === null || item.word_index === null) return
     const url = api.clipUrl(item.book_id, item.word_index)
     setPhase('hearing')
-    if (!url) {
-      // Sample data has no recordings, so just show the button working.
-      sfx.pop()
-      setTimeout(() => setPhase('ready'), 900)
-      return
-    }
     const audio = new Audio(url)
     const done = () => setPhase('ready')
     audio.onended = done
@@ -260,7 +254,7 @@ export function PracticeScreen() {
         <div ref={counter} className="flex items-center gap-2 rounded-full bg-white py-2 pr-5 pl-3 shadow-soft">
           <Emoji name="star" size={32} />
           <span key={stats?.stars} className="animate-pop text-2xl font-black text-navy tabular-nums">
-            {stats?.stars ?? 0}
+            {stats?.stars}
           </span>
         </div>
         {step !== 'done' && <StonePath total={items.length} at={index} />}

@@ -70,9 +70,10 @@ Marks the assessment final (`status: "confirmed"`) and deletes the child's audio
 A file that is already gone counts as deleted.
 
 ## Learners and passages
-- `GET /assessments/recent` → `[{"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}]`: the 10 most recently confirmed checks, newest first (`date` is `YYYY-MM-DD`, UTC). For the Basa tab.
-- `GET /learners` → `[{"id", "display_name", "grade", "level", "latest_wcpm", "last_check", "needs_practice"}]`, by `id` (display names are synthetic or initials only)
-  - The last four come from the learner's latest **confirmed** check (same "latest" as practice and `/class`): its `level`, its `wcpm`, its date (`YYYY-MM-DD`, UTC) and whether it has any `misread` or `skipped` word. They are left out for a learner with no confirmed check.
+- `GET /assessments/recent` → `[{"assessment_id", "learner_id", "display_name", "date", "passage_title", "wcpm"}]`: the 10 most recently confirmed checks, newest first (`date` is `YYYY-MM-DD` in the laptop's time zone). For the Basa tab.
+- `GET /learners` → `[{"id", "display_name", "grade", "stars", "streak_days", "level", "latest_wcpm", "last_check", "needs_practice"}]`, by `id` (display names are synthetic or initials only)
+  - `stars` and `streak_days` are the same counts as in `/learners/{id}/stats`.
+  - The last four come from the learner's latest **confirmed** check (same "latest" as practice and `/class`): its `level`, its `wcpm`, its date (`YYYY-MM-DD`, in the laptop's time zone) and whether it has any `misread` or `skipped` word. They are left out for a learner with no confirmed check.
 - `GET /passages` → `[{"id", "title", "language", "grade", "text"}]`
 
 ## Sulat: books
@@ -101,7 +102,13 @@ A file that is already gone counts as deleted.
   - Words are the ones the teacher left as `misread` or `skipped` (final labels), in passage order, once each, with surrounding punctuation removed. `sentence` is the passage sentence the word was missed in.
   - `book_id` / `word_index` point at the first timed occurrence of the word in a Sulat book of the same language, for `GET /books/{id}/clips/{i}`. Both are `null` when no book has the word.
   - `{"items": []}` when the learner has no confirmed check (drafts are not practised). `404` for an unknown learner.
-- `POST /practice/check`: multipart form with `audio` and `word`. Returns `{"word", "result": "match" | "no_match", "score"}`. The recording is used only for this answer and never kept. Errors: `400` if the audio can't be read, `422` if `word` is missing or blank, `503` if the scoring model isn't installed, `500` if checking fails.
+- `POST /practice/check`: multipart form with `audio`, `word` and optional `learner_id`. Returns `{"word", "result": "match" | "no_match", "score"}`. The recording is used only for this answer and never kept.
+  - With `learner_id`, the attempt is saved in `practice_attempts`, linked to the learner's latest confirmed check (the one their practice set comes from). A learner with no confirmed check has nothing to practise, so nothing is saved.
+  - Errors: `400` if the audio can't be read, `404` for an unknown `learner_id`, `422` if `word` is missing or blank, `503` if the scoring model isn't installed, `500` if checking fails.
+- `GET /learners/{id}/stats` → `{"stars", "streak_days", "minutes_read", "wcpm_history": [{"date", "wcpm"}], "practicing": ["palay", ...], "days_read": ["2026-10-10", ...]}`, all counted from saved rows
+  - `stars`: Sanay attempts with `result: "match"`. `days_read`: days with a confirmed check or a Sanay attempt. `streak_days`: consecutive days read up to today (a streak that ended yesterday still counts).
+  - `minutes_read`: recording time of confirmed checks, rounded (Sanay attempts don't store their length). `wcpm_history`: every confirmed check, oldest first. `practicing`: the words of `/learners/{id}/practice`.
+  - Dates are in the laptop's time zone (the engine and app run on the same laptop). Drafts are ignored. `404` for an unknown learner.
 - `GET /learners/{id}/progress` → `{"checks": [{"assessment_id", "passage_id", "confirmed_at", "wcpm", "level"}, ...], "words": [{"i", "text", "before", "after"}], "wcpm_before", "wcpm_after", "wcpm_change"}`
   - Compares the learner's latest two **confirmed** checks **on the same passage**: the newest check that has an earlier one on its passage, and the newest of those earlier ones. `checks` is `[before, after]`. If the newest check is on a passage read only once, an older pair is used, so `after` is not always the learner's latest check.
   - `words` lists every passage word in passage order, one per position (repeats are not merged), with `text` as written (punctuation kept). `before`/`after` are the teacher's final labels (`matched`, `misread`, `skipped`), or `null` if that check has no result for the word.
@@ -122,12 +129,8 @@ A file that is already gone counts as deleted.
   - UTF-8 with a BOM, so Excel shows ñ and accents. A text cell starting with `=`, `+`, `-` or `@` gets a leading `'` so Excel doesn't run it as a formula.
 
 ## Proposed by frontend (needs team agreement)
-These support the learner profile and story categories. Until the engine implements them, the app uses sample data for them.
+Until the engine implements these, the app hides what depends on them, or keeps what the teacher typed (class settings, a book's category and reader) on the laptop. It never shows sample data.
 - `category` on every passage: `"bukid" | "pamilya" | "hayop" | "kalikasan" | "paaralan"`
-- `GET /learners` items also include `stars` and `streak_days` (for the class summary cards)
-- `GET /learners/{id}/stats` → `{"stars", "streak_days", "minutes_read", "wcpm_history": [{"date", "wcpm"}], "practicing": ["palay", ...], "days_read": ["2026-10-10", ...]}` (`days_read` = dates with a check or practice, for the reading card)
-  - stars = words gotten right in Sanay; streak = consecutive days with a check or practice; minutes = recording time
-- `POST /practice/check` also takes `learner_id`, so a correct word can earn a star
 - `GET /books` items and `GET /books/{id}` also include `category`, `reader` and `duration_sec`; `POST /books` also takes `category` and `reader`, and its story becomes a passage
 - `GET /storage` → `{"audio_files", "audio_mb", "db_mb", "data_dir"}`; `DELETE /audio` deletes all children's recordings (book readings are kept) → `{"deleted"}`
 - `POST /learners` `{"display_name"}` and `PATCH /learners/{id}` `{"display_name"}` (Settings → Klase)
@@ -138,6 +141,12 @@ These support the learner profile and story categories. Until the engine impleme
   - `models.aligner` is `loaded` or `not_loaded`; `models.ollama` is `up` or `down`. The engine reports `not_loaded` until the aligner is in memory (after the first `/assess`, or at startup with `BASA_WARM_UP=1`). `ollama` is `up` if Ollama answers at `OLLAMA_URL` within 1 s; it doesn't check that the model is pulled.
 
 ## Contract changes
+
+### 2026-10-10 · frontend (real stats)
+- `GET /learners/{id}/stats` is live (it was a proposal), counted from saved checks and Sanay attempts.
+- `POST /practice/check` takes `learner_id` and saves the attempt; `404` for an unknown learner.
+- `GET /learners` items include `stars` and `streak_days`.
+- `last_check` in `/learners` and `date` in `/assessments/recent` are now the laptop's local day, not the UTC day (in Manila a check before 8 am showed as the day before).
 
 ### 2026-10-10 · frontend (wiring the app to the engine)
 - `GET /learners` and `GET /passages` are live, ordered by `id`. **Addition:** learners with a confirmed check also carry `level`, `latest_wcpm`, `last_check` and `needs_practice`.
