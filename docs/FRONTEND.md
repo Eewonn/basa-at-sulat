@@ -99,6 +99,10 @@ Bright color-block cards, rounded type, a warm sidebar with a blue header and an
 - **Type:** Nunito (rounded, bundled), weights 700–900 for headings. Scale: 14 / 16 / 20 / 28 / 40 / 56 / 120.
 - **Shape:** 20px radius on cards, 14px on tiles, pill buttons, a soft shadow plus a lift on hover.
 - **Illustrations:** our own SVG set (`components/Art.tsx`) in Taw's style: flat shapes, soft highlights, no outlines. Stock emoji were dropped because they made the app look generic. Lucide stays only for small utility glyphs (arrows, check, pause, volume).
+- **Classroom craft (signature elements, used sparingly):**
+  - the teacher's violet **"VG / Very Good!" stamp** (`components/Stamp.tsx`) on the Sanay finish and on Resulta after I-confirm, with a soft stamp sound in kid mode
+  - the Sanay word on a **manila-paper flashcard** with ruled lines, a red margin and ring holes (`flashcard` utility)
+  - the profile's **reading card**: one violet stamp per day read over the last 14 days, replacing a generic streak number
 - **Mascot:** an original tamaraw (`components/Tamaraw.tsx`, pure SVG) with moods idle / happy / listening / encourage / thinking. It appears in the sidebar, the processing screen, Sanay, the Done screen and empty states. Its name lives in `strings.ts` (`mascotName`, currently "Taw").
 - **Gamification:** stat cards (stars collected, days read in a row, time spent reading) on the learner profile, and story categories (Bukid, Pamilya, Hayop, Kalikasan, Paaralan) in the Check flow. No badges and no levels, on purpose.
 - **Accessibility:** status is never shown by color alone (word labels have text and icons); full keyboard use in teacher mode (Space = record, Enter = confirm); `prefers-reduced-motion` respected.

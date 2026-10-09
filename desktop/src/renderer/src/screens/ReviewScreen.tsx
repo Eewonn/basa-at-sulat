@@ -6,6 +6,7 @@ import { api } from '@/api'
 import { Art } from '@/components/Art'
 import type { Assessment, Learner, WordLabel } from '@/api/types'
 import { CountUp } from '@/components/CountUp'
+import { Stamp } from '@/components/Stamp'
 import { Tamaraw } from '@/components/Tamaraw'
 import { WordChip } from '@/components/WordChip'
 import { LevelChip, useToast } from '@/components/ui'
@@ -103,8 +104,9 @@ export function ReviewScreen() {
         <div className="mt-auto flex flex-col gap-2">
           {confirmed ? (
             <>
-              <div className="flex justify-center">
-                <Tamaraw mood="happy" size={110} />
+              <div className="flex items-end justify-center gap-2">
+                <Tamaraw mood="happy" size={90} />
+                <Stamp size={120} />
               </div>
               <button
                 onClick={() => navigate(`/practice/${a.learner_id}`)}

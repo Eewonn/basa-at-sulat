@@ -7,6 +7,7 @@ import { isMuted, setMuted, sfx } from '@/audio/sfx'
 import { useRecorder } from '@/audio/useRecorder'
 import { Confetti, ConfettiRain } from '@/components/Confetti'
 import { Emoji } from '@/components/Emoji'
+import { Stamp } from '@/components/Stamp'
 import { LiveWaveform } from '@/components/LiveWaveform'
 import { Tamaraw, type Mood } from '@/components/Tamaraw'
 import { useT } from '@/strings'
@@ -146,9 +147,8 @@ export function PracticeScreen() {
     doneRef.current = true
     setBubble(t.kidDone(name))
     sfx.fanfare()
-    const shown = Math.max(1, Math.min(earned, 5))
-    const timers = Array.from({ length: shown }, (_, i) => setTimeout(sfx.sparkle, 700 + i * 260))
-    return () => timers.forEach(clearTimeout)
+    const timer = setTimeout(sfx.stamp, 850)
+    return () => clearTimeout(timer)
   }, [step, earned, name, t])
 
   if (!items) return <div className="h-full bg-kid" />
@@ -261,10 +261,14 @@ export function PracticeScreen() {
             <div
               ref={card}
               key={`${index}-${phase === 'retry' ? 'r' : ''}`}
-              className={`relative flex min-w-[480px] flex-col items-center rounded-[28px] bg-white px-16 py-10 shadow-lift ${
+              className={`flashcard relative flex min-w-[480px] flex-col items-center rounded-[10px] px-16 pt-12 pb-8 shadow-lift ${
                 phase === 'correct' ? 'ring-4 ring-teal' : ''
               } ${phase === 'retry' ? 'animate-shake ring-4 ring-coral' : 'animate-pop'}`}
             >
+              <span className="absolute top-3 left-1/2 flex -translate-x-1/2 gap-24" aria-hidden>
+                <span className="size-4 rounded-full bg-kid shadow-[inset_0_2px_3px_rgba(30,42,90,0.35)]" />
+                <span className="size-4 rounded-full bg-kid shadow-[inset_0_2px_3px_rgba(30,42,90,0.35)]" />
+              </span>
               {phase === 'correct' && <Confetti key={burst} count={comboShown ? 44 : 28} />}
               {comboShown >= 2 && (
                 <span className="absolute -top-6 right-6 flex animate-pop items-center gap-1 rounded-full bg-sun px-4 py-2 text-xl font-black text-navy shadow-lift">
@@ -335,13 +339,7 @@ export function PracticeScreen() {
             {bubble && <Bubble text={bubble} />}
             <Tamaraw mood="happy" size={220} dance />
           </div>
-          <div className="relative z-20 flex gap-3">
-            {Array.from({ length: Math.max(1, Math.min(earned, 5)) }, (_, i) => (
-              <span key={i} className="animate-land" style={{ animationDelay: `${700 + i * 260}ms` }}>
-                <Emoji name="star" size={72} />
-              </span>
-            ))}
-          </div>
+          <Stamp size={190} className="relative z-20 -my-4" />
           <div className="relative z-20 text-center">
             <p className="text-6xl font-black text-navy">{t.done}</p>
             <p className="mt-3 flex items-center justify-center gap-2 text-2xl font-extrabold text-body">

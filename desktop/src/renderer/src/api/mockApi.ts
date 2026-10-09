@@ -66,13 +66,16 @@ const LEARNERS: Learner[] = [
   { id: 'l_06', display_name: 'Ana', grade: 2 }
 ]
 
+// Reading days: the current streak (ending today) plus a few earlier days.
+const readDays = (streak: number, earlier: number[]) => [...Array.from({ length: streak }, (_, i) => daysAgo(i)), ...earlier.map(daysAgo)]
+
 const STATS: Record<string, LearnerStats> = {
-  l_01: { stars: 12, streak_days: 3, minutes_read: 25, practicing: ['palay', 'ng', 'kanyang'], wcpm_history: series([41, 46, 44, 52, 58]) },
-  l_02: { stars: 20, streak_days: 5, minutes_read: 41, practicing: ['Tinulungan'], wcpm_history: series([55, 60, 63, 66]) },
-  l_03: { stars: 31, streak_days: 7, minutes_read: 64, practicing: [], wcpm_history: series([70, 74, 79, 82]) },
-  l_04: { stars: 4, streak_days: 1, minutes_read: 9, practicing: ['Nagtanim', 'bukid', 'mangga'], wcpm_history: series([18, 22, 27]) },
-  l_05: { stars: 9, streak_days: 2, minutes_read: 18, practicing: ['palay', 'Pagkatapos'], wcpm_history: series([38, 43, 49]) },
-  l_06: { stars: 0, streak_days: 0, minutes_read: 0, practicing: [], wcpm_history: [] }
+  l_01: { stars: 12, streak_days: 3, minutes_read: 25, practicing: ['palay', 'ng', 'kanyang'], wcpm_history: series([41, 46, 44, 52, 58]), days_read: readDays(3, [5, 6, 9, 12]) },
+  l_02: { stars: 20, streak_days: 5, minutes_read: 41, practicing: ['Tinulungan'], wcpm_history: series([55, 60, 63, 66]), days_read: readDays(5, [7, 8, 11]) },
+  l_03: { stars: 31, streak_days: 7, minutes_read: 64, practicing: [], wcpm_history: series([70, 74, 79, 82]), days_read: readDays(7, [8, 9, 10, 12, 13]) },
+  l_04: { stars: 4, streak_days: 1, minutes_read: 9, practicing: ['Nagtanim', 'bukid', 'mangga'], wcpm_history: series([18, 22, 27]), days_read: readDays(1, [4, 10]) },
+  l_05: { stars: 9, streak_days: 2, minutes_read: 18, practicing: ['palay', 'Pagkatapos'], wcpm_history: series([38, 43, 49]), days_read: readDays(2, [9]) },
+  l_06: { stars: 0, streak_days: 0, minutes_read: 0, practicing: [], wcpm_history: [], days_read: [] }
 }
 
 function series(values: number[]) {
@@ -241,12 +244,13 @@ export const mockApi: Api = {
       s.minutes_read += Math.max(1, Math.round(a.duration_sec / 60))
       s.practicing = next.words.filter((w) => w.label !== 'matched').map((w) => clean(w.text))
       if (s.streak_days === 0) s.streak_days = 1
+      if (!s.days_read.includes(daysAgo(0))) s.days_read.push(daysAgo(0))
     }
     return next
   },
   async learnerStats(learnerId) {
     await sleep(200)
-    return structuredClone(STATS[learnerId] ?? { stars: 0, streak_days: 0, minutes_read: 0, wcpm_history: [], practicing: [] })
+    return structuredClone(STATS[learnerId] ?? { stars: 0, streak_days: 0, minutes_read: 0, wcpm_history: [], practicing: [], days_read: [] })
   },
   async practice(learnerId) {
     missedThisSession.delete(learnerId)
@@ -310,7 +314,7 @@ export const mockApi: Api = {
     const id = `l_${String(LEARNERS.length + 1).padStart(2, '0')}`
     const l: Learner = { id, display_name: name, grade: 2 }
     LEARNERS.push(l)
-    STATS[id] = { stars: 0, streak_days: 0, minutes_read: 0, wcpm_history: [], practicing: [] }
+    STATS[id] = { stars: 0, streak_days: 0, minutes_read: 0, wcpm_history: [], practicing: [], days_read: [] }
     return l
   },
   async renameLearner(id, name) {

@@ -62,6 +62,12 @@ export const sfx = {
     play(() => {
       ;[C5, E5, G5, C6, E6].forEach((f, i) => tone(f, i * 0.06, 0.2, 'triangle', 0.12))
     }),
+  // A soft rubber-stamp "thud".
+  stamp: () =>
+    play(() => {
+      tone(150, 0, 0.16, 'sine', 0.3, 60)
+      tone(90, 0.01, 0.12, 'triangle', 0.12, 50)
+    }),
   fanfare: () =>
     play(() => {
       ;[C5, E5, G5].forEach((f, i) => tone(f, i * 0.14, 0.22, 'triangle', 0.15))

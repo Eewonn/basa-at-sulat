@@ -49,6 +49,7 @@ export interface LearnerStats {
   minutes_read: number
   wcpm_history: { date: string; wcpm: number }[]
   practicing: string[]
+  days_read: string[]
 }
 
 export type Category = 'bukid' | 'pamilya' | 'hayop' | 'kalikasan' | 'paaralan'

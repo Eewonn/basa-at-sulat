@@ -11,6 +11,51 @@ import { Tamaraw } from '@/components/Tamaraw'
 import { LevelChip, StatCard } from '@/components/ui'
 import { useT } from '@/strings'
 
+const INK = '#6B3FA0'
+
+// A loyalty-card style grid of the last 14 days: a violet stamp for every day the child read.
+function ReadingCard({ name, days, streak }: { name: string; days: string[]; streak: number }) {
+  const t = useT()
+  const today = new Date().toISOString().slice(0, 10)
+  const cells = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(Date.now() - (13 - i) * 86_400_000)
+    const iso = d.toISOString().slice(0, 10)
+    return { iso, day: d.getDate(), read: days.includes(iso), today: iso === today }
+  })
+  return (
+    <div className="stagger flex min-h-52 flex-col rounded-card bg-white p-6 shadow-soft ring-1 ring-line" style={{ '--i': 0 } as CSSProperties}>
+      <div className="flex items-baseline justify-between gap-3">
+        <p className="text-xl font-black text-navy">{t.readingCard(name)}</p>
+        <p className="text-sm font-bold text-muted">{t.last14}</p>
+      </div>
+      <p className="mt-1 flex items-center gap-1.5 font-extrabold text-[#5a3290]">
+        <Emoji name="fire" size={22} /> {t.readingStreak(streak)}
+      </p>
+      <div className="mt-4 grid grid-cols-7 gap-x-2 gap-y-3">
+        {cells.map((c, i) => (
+          <div key={c.iso} className="flex flex-col items-center gap-1">
+            <span
+              className={`grid size-11 place-items-center rounded-full ${
+                c.read ? 'animate-stamp' : c.today ? 'border-2 border-dashed border-[#a58bc9]' : 'bg-side'
+              }`}
+              style={c.read ? { rotate: `${((i * 37) % 24) - 12}deg`, animationDelay: `${300 + i * 45}ms` } : undefined}
+              aria-label={c.read ? `${c.iso}: nagbasa` : c.iso}
+            >
+              {c.read && (
+                <svg viewBox="0 0 44 44" className="size-11" aria-hidden>
+                  <circle cx="22" cy="22" r="19" fill="none" stroke={INK} strokeWidth="3" />
+                  <polygon points="22,10 25.5,18 34,18.8 27.6,24.4 29.5,32.8 22,28.4 14.5,32.8 16.4,24.4 10,18.8 18.5,18" fill={INK} />
+                </svg>
+              )}
+            </span>
+            <span className={`text-xs font-bold ${c.today ? 'text-navy' : 'text-muted'}`}>{c.day}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // Mirrors the BOOKR profile: three color-block stat cards, then progress below.
 export function LearnerScreen() {
   const t = useT()
@@ -29,9 +74,9 @@ export function LearnerScreen() {
         <LevelChip level={learner?.level} />
       </div>
 
-      <div className="mt-6 grid grid-cols-3 gap-6">
-        <StatCard index={0} color="coral" title={t.statStars} value={<CountUp value={stats?.stars ?? 0} />} emoji="star" />
-        <StatCard index={1} color="blue" title={t.statStreak} value={<CountUp value={stats?.streak_days ?? 0} format={t.days} />} emoji="fire" />
+      <div className="mt-6 grid grid-cols-[1.5fr_1fr_1fr] gap-6">
+        <ReadingCard name={learner?.display_name ?? ''} days={stats?.days_read ?? []} streak={stats?.streak_days ?? 0} />
+        <StatCard index={1} color="coral" title={t.statStars} value={<CountUp value={stats?.stars ?? 0} />} emoji="star" />
         <StatCard index={2} color="teal" title={t.statTime} value={<CountUp value={stats?.minutes_read ?? 0} format={t.hm} />} emoji="hourglass" />
       </div>
 
