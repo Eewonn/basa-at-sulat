@@ -163,3 +163,9 @@ scripts/start.sh --check              # only report what is ready or missing
 - **Tests:** `cd engine && pytest` (includes the command line), `cd scripts && pytest` (download, check, launch; no internet, Ollama, torch or weights needed). The tests use a stub for the app and fake `ollama` scripts. What they cannot prove: real downloads, a real Ollama, the Electron launch and a full offline run. Those are in `docs/OFFLINE_CHECKLIST.md`.
 - **Run everything before a push:** `engine/`, `scripts/`, `ai/` and `eval/` each have their own `pytest.ini`; run `pytest` in each folder. `eval/` needs the AI packages (`soundfile`, `numpy`) to pass.
 - **Browser access (CORS):** the engine allows browser requests only from `http://localhost:<port>` and `http://127.0.0.1:<port>` (`CORSMiddleware` in `app/main.py`, pattern matched against the whole origin), so `npm run dev` pages can call it. Other origins are refused. `tests/test_cors.py` sends the headers a browser would; it cannot run a real browser.
+
+## Update: progress (P2-BE2-2)
+- `GET /learners/{id}/progress` (`app/routes/learners.py`, logic in `app/progress.py`) compares two confirmed checks word by word, using the teacher's final labels, and returns the WCPM change.
+- **Which pair:** the newest confirmed check that has an earlier confirmed check on the same passage, and the newest of those. Checks on different passages are never paired. Order is `confirmed_at`, then `created_at`, then `id`, the same as the practice set's "latest check".
+- **Words** come from the passage text, not from `word_results`, because a check may not cover every word. A word a check has no result for is `null` on that side.
+- No pair gives a `200` with empty lists and nulls. Practice attempts aren't part of the response yet.
