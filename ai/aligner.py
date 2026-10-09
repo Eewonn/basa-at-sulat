@@ -89,13 +89,24 @@ def model_loaded() -> bool:
     return _load.cache_info().currsize > 0
 
 
+# Speed (P3-AI-1). Nearly all of the time is the network; alignment itself takes hundredths of a second.
+# int8 weights for its Linear layers ran about 1.8x faster on our CPU laptop (Ryzen 5 7520U), and using
+# every hardware thread instead of torch's default of one per core added a little more. Accuracy with int8
+# was re-checked on eval/ before turning it on. Set BASA_FULL_PRECISION=1 to compare against the original.
+QUANTIZE = os.environ.get("BASA_FULL_PRECISION") != "1"
+
+
 @lru_cache(maxsize=1)
 def _load():
+    import torch
     import torchaudio
 
+    torch.set_num_threads(os.cpu_count() or torch.get_num_threads())
     bundle = torchaudio.pipelines.MMS_FA
     model = bundle.get_model()
     model.eval()
+    if QUANTIZE:
+        model = torch.ao.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
     return bundle, model, bundle.get_tokenizer(), bundle.get_aligner()
 
 
