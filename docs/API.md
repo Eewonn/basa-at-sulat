@@ -1,6 +1,6 @@
 # API contract
 
-The web app talks to the engine (`engine/`, FastAPI) on `http://localhost:8000`. **Change this file first, tell the team, then change code.** Frontend builds against [`api/assess.example.json`](api/assess.example.json) until the real endpoint exists.
+The app talks to the engine (`engine/`, FastAPI) on `http://localhost:8000` by default. Set the `PORT` environment variable to use another port (the desktop app picks a free one). Start it from `engine/` with `python -m app`. **Change this file first, tell the team, then change code.** Frontend builds against [`api/assess.example.json`](api/assess.example.json) until the real endpoint exists.
 
 ## Word labels
 
@@ -34,9 +34,14 @@ Returns:
   "pauses": [{"before_word": 3, "seconds": 1.8}],
   "wcpm": 52,
   "level": "Developing",
-  "status": "draft"
+  "status": "draft",
+  "timings": {"convert_ms": 180, "align_ms": 2400, "score_ms": 35}
 }
 ```
+
+`timings` is the processing time on this laptop, for the "scored in X s" line. Until `ai.score` reports alignment and scoring separately, `align_ms` covers the whole `ai.score` call and `score_ms` is `0`. `wcpm` and `level` are `null` until Backend 2 computes them (P1-BE2-2).
+
+Errors: `400` if the audio can't be read, `404` for an unknown `passage_id` or `learner_id`, `422` if a field is missing.
 
 ### `PATCH /assessments/{id}/words/{i}`
 Body `{"label": "matched"}`. This is the teacher's override, and it returns the updated assessment (recomputed `wcpm`, `level`).
@@ -70,7 +75,6 @@ These support the learner profile and story categories. Until the engine impleme
 - `GET /learners/{id}/stats` → `{"stars", "streak_days", "minutes_read", "wcpm_history": [{"date", "wcpm"}], "practicing": ["palay", ...]}`
   - stars = words gotten right in Sanay; streak = consecutive days with a check or practice; minutes = recording time
 - `POST /practice/check` also takes `learner_id`, so a correct word can earn a star
-- `/assess` response includes `timings: {"convert_ms", "align_ms", "score_ms"}` for the "scored in X s on this laptop" line
 
 ## Health
 - `GET /health` → `{"ok": true, "models": {"aligner": "loaded", "ollama": "up"}}`
