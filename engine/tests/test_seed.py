@@ -140,6 +140,7 @@ def test_seed_adds_category_to_an_older_database(db_path, files):
             "CREATE TABLE learners (id TEXT PRIMARY KEY, display_name TEXT, grade INTEGER);"
             "CREATE TABLE passages (id TEXT PRIMARY KEY, title TEXT, language TEXT, grade INTEGER, text TEXT);"
             "CREATE TABLE assessments (id TEXT PRIMARY KEY, passage_id TEXT);"
+            "CREATE TABLE books (id TEXT PRIMARY KEY, title TEXT, language TEXT, text TEXT);"
         )
     write_json(files["passages_path"], [{**PASSAGES[0], "category": "bukid"}])
     seed_db(db_path, **files)

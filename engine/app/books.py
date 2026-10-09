@@ -12,6 +12,7 @@ from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, UploadF
 from ai import word_timings
 from app.audio import AudioConversionError, convert_to_wav16k, cut_wav, storage_dir, stored_wav
 from app.plans import PlanError
+from app.seed import CATEGORIES
 from app.routes.assessments import get_conn
 from app.story import draft_story
 
@@ -22,6 +23,8 @@ MAX_AUDIO_BYTES = 25 * 1024 * 1024
 MAX_WORDS = 3000
 # ISO 639 codes (fil, eng, ilo...), the same rule as the seed data.
 LANGUAGE_PATTERN = re.compile(r"[a-z]{2,3}")
+# Books have no grade; their Basa passage is listed as grade 2, the grade the app is built for.
+BOOK_GRADE = 2
 
 
 @router.post("")
@@ -30,6 +33,7 @@ def create_book(
     language: str = Form(...),
     text: str = Form(...),
     audio: UploadFile = File(...),
+    category: str | None = Form(None),
     conn=Depends(get_conn),
 ):
     if not title.strip():
@@ -40,6 +44,8 @@ def create_book(
         raise HTTPException(422, "text can't be blank")
     if len(text.split()) > MAX_WORDS:
         raise HTTPException(422, f"the story is over {MAX_WORDS} words")
+    if category is not None and category not in CATEGORIES:
+        raise HTTPException(422, f"category must be one of {', '.join(CATEGORIES)}")
 
     data = audio.file.read(MAX_AUDIO_BYTES + 1)
     if len(data) > MAX_AUDIO_BYTES:
@@ -62,6 +68,11 @@ def create_book(
                 conn.execute(
                     "INSERT INTO books (id, title, language, text, audio_path) VALUES (?, ?, ?, ?, ?)",
                     (book_id, title, language, text, f"books/{book_id}.wav"),
+                )
+                # Every book can also be read in a Basa check, as a passage with the book's id.
+                conn.execute(
+                    "INSERT INTO passages (id, title, language, grade, text, category) VALUES (?, ?, ?, ?, ?, ?)",
+                    (book_id, title, language, BOOK_GRADE, text, category),
                 )
                 conn.executemany(
                     "INSERT INTO book_words (book_id, i, text, start_sec, end_sec) VALUES (?, ?, ?, ?, ?)",
@@ -147,7 +158,7 @@ def _book_wav_path(book):
 
 @router.delete("/{book_id}", status_code=204)
 def delete_book(book_id: str, conn=Depends(get_conn)):
-    """Delete a book, its word timings and its model reading.
+    """Delete a book, its word timings, its model reading and its Basa passage.
 
     Sanay attempts that played a clip from it are history, so they're kept: they just lose the clip reference.
     """
@@ -155,6 +166,11 @@ def delete_book(book_id: str, conn=Depends(get_conn)):
     with conn:
         conn.execute("UPDATE practice_attempts SET book_id = NULL, word_index = NULL WHERE book_id = ?", (book_id,))
         conn.execute("DELETE FROM books WHERE id = ?", (book_id,))
+        # Its passage goes too, unless a Basa check was read from it: those results need the text.
+        conn.execute(
+            "DELETE FROM passages WHERE id = ? AND NOT EXISTS (SELECT 1 FROM assessments WHERE passage_id = ?)",
+            (book_id, book_id),
+        )
     path = stored_wav(book["audio_path"])
     if path is not None:
         path.unlink(missing_ok=True)

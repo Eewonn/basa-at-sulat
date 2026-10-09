@@ -18,7 +18,7 @@ CREATE TABLE passages (
     grade       INTEGER NOT NULL CHECK (grade BETWEEN 1 AND 12),
     text        TEXT NOT NULL CHECK (length(trim(text)) > 0),
     created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
-    -- Topic for the picture and filter (app.seed.CATEGORIES). Older databases get it from app.db.add_missing_columns.
+    -- Topic for the picture and filter (app.seed.CATEGORIES). Older databases get it from app.db.upgrade_db.
     category    TEXT
 );
 

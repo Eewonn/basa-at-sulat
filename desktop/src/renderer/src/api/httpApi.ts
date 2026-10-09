@@ -107,7 +107,7 @@ export function createHttpApi(port: number): Api {
       // The engine replies with only {id, words}; the rest of the book is what the teacher just entered.
       const created = await json<{ id: string; words: BookWord[] }>('/books', {
         method: 'POST',
-        body: form({ title: book.title, language: languageCode(book.language), text: book.text, audio })
+        body: form({ title: book.title, language: languageCode(book.language), text: book.text, audio, category: book.category })
       })
       saveLocal('basa.bookMeta', { ...bookMeta(), [created.id]: { category: book.category, reader: book.reader, duration_sec: durationSec } })
       return withAudio({ ...book, ...created, duration_sec: durationSec })

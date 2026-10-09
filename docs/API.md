@@ -87,11 +87,11 @@ A file that is already gone counts as deleted.
 
 ## Sulat: books
 - `GET /books` → `[{"id", "title", "language", "text"}]`, newest first, without word timings (`GET /books/{id}` has them). Every book has its model reading, because `POST /books` requires it.
-- `POST /books`: multipart form with `title`, `language` (2-3 lowercase letters, such as `fil`, `eng`, `ilo`), `text` and `audio` (the model reading). Returns `{"id", "words": [{"i", "text", "start", "end"}]}`. Use a fluent speaker's complete reading of the story, and keep digits and dashes out of it, because words with no letters get zero-length times.
+- `POST /books`: multipart form with `title`, `language` (2-3 lowercase letters, such as `fil`, `eng`, `ilo`), `text`, `audio` (the model reading) and optional `category` (a passage topic). The book is also saved as a Basa passage with the same id (grade 2), so a child can be checked on it; older books get theirs on the next engine start. Returns `{"id", "words": [{"i", "text", "start", "end"}]}`. Use a fluent speaker's complete reading of the story, and keep digits and dashes out of it, because words with no letters get zero-length times.
 - `GET /books/{id}` → `{"id", "title", "language", "text", "words": [{"i", "text", "start", "end"}]}`
 - `GET /books/{id}/audio` → the full model reading (`audio/wav`, 16 kHz mono)
 - `GET /books/{id}/clips/{i}` → audio for word `i` only (`audio/wav`, 16 kHz mono), cut from the model reading between that word's `start` and `end`
-- `DELETE /books/{id}` → 204. Removes the book, its word timings and its model reading. Sanay attempts that used one of its clips are kept, with `book_id`/`word_index` set to null. 404 if there is no such book.
+- `DELETE /books/{id}` → 204. Removes the book, its word timings, its model reading and its Basa passage (the passage stays if a check was read from it). Sanay attempts that used one of its clips are kept, with `book_id`/`word_index` set to null. 404 if there is no such book.
 - `POST /books/draft`: JSON `{"topic", "language", "idea"?}` → `{"title", "text"}`. `topic` is a passage category, `language` is `fil` or `eng`. The local model (qwen2.5:7b in Ollama, prompts `engine/prompts/story-*.txt`) drafts a short grade-2 story; a reply that isn't JSON, is over 80 words or has digits is retried once with another seed. Nothing is saved. 422 for a bad topic or language, 503 if Ollama is down or both tries fail. The draft is for the teacher to edit: Filipino drafts from the 7B model are often unnatural.
 
 `POST /books` errors (body `{"detail": "<what went wrong>"}`). A rejected upload keeps nothing: no audio file and no book.

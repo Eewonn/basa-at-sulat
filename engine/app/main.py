@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.assess import router as assess_router
 from app.books import router as books_router
-from app.db import add_missing_columns, connect, get_db_path
+from app.db import connect, get_db_path, upgrade_db
 from app.plans import ollama_status
 from app.retention import delete_owed_audio
 from app.routes.assessments import router as assessments_router
@@ -24,7 +24,7 @@ log = logging.getLogger("engine")
 async def lifespan(app: FastAPI):
     if get_db_path().exists():
         with closing(connect()) as conn:
-            add_missing_columns(conn)
+            upgrade_db(conn)
     delete_owed_audio()
     # Opt-in: loading the model takes ~10 s and needs torch plus the weights.
     if os.environ.get("BASA_WARM_UP") == "1":

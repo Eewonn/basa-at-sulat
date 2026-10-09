@@ -238,3 +238,48 @@ def test_deleting_a_book_keeps_practice_attempts_without_the_clip(env):
     finally:
         conn.close()
     assert tuple(row) == ("Ben", None, None)
+
+
+def test_a_new_book_is_also_a_basa_passage_with_its_category(env):
+    posted = post_book(make_reading(env), category="hayop").json()
+    passage = next(p for p in client.get("/passages").json() if p["id"] == posted["id"])
+    assert passage == {"id": posted["id"], "title": "Ang Saranggola", "language": "fil", "grade": 2,
+                       "text": STORY, "category": "hayop"}
+
+
+def test_an_unknown_category_is_422(env):
+    assert post_book(make_reading(env), category="dagat").status_code == 422
+    nothing_kept(env)
+
+
+def test_deleting_a_book_removes_its_passage(env):
+    posted = post_book(make_reading(env)).json()
+    client.delete(f"/books/{posted['id']}")
+    assert posted["id"] not in {p["id"] for p in client.get("/passages").json()}
+
+
+def test_deleting_a_book_keeps_its_passage_when_a_check_used_it(env):
+    posted = post_book(make_reading(env)).json()
+    conn = connect()
+    conn.execute("INSERT INTO learners (id, display_name, grade) VALUES ('l_01', 'Lina', 2)")
+    conn.execute(
+        "INSERT INTO assessments (id, learner_id, passage_id, duration_sec) VALUES ('a_1', 'l_01', ?, 5)",
+        (posted["id"],),
+    )
+    conn.commit()
+    conn.close()
+    assert client.delete(f"/books/{posted['id']}").status_code == 204
+    assert posted["id"] in {p["id"] for p in client.get("/passages").json()}
+
+
+def test_upgrade_gives_an_older_book_its_passage(env):
+    from app.db import upgrade_db
+
+    conn = connect()
+    conn.execute("INSERT INTO books (id, title, language, text) VALUES ('b_old', 'Luma', 'fil', 'Si Ben')")
+    conn.commit()
+    upgrade_db(conn)
+    upgrade_db(conn)  # safe to run twice
+    rows = conn.execute("SELECT id, grade, text FROM passages").fetchall()
+    conn.close()
+    assert [tuple(r) for r in rows] == [("b_old", 2, "Si Ben")]

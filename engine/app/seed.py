@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from app.assessments import AssessmentError
-from app.db import ENGINE_DIR, add_missing_columns, connect, get_db_path, init_db
+from app.db import ENGINE_DIR, connect, get_db_path, init_db, upgrade_db
 from app.demo_seed import DemoSeedError, load_demo_checks, load_demo_practice, prepare_demo_checks
 
 DATA_DIR = ENGINE_DIR.parent / "data"
@@ -238,7 +238,7 @@ def seed_db(path: Path | str | None = None, reset: bool = False,
         init_db(db_path, reset=reset)
 
     with closing(connect(db_path)) as conn:
-        add_missing_columns(conn)
+        upgrade_db(conn)
         return apply_seed(conn, learners, passages)
 
 

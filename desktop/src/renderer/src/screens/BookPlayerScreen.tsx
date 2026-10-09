@@ -27,6 +27,7 @@ export function BookPlayerScreen() {
     onSuccess: () => {
       qc.removeQueries({ queryKey: ['book', bookId] })
       qc.invalidateQueries({ queryKey: ['books'] })
+      qc.invalidateQueries({ queryKey: ['passages'] })
       toast(t.deletedBook)
       navigate('/books')
     },
