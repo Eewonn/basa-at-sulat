@@ -19,7 +19,7 @@ word_timings(audio_path: str, text: str) -> list[dict]   # Sulat: a fluent speak
 check_word(audio_path: str, word: str) -> dict           # Sanay "Say it": {"result": "match"|"no_match", "score"}
 ```
 
-**Status:** `score()` is real (MMS forced alignment). `word_timings()` and `check_word()` are still stubs that return the contract shape (P2-AI-1, P2-AI-2). Thresholds are tuned on 15 Filipino readings of `fil_g2_01` by **one adult reader** (`eval/REPORT.md`: held-out F1 0.76). They still need confirming on fresh recordings that weren't used to tune them.
+**Status:** `score()` and `word_timings()` are real (MMS forced alignment). `check_word()` is still a stub that returns the contract shape (P2-AI-2). `word_timings()` widens each word's span by 0.10 s before and 0.15 s after, never past the midpoint to its neighbour, so word clips hold the whole word and never overlap; `python eval/timing_check.py <recording ids>` makes listening pages to check them by ear. Thresholds are tuned on 15 Filipino readings of `fil_g2_01` by **one adult reader** (`eval/REPORT.md`: held-out F1 0.76). They still need confirming on fresh recordings that weren't used to tune them.
 
 Run the tests from `ai/`: `python -m pytest`. The model-backed tests skip if the weights aren't downloaded.
 

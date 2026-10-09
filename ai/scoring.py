@@ -1,11 +1,10 @@
 """Public interface of the ai package.
 
-score() is real (MMS forced alignment, see aligner.py). word_timings() and check_word() are still STUBS
-that return the docs/API.md shapes so the engine can wire against them (P2-AI-1 and P2-AI-2 replace them).
+score() and word_timings() are real (MMS forced alignment, see aligner.py). check_word() is still a STUB
+that returns the docs/API.md shape so the engine can wire against it (P2-AI-2 replaces it).
 """
 import math
 import time
-import wave
 
 from . import aligner, text
 
@@ -17,6 +16,14 @@ FLAG_AT_OR_BELOW = 0.25  # = a letter with under a 1-in-1000 chance. F1 is flat 
 #                          0.25 leans to recall, since the teacher confirms every flag and a miss goes unseen
 SQUEEZED_FRAMES_PER_CHAR = 1.25  # a word cramped to ~1 frame per letter had no real speech of its own
 PAUSE_SEC = 1.0  # a gap between two words at least this long is reported as a hesitation
+
+# word_timings(): the aligner marks each letter with a short spike, so a word's raw span runs from its first
+# letter's spike to its last and misses the start of the first sound and the tail of the last. Each word is
+# widened by these pads, but never past the midpoint to its neighbour, so clips never overlap. Inside a
+# sentence words nearly touch (median gap 0.06 s in our clean readings), so their clips meet at the midpoint;
+# at a sentence break (up to 0.8 s) the silence is left out. Starting values: check by ear (P2-AI-1).
+PAD_BEFORE_SEC = 0.10
+PAD_AFTER_SEC = 0.15
 
 
 def word_score(letter_probs: list) -> float:
@@ -106,33 +113,47 @@ def score(audio_path: str, passage_text: str) -> dict:
     return {"words": rows, "pauses": pauses, "timings": timings()}
 
 
-# --- stubs (P2-AI-1, P2-AI-2) -----------------------------------------------
-
-_FALLBACK_SEC_PER_WORD = 0.4  # when the file isn't a readable wav
-_STUB_SCORE = 0.9
-
-
-def _duration(audio_path: str, n_words: int) -> float:
-    try:
-        with wave.open(audio_path, "rb") as f:
-            return f.getnframes() / f.getframerate()
-    except (wave.Error, EOFError, FileNotFoundError, OSError):
-        return n_words * _FALLBACK_SEC_PER_WORD
-
-
 def word_timings(audio_path: str, text_: str) -> list[dict]:
-    """Sulat: start/end seconds for each word of a fluent speaker's correct reading.
+    """Sulat: start/end seconds for every word of a fluent speaker's correct reading.
 
-    Returns [{"i", "text", "start", "end"}]. STUB: words spread evenly over the audio.
+    Returns [{"i", "text", "start", "end"}], `i` and `text` as in docs/API.md. Used to highlight each word
+    as the story plays and to cut word clips for Sanay ("Hear it"). Each word's raw span is widened by
+    PAD_BEFORE_SEC / PAD_AFTER_SEC, capped at the midpoint to its neighbours, so consecutive words never
+    overlap and a word's clip holds the whole word without its neighbour.
+
+    - Words with no letters the aligner knows (digits, dashes) get a zero-length time at the previous
+      word's end. Keep digits out of stories.
+    - Raises ValueError if the audio is too short to hold the text: that isn't a reading of this story.
+    - Raises if the audio file can't be read: convert to wav first.
     """
     words = text.split_words(text_)
-    if not words:
-        return []
-    step = _duration(audio_path, len(words)) / len(words)
-    return [
-        {"i": i, "text": w, "start": round(i * step, 2), "end": round((i + 1) * step, 2)}
-        for i, w in enumerate(words)
-    ]
+    normalised = [text.normalize_word(w) for w in words]
+    alignable = [i for i, n in enumerate(normalised) if n]
+    if not alignable:
+        return [{"i": i, "text": w, "start": 0.0, "end": 0.0} for i, w in enumerate(words)]
+    result = aligner.align(audio_path, [normalised[i] for i in alignable])
+    if result is None:
+        raise ValueError("the recording is too short to be a reading of this text")
+
+    raw = [(a.start_frame * result.frame_sec, a.end_frame * result.frame_sec) for a in result.words]
+    bounds = []
+    for k, (start, end) in enumerate(raw):
+        lo = (raw[k - 1][1] + start) / 2 if k > 0 else 0.0
+        hi = (end + raw[k + 1][0]) / 2 if k + 1 < len(raw) else result.duration_sec
+        bounds.append((max(start - PAD_BEFORE_SEC, lo), min(end + PAD_AFTER_SEC, hi)))
+    by_index = dict(zip(alignable, bounds))
+
+    out, prev_end = [], 0.0
+    for i, word in enumerate(words):
+        start, end = by_index.get(i, (prev_end, prev_end))
+        out.append({"i": i, "text": word, "start": round(start, 2), "end": round(end, 2)})
+        prev_end = end
+    return out
+
+
+# --- stub (P2-AI-2) -----------------------------------------------------------
+
+_STUB_SCORE = 0.9
 
 
 def check_word(audio_path: str, word: str) -> dict:
