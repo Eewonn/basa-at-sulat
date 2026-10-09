@@ -74,11 +74,11 @@ def test_word_timings_of_nothing_is_empty(make_wav):
     assert ai.word_timings(make_wav(2), "   ") == []
 
 
-def test_check_word_stub_shape(make_wav):
+@requires_model
+def test_check_word_rejects_silence(make_wav):
     result = ai.check_word(make_wav(2), "palay")
     assert set(result) == {"result", "score"}
-    assert result["result"] in {"match", "no_match"}
-    assert 0 <= result["score"] <= 1
+    assert result == {"result": "no_match", "score": 0.0} or (result["result"] == "no_match" and 0 <= result["score"] <= 0.5)
 
 
 @requires_model

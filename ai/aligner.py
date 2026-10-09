@@ -32,6 +32,43 @@ class Alignment:
     duration_sec: float
 
 
+@dataclass
+class Fit:
+    gap: float  # forced-alignment log-probability minus the best label's at every frame (0 = perfect, < 0 worse)
+    speech_frames: int  # frames where the model's best guess is a letter, not the blank (0 = nothing said)
+
+
+def fit_gap(audio_path: str, words: list):
+    """How well the audio fits these words compared with the model's own best guess, frame by frame (a Fit).
+
+    Total log-probability of the forced alignment to `words` minus that of the best label at every frame,
+    so 0 is a perfect fit and more negative is worse. No `*` wildcard: silence is left to the blank, where
+    both sides agree, so it costs nothing. This is what tells a lone word from something else (Sanay's
+    "Say it"): unlike inside a passage, a lone word isn't pinned by neighbours, so its letters can always
+    find *some* frames that fit them a little, and only the comparison shows it wasn't said.
+    `speech_frames` says whether anything was said at all: silence is all blank. Without it, a very short
+    word (si, ng) can't fall far enough behind to be rejected even in silence.
+    Returns None when the audio is too short to hold the words.
+    """
+    import torch
+    import torchaudio.functional as F
+
+    bundle, model, tokenizer, _ = _load()
+    with torch.inference_mode():
+        emission, _ = model(load_audio(audio_path))
+    log_probs = emission[0, :, : bundle.get_dict()["*"]].contiguous()  # drop the wildcard column
+    tokens = torch.tensor([sum(tokenizer(words), [])], dtype=torch.int32)
+    try:
+        _, scores = F.forced_align(log_probs.unsqueeze(0), tokens, blank=0)
+    except RuntimeError as err:
+        if "too long" in str(err):
+            return None
+        raise
+    best = log_probs.max(dim=-1)
+    return Fit(gap=scores[0].sum().item() - best.values.sum().item(),
+               speech_frames=int((best.indices != 0).sum().item()))
+
+
 def weights_cached() -> bool:
     """True if the aligner weights are already on disk (so loading won't trigger a ~1.2 GB download)."""
     checkpoints = Path(os.environ["TORCH_HOME"]) / "hub" / "checkpoints"
