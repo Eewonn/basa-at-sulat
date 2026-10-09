@@ -1,7 +1,8 @@
-"""GET /learners, GET /passages, GET /books, GET /assessments/recent and POST /practice/check. Contract: docs/API.md."""
+"""GET /learners, /learners/{id}/stats, /passages, /books, /assessments/recent and POST /practice/check. Contract: docs/API.md."""
 
 import subprocess
 from contextlib import closing
+from datetime import date
 
 import pytest
 from fastapi.testclient import TestClient
@@ -10,6 +11,7 @@ from app.assessments import confirm_assessment, save_assessment
 from app.db import connect
 from app.main import app
 from app.seed import seed_db
+from app.stats import streak
 
 client = TestClient(app)
 
@@ -53,7 +55,7 @@ def test_learners_lists_the_seeded_class():
     r = client.get("/learners")
     assert r.status_code == 200
     rows = r.json()
-    assert rows[0] == {"id": "l_01", "display_name": "A.R.", "grade": 1}
+    assert rows[0] == {"id": "l_01", "display_name": "A.R.", "grade": 1, "stars": 0, "streak_days": 0}
     assert [x["id"] for x in rows] == sorted(x["id"] for x in rows)
 
 
@@ -69,7 +71,7 @@ def test_learners_summarise_the_latest_confirmed_check(env):
     assert rows["l_01"]["level"] is not None
     assert rows["l_02"]["needs_practice"] is True
     # Drafts don't count, and a learner with no confirmed check has no summary fields.
-    assert rows["l_03"] == {"id": "l_03", "display_name": "C.M.", "grade": 1}
+    assert rows["l_03"] == {"id": "l_03", "display_name": "C.M.", "grade": 1, "stars": 0, "streak_days": 0}
 
 
 def test_recent_lists_confirmed_checks_newest_first(env):
@@ -142,3 +144,73 @@ def test_practice_check_reports_a_missing_model(monkeypatch, tmp_path):
     with open(tone(tmp_path), "rb") as f:
         r = client.post("/practice/check", data={"word": "palay"}, files={"audio": ("w.wav", f)})
     assert r.status_code == 503
+
+
+def say(tmp_path, monkeypatch, word, learner_id, result="match"):
+    monkeypatch.setattr("app.routes.practice.check_word", lambda *a: {"result": result, "score": 0.9 if result == "match" else 0.2})
+    with open(tone(tmp_path), "rb") as f:
+        return client.post("/practice/check", data={"word": word, "learner_id": learner_id}, files={"audio": ("w.webm", f)})
+
+
+def attempts(tmp_path):
+    with closing(connect(tmp_path / "test.db")) as conn:
+        return [dict(r) for r in conn.execute("SELECT learner_id, assessment_id, word, result FROM practice_attempts ORDER BY id")]
+
+
+def test_practice_check_saves_the_attempt_against_the_latest_check(env, monkeypatch):
+    save_check(env, "a_1", "l_01", missed={0})
+    assert say(env, monkeypatch, "Ben", "l_01").status_code == 200
+    assert say(env, monkeypatch, "Ben", "l_01", result="no_match").status_code == 200
+    assert attempts(env) == [
+        {"learner_id": "l_01", "assessment_id": "a_1", "word": "Ben", "result": "match"},
+        {"learner_id": "l_01", "assessment_id": "a_1", "word": "Ben", "result": "no_match"},
+    ]
+
+
+def test_practice_check_saves_nothing_without_a_confirmed_check_or_a_learner(env, monkeypatch):
+    assert say(env, monkeypatch, "Ben", "l_02").status_code == 200
+    monkeypatch.setattr("app.routes.practice.check_word", lambda *a: {"result": "match", "score": 0.9})
+    with open(tone(env), "rb") as f:
+        assert client.post("/practice/check", data={"word": "Ben"}, files={"audio": ("w.webm", f)}).status_code == 200
+    assert attempts(env) == []
+
+
+def test_practice_check_rejects_an_unknown_learner(env, monkeypatch):
+    assert say(env, monkeypatch, "Ben", "l_99").status_code == 404
+
+
+def test_streak_counts_back_from_today_or_yesterday():
+    today = date(2026, 10, 10)
+    d = lambda n: date(2026, 10, 10 - n)  # noqa: E731
+    assert streak({d(0), d(1), d(2), d(4)}, today) == 3
+    assert streak({d(1), d(2)}, today) == 2  # not read yet today: the streak still stands
+    assert streak({d(2), d(3)}, today) == 0
+    assert streak(set(), today) == 0
+
+
+def test_stats_are_counted_from_saved_rows(env, monkeypatch):
+    save_check(env, "a_1", "l_01", missed={0, 1}, confirmed_at="2026-09-01T04:00:00.000Z")
+    save_check(env, "a_2", "l_01", missed={1}, confirmed_at="2026-10-05T04:00:00.000Z")
+    save_check(env, "a_draft", "l_01", confirm=False)
+    say(env, monkeypatch, "has", "l_01")
+    say(env, monkeypatch, "has", "l_01", result="no_match")
+    r = client.get("/learners/l_01/stats")
+    assert r.status_code == 200
+    s = r.json()
+    assert s["stars"] == 1
+    assert [h["date"] for h in s["wcpm_history"]] == ["2026-09-01", "2026-10-05"]  # drafts left out
+    assert s["minutes_read"] == 1  # two 30 s checks
+    assert s["practicing"] == ["has"]
+    assert {"2026-09-01", "2026-10-05", date.today().isoformat()} <= set(s["days_read"])
+    assert s["streak_days"] == 1  # the practice today
+    assert client.get("/learners").json()[0]["stars"] == 1
+
+
+def test_stats_for_a_learner_with_nothing_yet_are_empty(env):
+    assert client.get("/learners/l_05/stats").json() == {
+        "stars": 0, "streak_days": 0, "minutes_read": 0, "wcpm_history": [], "practicing": [], "days_read": [],
+    }
+
+
+def test_stats_404_for_an_unknown_learner():
+    assert client.get("/learners/l_99/stats").status_code == 404

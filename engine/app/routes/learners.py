@@ -1,4 +1,6 @@
-"""Learner endpoints: the class list, Sanay practice sets (P2-BE2-1) and progress (P2-BE2-2). Contract: docs/API.md."""
+"""Learner endpoints: the class list, stats, Sanay practice sets (P2-BE2-1) and progress (P2-BE2-2). Contract: docs/API.md."""
+
+from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -6,17 +8,20 @@ from app.class_view import _latest_checks
 from app.practice import LearnerNotFoundError, build_practice_set
 from app.progress import build_progress
 from app.routes.assessments import get_conn
+from app.stats import build_stats, reading_days, stars, streak
 
 router = APIRouter(prefix="/learners", tags=["learners"])
 
 
 @router.get("")
 def list_learners(conn=Depends(get_conn)) -> list[dict]:
-    """Every learner in the class, by id, with a summary of their latest confirmed check if they have one."""
+    """Every learner in the class, by id, with stars, streak and a summary of their latest confirmed check if they have one."""
     latest = {r["learner_id"]: r for r in _latest_checks(conn)}
     out = []
     for row in conn.execute("SELECT id, display_name, grade FROM learners ORDER BY id"):
         learner = dict(row)
+        learner["stars"] = stars(conn, row["id"])
+        learner["streak_days"] = streak(reading_days(conn, row["id"]), date.today())
         check = latest.get(row["id"])
         if check is not None and check["assessment_id"] is not None:
             learner.update(
@@ -27,6 +32,15 @@ def list_learners(conn=Depends(get_conn)) -> list[dict]:
             )
         out.append(learner)
     return out
+
+
+@router.get("/{learner_id}/stats")
+def get_stats(learner_id: str, conn=Depends(get_conn)) -> dict:
+    """Stars, streak, reading time, WCPM over time and practice words, all counted from saved rows."""
+    try:
+        return build_stats(conn, learner_id)
+    except LearnerNotFoundError as err:
+        raise HTTPException(status_code=404, detail=str(err)) from None
 
 
 @router.get("/{learner_id}/practice")
