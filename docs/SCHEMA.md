@@ -108,6 +108,29 @@ We chose "upsert, but guard passages in use" over "insert only" and "always rebu
 - **The text comparison is exact.** Fixing a typo or even trailing whitespace in a passage in use still counts as a change, and the run is refused. That's deliberate, since even a one-word fix can shift indices, but it means a small correction needs a new passage ID.
 - **Fixing a passage in use leaves both versions.** The new-ID workaround keeps the old passage in the database and in the passage picker until it's removed with `--reset` or by hand.
 
+## Demo checks
+
+**Task:** P1-BE2-3 · **Code:** [`engine/app/demo_seed.py`](../engine/app/demo_seed.py) · **Config:** [`data/demo_seed.json`](../data/demo_seed.json)
+
+```
+cd engine
+python -m app.seed --demo
+```
+
+This loads 14 confirmed Basa checks for the 10 synthetic learners, so the level, class and progress screens have something to show. Every level appears at least once. Learners `l_03`, `l_07`, `l_09` and `l_10` have an earlier and a later check (2026-09-07 → 2026-10-05) for progress.
+
+**Where the data comes from.** Each check starts as a real `score()` result from the AI engineer's tuning recordings (`data/demo_checks/`, one JSON per recording, from PR #16). There's no audio and no reader names. `demo_seed.json` maps each recording to a learner and changes it:
+- **Slowed down.** The readers were adults (80–155 WCPM), so `target_wcpm` (or `duration_sec`) sets a child's pace. Word `start`/`end` and pause lengths are scaled by the same factor, so they still fit the recording.
+- **Hand-edited labels.** The recordings have at most 3 mistakes, which only reaches Transitioning and At Grade Level. To show the lower levels, `relabel` changes chosen words to `misread` or `skipped` **by hand** (`demo_l01_a` to `demo_l05_a`). Their scores are capped (0.3 / 0.05) so they match the new label. **These checks are synthetic, not model output.**
+- `expected_level` is checked on every run. A mismatch prints a warning, which usually means the cutoffs in `levels.py` changed.
+
+**Rules.**
+- **Every demo id starts with `demo_`.** The accuracy report (P3-AI-1) must skip `assessments.id LIKE 'demo\_%' ESCAPE '\'`. Demo checks are never evidence of scoring accuracy.
+- **A run replaces all `demo_` checks and never touches real ones.** The config and source files are checked before the database is touched (and before `--reset`), and every check is validated against the database before old demo checks are deleted.
+- **Practice on a demo check is deleted on the next `--demo` run.** `practice_attempts` normally blocks deleting a check that has practice, but demo practice is rehearsal data.
+- **Drawback:** `save_assessment` commits each check on its own, so a failure partway through (unlikely once validated) leaves some new demo checks. Running `--demo` again fixes it.
+- Use `--demo-checks PATH` to load the score() results from another folder.
+
 ## Rules for code that uses the database
 
 - **Always open connections with `app.db.connect()`.** SQLite turns foreign keys **off** for every new connection by default, and `connect()` turns them on. A plain `sqlite3.connect()` would silently skip cascades and reference checks.

@@ -1,6 +1,8 @@
 """Load synthetic learners and sample passages into the database (P0-BE2-2).
 
-Run from engine/: python -m app.seed [--path PATH] [--reset]
+Run from engine/: python -m app.seed [--path PATH] [--reset] [--demo]
+
+--demo also loads the demo Basa checks (see app/demo_seed.py).
 
 Re-running is safe: rows are inserted or updated from the JSON files. The one
 exception is a passage whose text changed while assessments already point at
@@ -17,11 +19,15 @@ from contextlib import closing
 from dataclasses import dataclass
 from pathlib import Path
 
+from app.assessments import AssessmentError
 from app.db import ENGINE_DIR, connect, get_db_path, init_db
+from app.demo_seed import DemoSeedError, load_demo_checks, prepare_demo_checks
 
 DATA_DIR = ENGINE_DIR.parent / "data"
 DEFAULT_LEARNERS_PATH = DATA_DIR / "learners" / "learners.json"
 DEFAULT_PASSAGES_PATH = DATA_DIR / "passages" / "passages.json"
+DEFAULT_DEMO_CONFIG_PATH = DATA_DIR / "demo_seed.json"
+DEFAULT_DEMO_CHECKS_DIR = DATA_DIR / "demo_checks"
 
 # ISO 639 codes (fil, eng, ilo, ceb, pam...), so a regional passage can be
 # added without touching this file.
@@ -243,11 +249,32 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="delete the existing database first (all data is lost)",
     )
+    parser.add_argument(
+        "--demo",
+        action="store_true",
+        help="also load the demo checks (replaces existing demo_ checks only)",
+    )
+    parser.add_argument(
+        "--demo-checks",
+        type=Path,
+        default=DEFAULT_DEMO_CHECKS_DIR,
+        help=f"folder of score() results for --demo (default: {DEFAULT_DEMO_CHECKS_DIR})",
+    )
     args = parser.parse_args(argv)
 
     try:
+        demo_checks = None
+        if args.demo:
+            # Prepared before the database is touched, so a bad demo config
+            # can't follow a --reset that already wiped the data.
+            demo_checks = prepare_demo_checks(DEFAULT_DEMO_CONFIG_PATH, args.demo_checks)
         result = seed_db(args.path, reset=args.reset)
-    except SeedError as err:
+        demo = None
+        if demo_checks is not None:
+            db_path = Path(args.path) if args.path else get_db_path()
+            with closing(connect(db_path)) as conn:
+                demo = load_demo_checks(conn, demo_checks)
+    except (SeedError, DemoSeedError, AssessmentError) as err:
         print(f"Error: {err}", file=sys.stderr)
         return 1
     except (sqlite3.Error, OSError) as err:
@@ -258,6 +285,14 @@ def main(argv: list[str] | None = None) -> int:
         f"Learners: {result.learners_added} added, {result.learners_updated} updated. "
         f"Passages: {result.passages_added} added, {result.passages_updated} updated."
     )
+    if demo is not None:
+        print(
+            f"Demo checks: {demo.loaded} loaded (synthetic, see data/demo_seed.json), "
+            f"{demo.replaced} old ones replaced, {demo.practice_removed} demo practice attempts removed."
+        )
+        for mismatch in demo.level_mismatches:
+            # Usually means levels.py cutoffs changed; update expected_level in the config.
+            print(f"Warning: {mismatch}", file=sys.stderr)
     return 0
 
 

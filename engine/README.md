@@ -95,6 +95,12 @@ Built against `docs/api/assess.example.json`, ahead of the real `/assess`.
 - `recompute(final_labels, duration_sec, passage_word_count)` is called only from `app/assessments.py`, so nothing changes for Backend 1.
 - No `CHECK` constraint on `level` yet (it would force a `--reset`). It's noted as a P3 to do in `docs/SCHEMA.md`.
 
+### Demo checks (P1-BE2-3)
+`python -m app.seed --demo` loads 14 confirmed demo checks (ids `demo_…`) covering every level, plus before-and-after pairs for progress. Some are hand-edited and synthetic. See "Demo checks" in `docs/SCHEMA.md`. The score() results in `data/demo_checks/` came from the AI engineer (#16).
+
+- `validate_result(conn, result)` in `app/assessments.py` runs `save_assessment`'s checks without saving.
+- **For the AI engineer (P3-AI-1):** leave out `demo_` checks.
+
 ### Group plans (P0-BE2-3)
 `app/plans.py` turns one group's stats into a draft activity in Filipino. The activity is a template from `prompts/activities-fil.json` filled with the group's missed words. **qwen2.5:7b** in Ollama adds one example sentence (`prompts/sentence-fil.txt`, or `prompts/sentence-small-words-fil.txt` when every missed word is a function word like *ng* or *sa*). The sentence is checked and retried with up to 3 seeds; if it still fails, the plan is the template alone. See `docs/DECISIONS.md` for why, and for the license (Apache 2.0).
 
