@@ -1,5 +1,14 @@
 import { createContext, useContext } from 'react'
 
+const FIL_MONTHS = ['Ene', 'Peb', 'Mar', 'Abr', 'May', 'Hun', 'Hul', 'Ago', 'Set', 'Okt', 'Nob', 'Dis']
+const EN_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const shortDate = (iso: string, months: string[]) => `${months[Number(iso.slice(5, 7)) - 1]} ${Number(iso.slice(8, 10))}`
+
+/** Whole days between an ISO date (YYYY-MM-DD) and today. */
+export function daysSince(iso: string): number {
+  return Math.round((Date.parse(new Date().toISOString().slice(0, 10)) - Date.parse(iso)) / 86_400_000)
+}
+
 // All UI text lives here. Default is Filipino, with English where it's clearer for teachers.
 const fil = {
   appName: 'Basa at Sulat',
@@ -17,10 +26,9 @@ const fil = {
   statusDown: 'Hindi available',
 
   classTitle: 'Klase',
-  classSubtitle: 'Grade 2 · sample na klase',
   classCheck: 'Basahin',
   classPractice: 'Sanay',
-  classLastCheck: 'Huling check',
+  classLastCheck: 'Na-check',
   classNeverChecked: 'Wala pang check',
   classNeedsPractice: 'Kailangan ng practice',
 
@@ -108,8 +116,13 @@ const fil = {
   starsEarned: (n: number) => (n === 1 ? '1 star ang nakuha mo!' : `${n} star ang nakuha mo!`),
   creditsTitle: 'Mga larawan',
   creditsText: 'Lahat ng larawan, pati si Taw na tamaraw, ay orihinal na gawa ng team.',
-  learnersCount: (n: number) => `${n} learner`,
-  greeting: (h: number): string => (h < 12 ? 'Magandang umaga, Guro!' : h < 18 ? 'Magandang hapon, Guro!' : 'Magandang gabi, Guro!'),
+  greeting: (h: number, name = 'Guro'): string => `${h < 12 ? 'Magandang umaga' : h < 18 ? 'Magandang hapon' : 'Magandang gabi'}, ${name}!`,
+  classLine: (grade: number, section: string, n: number): string => `Grade ${grade} – ${section} · ${n} learner`,
+  relDay: (n: number, iso: string): string => (n <= 0 ? 'Ngayon' : n === 1 ? 'Kahapon' : n < 7 ? `${n} araw ang nakalipas` : shortDate(iso, FIL_MONTHS)),
+  teacherName: 'Pangalan mo (hal. Ma\'am Rose)',
+  sectionName: 'Seksyon (hal. Sampaguita)',
+  saveClass: 'I-save ang klase',
+  savedOk: 'Na-save ✓',
   cheersRight: ['Galing!', 'Ang husay!', 'Tama!', 'Sige pa!'],
   cheersRetry: ["Kaya mo 'yan!", 'Isa pa!', 'Subukan ulit'],
   sumChecked: 'Na-check ngayong linggo',
@@ -190,10 +203,9 @@ const en: Strings = {
   statusReady: 'Ready',
   statusDown: 'Unavailable',
   classTitle: 'Class',
-  classSubtitle: 'Grade 2 · sample class',
   classCheck: 'Check',
   classPractice: 'Practice',
-  classLastCheck: 'Last check',
+  classLastCheck: 'Checked',
   classNeverChecked: 'Not checked yet',
   classNeedsPractice: 'Needs practice',
   pickPassage: 'Choose a passage',
@@ -269,8 +281,13 @@ const en: Strings = {
   starsEarned: (n) => (n === 1 ? 'You earned 1 star!' : `You earned ${n} stars!`),
   creditsTitle: 'Illustrations',
   creditsText: 'All illustrations, including Taw the tamaraw, are original work by the team.',
-  learnersCount: (n) => `${n} learners`,
-  greeting: (h) => (h < 12 ? 'Good morning, Teacher!' : h < 18 ? 'Good afternoon, Teacher!' : 'Good evening, Teacher!'),
+  greeting: (h, name = 'Teacher') => `${h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'}, ${name}!`,
+  classLine: (grade, section, n) => `Grade ${grade} – ${section} · ${n} learners`,
+  relDay: (n, iso) => (n <= 0 ? 'Today' : n === 1 ? 'Yesterday' : n < 7 ? `${n} days ago` : shortDate(iso, EN_MONTHS)),
+  teacherName: "Your name (e.g. Ma'am Rose)",
+  sectionName: 'Section (e.g. Sampaguita)',
+  saveClass: 'Save class',
+  savedOk: 'Saved ✓',
   cheersRight: ['Great job!', 'Awesome!', 'Correct!', 'Keep going!'],
   cheersRetry: ['You can do it!', 'One more time!', 'Try again'],
   sumChecked: 'Checked this week',

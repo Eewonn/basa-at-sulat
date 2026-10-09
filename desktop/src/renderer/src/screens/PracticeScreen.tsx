@@ -81,7 +81,7 @@ function StonePath({ total, at }: { total: number; at: number }) {
 
 function Bubble({ text }: { text: string }) {
   return (
-    <p key={text} className="relative animate-pop rounded-tile bg-white px-4 py-2 text-center text-lg font-black text-navy shadow-soft">
+    <p key={text} className="relative animate-pop rounded-tile bg-white px-4 py-2 text-center font-hand text-2xl leading-tight text-navy shadow-soft">
       {text}
       <span className="absolute -bottom-2 left-1/2 size-4 -translate-x-1/2 rotate-45 bg-white" aria-hidden />
     </p>
@@ -309,7 +309,7 @@ export function PracticeScreen() {
 
       {step === 'reread' && (
         <>
-          <p className="mt-16 text-2xl font-black text-blue">{t.rereadTitle}</p>
+          <p className="mt-16 font-hand text-4xl text-blue">{t.rereadTitle}</p>
           <p className="max-w-4xl text-center text-5xl leading-snug font-black text-navy">
             {item.sentence.split(/\s+/).map((w, i) => {
               const hit = items.some((it) => w.replace(/[.,]/g, '') === it.word)
@@ -341,7 +341,7 @@ export function PracticeScreen() {
           </div>
           <Stamp size={190} className="relative z-20 -my-4" />
           <div className="relative z-20 text-center">
-            <p className="text-6xl font-black text-navy">{t.done}</p>
+            <p className="font-hand text-7xl text-navy">{t.done}</p>
             <p className="mt-3 flex items-center justify-center gap-2 text-2xl font-extrabold text-body">
               <Emoji name="glowingStar" size={40} /> {t.starsEarned(earned)}
             </p>

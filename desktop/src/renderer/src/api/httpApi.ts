@@ -49,6 +49,9 @@ export function createHttpApi(port: number): Api {
     deleteAllAudio: () => json('/audio', { method: 'DELETE' }),
     addLearner: (name) =>
       json('/learners', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ display_name: name }) }),
+    classSettings: () => json('/class/settings'),
+    saveClassSettings: (settings) =>
+      json('/class/settings', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) }),
     renameLearner: (id, name) =>
       json(`/learners/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ display_name: name }) })
   }

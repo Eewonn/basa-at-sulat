@@ -107,6 +107,12 @@ export interface Storage {
   data_dir: string
 }
 
+export interface ClassSettings {
+  teacher_name: string
+  section: string
+  grade: number
+}
+
 export interface Health {
   ok: boolean
   models: { aligner: string; ollama: string }
@@ -136,4 +142,6 @@ export interface Api {
   deleteAllAudio(): Promise<{ deleted: number }>
   addLearner(name: string): Promise<Learner>
   renameLearner(id: string, name: string): Promise<Learner>
+  classSettings(): Promise<ClassSettings>
+  saveClassSettings(settings: Partial<ClassSettings>): Promise<ClassSettings>
 }

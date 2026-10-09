@@ -96,7 +96,9 @@ Bright color-block cards, rounded type, a warm sidebar with a blue header and an
 - **Contrast rule (measured):** white text works at any size on blue (5.9:1), coral (4.8:1) and purple (5.5:1). On teal (4.5:1) keep white text bold and at least 20px. Small text goes on tints, using the `-ink` colors.
 - **Banig weave:** `banig` (sidebar header only) and `banig-light` (kid-mode background), never behind text. Kept tonal (one color, low opacity) so screens stay calm; multicolor stripes were tried and dropped as too busy. It's a generic woven-mat lattice, used across the Philippines. We deliberately don't use sacred IP textile motifs (e.g. T'nalak) without community consent.
 - **Filipino phrasing:** a time-based greeting ("Magandang umaga, Guro!"), and varied cheers in Sanay ("Galing!", "Ang husay!", "Kaya mo 'yan!", "Isa pa!"), with English equivalents.
-- **Type:** Nunito (rounded, bundled), weights 700–900 for headings. Scale: 14 / 16 / 20 / 28 / 40 / 56 / 120.
+- **Type:** Nunito (rounded, bundled), weights 700–900 for headings. Scale: 14 / 16 / 20 / 28 / 40 / 56 / 120. **Patrick Hand** (bundled) as marker lettering for kid-mode headings, Taw's speech bubbles, the stamp and the greeting only; passages and reading text always stay Nunito.
+- **Paper grain:** a barely visible noise texture on the page and sidebar (`paper` utility) so screens feel like paper, not glass.
+- **Real classroom details:** the greeting uses the teacher's name and the subtitle the section ("Grade 2 – Sampaguita"), both editable in Settings; dates read like a person says them ("Kahapon", "3 araw ang nakalipas") instead of ISO dates.
 - **Shape:** 20px radius on cards, 14px on tiles, pill buttons, a soft shadow plus a lift on hover.
 - **Illustrations:** our own SVG set (`components/Art.tsx`) in Taw's style: flat shapes, soft highlights, no outlines. Stock emoji were dropped because they made the app look generic. Lucide stays only for small utility glyphs (arrows, check, pause, volume).
 - **Classroom craft (signature elements, used sparingly):**

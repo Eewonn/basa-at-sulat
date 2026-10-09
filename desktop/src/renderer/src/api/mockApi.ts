@@ -1,4 +1,4 @@
-import type { Api, Assessment, Book, BookWord, Learner, LearnerStats, Passage, PracticeItem, RecentCheck, Word, WordLabel } from './types'
+import type { Api, Assessment, Book, BookWord, ClassSettings, Learner, LearnerStats, Passage, PracticeItem, RecentCheck, Word, WordLabel } from './types'
 
 // Sample data only: synthetic learners, team-written passages (the first two match data/passages/passages.json).
 const PASSAGES: Passage[] = [
@@ -188,6 +188,7 @@ const RECENT: RecentCheck[] = [
   { assessment_id: 'r_5', learner_id: 'l_05', display_name: 'Ramon', date: daysAgo(9), passage_title: "Ben's Red Kite", wcpm: 49 }
 ]
 let audioFiles = 7
+const CLASS: ClassSettings = { teacher_name: "Ma'am Rose", section: 'Sampaguita', grade: 2 }
 
 export const mockApi: Api = {
   mode: 'mock',
@@ -316,6 +317,15 @@ export const mockApi: Api = {
     LEARNERS.push(l)
     STATS[id] = { stars: 0, streak_days: 0, minutes_read: 0, wcpm_history: [], practicing: [], days_read: [] }
     return l
+  },
+  async classSettings() {
+    await sleep(100)
+    return { ...CLASS }
+  },
+  async saveClassSettings(settings) {
+    await sleep(200)
+    Object.assign(CLASS, settings)
+    return { ...CLASS }
   },
   async renameLearner(id, name) {
     await sleep(200)

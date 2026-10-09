@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "@fontsource-variable/nunito";
+@import "@fontsource/patrick-hand/400.css";
 
 /* Playful, BOOKR-inspired system with a Filipino palette (docs/FRONTEND.md §6).
    dagat blue, gumamela red, palay green, mangga yellow, banig tan.
@@ -28,6 +29,8 @@
   --color-kid: #fbf6ec;
 
   --font-sans: "Nunito Variable", "Nunito", Arial, sans-serif;
+  /* Marker lettering: kid-mode headings, Taw's bubbles, the stamp and the greeting only. Reading text stays Nunito. */
+  --font-hand: "Patrick Hand", "Nunito Variable", cursive;
 
   --radius-card: 20px;
   --radius-tile: 14px;
@@ -167,6 +170,10 @@
     linear-gradient(90deg, transparent 54px, #e58a9a 54px, #e58a9a 56px, transparent 56px),
     repeating-linear-gradient(180deg, transparent 0 39px, #9db4e8 39px 40px);
   background-position: 0 0, 0 22px;
+}
+/* Very faint paper grain so screens feel like paper, not glass. Low enough to stay invisible behind text. */
+@utility paper {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.12  0 0 0 0 0.16  0 0 0 0 0.35  0 0 0 0.045 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 /* Loading placeholder with a soft sweep instead of a blink. */
 @utility shimmer {

@@ -2,6 +2,9 @@
 
 Newest first. Each entry: what we decided, and why.
 
+## 2026-10-10: "Silid-aralan craft": make it look made for Filipino classrooms, not AI-made
+Stock emoji, a sparkles icon and dashboard stat cards made the app look generated. We replaced them with our own illustrations in Taw's style and borrowed real classroom objects: the teacher's violet "VG / Very Good!" stamp, manila-paper flashcards with ruled lines, a reading card with a stamp per day, marker lettering for kid headings, a faint paper grain, the teacher's name and section in the greeting, and natural dates. Each signature element appears in one or two places so screens stay calm.
+
 ## 2026-10-10: Playful, BOOKR-inspired look with a tamaraw mascot
 The whole app moved from the calm navy and cream look to bright color-block cards, rounded Nunito type and a BOOKR Class-style sidebar, because the app is used next to children and needs to feel friendly in the demo. Gamification is limited to stat cards (stars, days in a row, reading time) and story categories; badges and levels were left out to keep scope small. The mascot is an original tamaraw (a Philippine endemic animal) drawn as SVG; illustrations are Microsoft Fluent Emoji (MIT). The team deck still uses the old palette.
 

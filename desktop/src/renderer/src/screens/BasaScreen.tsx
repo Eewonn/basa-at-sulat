@@ -5,7 +5,7 @@ import { Mic } from 'lucide-react'
 import { api } from '@/api'
 import { Tamaraw } from '@/components/Tamaraw'
 import { Avatar, LevelChip } from '@/components/ui'
-import { useT } from '@/strings'
+import { daysSince, useT } from '@/strings'
 
 // The Basa tab: who still needs a check this week, and what was checked recently.
 export function BasaScreen() {
@@ -15,7 +15,6 @@ export function BasaScreen() {
   const { data: recent } = useQuery({ queryKey: ['recent'], queryFn: () => api.recentChecks() })
 
   const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10)
-  const today = new Date().toISOString().slice(0, 10)
   const indexed = learners?.map((l, i) => ({ l, i })) ?? []
   const due = indexed.filter(({ l }) => !l.last_check || l.last_check < weekAgo)
   const done = indexed.filter(({ l }) => l.last_check && l.last_check >= weekAgo)
@@ -26,7 +25,7 @@ export function BasaScreen() {
         <div className="flex items-center gap-5">
           <Tamaraw size={96} />
           <div>
-            <p className="text-lg font-extrabold text-coral-ink">{t.basaEyebrow}</p>
+            <p className="font-hand text-[28px] leading-tight text-coral-ink">{t.basaEyebrow}</p>
             <h1 className="text-[40px] leading-tight font-black text-navy">{t.navCheck}</h1>
           </div>
         </div>
@@ -45,7 +44,7 @@ export function BasaScreen() {
                   <div className="min-w-0 flex-1">
                     <p className="text-2xl font-black text-navy">{l.display_name}</p>
                     <p className="text-sm font-semibold text-muted">
-                      {l.last_check ? `${t.classLastCheck}: ${l.last_check}` : t.classNeverChecked}
+                      {l.last_check ? `${t.classLastCheck}: ${t.relDay(daysSince(l.last_check), l.last_check)}` : t.classNeverChecked}
                     </p>
                   </div>
                 </div>
@@ -75,7 +74,7 @@ export function BasaScreen() {
               <Avatar name={l.display_name} index={i} size={44} />
               <div className="min-w-0">
                 <p className="text-lg font-black text-navy">{l.display_name}</p>
-                <p className="text-xs font-semibold text-muted">{l.last_check}</p>
+                <p className="text-xs font-semibold text-muted">{l.last_check && t.relDay(daysSince(l.last_check), l.last_check)}</p>
               </div>
             </button>
           ))}
@@ -91,7 +90,7 @@ export function BasaScreen() {
                 <div className="min-w-0 flex-1">
                   <p className="font-extrabold text-navy">{r.display_name}</p>
                   <p className="truncate text-sm font-semibold text-muted">
-                    {r.date === today ? t.today : r.date} · {r.passage_title}
+                    {t.relDay(daysSince(r.date), r.date)} · {r.passage_title}
                   </p>
                 </div>
                 <span className="rounded-full bg-blue-soft px-3 py-1 text-sm font-black text-blue-dark tabular-nums">

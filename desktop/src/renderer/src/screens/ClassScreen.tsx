@@ -7,12 +7,13 @@ import { api } from '@/api'
 import { Art } from '@/components/Art'
 import { Emoji } from '@/components/Emoji'
 import { Avatar, LevelChip, SampleBadge, StatCard } from '@/components/ui'
-import { useT } from '@/strings'
+import { daysSince, useT } from '@/strings'
 
 export function ClassScreen() {
   const t = useT()
   const navigate = useNavigate()
   const { data: learners, isLoading } = useQuery({ queryKey: ['learners'], queryFn: () => api.learners() })
+  const { data: cls } = useQuery({ queryKey: ['classSettings'], queryFn: () => api.classSettings() })
 
   const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10)
   const checked = learners?.filter((l) => l.last_check && l.last_check >= weekAgo).length ?? 0
@@ -25,11 +26,10 @@ export function ClassScreen() {
     <div className="w-full max-w-[1680px] px-10 py-10">
       <header className="flex items-end justify-between">
         <div>
-          <p className="text-lg font-extrabold text-coral-ink">{t.greeting(new Date().getHours())}</p>
+          <p className="font-hand text-[28px] leading-tight text-coral-ink">{t.greeting(new Date().getHours(), cls?.teacher_name || undefined)}</p>
           <h1 className="text-[40px] leading-tight font-black text-navy">{t.classTitle}</h1>
           <p className="mt-1 font-semibold text-body">
-            {t.classSubtitle}
-            {learners && ` · ${t.learnersCount(learners.length)}`}
+            {cls && learners ? t.classLine(cls.grade, cls.section, learners.length) : '\u00a0'}
           </p>
         </div>
         {api.mode === 'mock' && <SampleBadge label={t.sampleData} />}
@@ -53,7 +53,7 @@ export function ClassScreen() {
               <div className="min-w-0 flex-1">
                 <p className="text-2xl font-black text-navy">{l.display_name}</p>
                 <p className="text-sm font-semibold text-muted">
-                  {l.last_check ? `${t.classLastCheck}: ${l.last_check}` : t.classNeverChecked}
+                  {l.last_check ? `${t.classLastCheck}: ${t.relDay(daysSince(l.last_check), l.last_check)}` : t.classNeverChecked}
                 </p>
               </div>
             </button>

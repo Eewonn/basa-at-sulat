@@ -46,6 +46,18 @@ export function SettingsScreen() {
   const [editing, setEditing] = useState<{ id: string; name: string } | null>(null)
   const { data: storage } = useQuery({ queryKey: ['storage'], queryFn: () => api.storage() })
   const { data: learners } = useQuery({ queryKey: ['learners'], queryFn: () => api.learners() })
+  const { data: cls } = useQuery({ queryKey: ['classSettings'], queryFn: () => api.classSettings() })
+  const [teacher, setTeacher] = useState<string | null>(null)
+  const [section, setSection] = useState<string | null>(null)
+  const saveClass = useMutation({
+    mutationFn: () => api.saveClassSettings({ teacher_name: (teacher ?? cls?.teacher_name ?? '').trim(), section: (section ?? cls?.section ?? '').trim() }),
+    onSuccess: () => {
+      setTeacher(null)
+      setSection(null)
+      toast(t.savedOk)
+      qc.invalidateQueries({ queryKey: ['classSettings'] })
+    }
+  })
 
   const wipe = useMutation({
     mutationFn: () => api.deleteAllAudio(),
@@ -115,6 +127,33 @@ export function SettingsScreen() {
         </Card>
 
         <Card index={3} title={t.secClass} icon={<Users className="size-5 text-blue" aria-hidden />}>
+          {cls && (
+            <form
+              className="mb-4 grid grid-cols-[1fr_1fr_auto] gap-2"
+              onSubmit={(e) => {
+                e.preventDefault()
+                saveClass.mutate()
+              }}
+            >
+              <input
+                aria-label={t.teacherName}
+                placeholder={t.teacherName}
+                className="rounded-tile bg-white px-4 py-2.5 font-bold text-navy ring-2 ring-line outline-none focus:ring-blue"
+                value={teacher ?? cls.teacher_name}
+                onChange={(e) => setTeacher(e.target.value)}
+              />
+              <input
+                aria-label={t.sectionName}
+                placeholder={t.sectionName}
+                className="rounded-tile bg-white px-4 py-2.5 font-bold text-navy ring-2 ring-line outline-none focus:ring-blue"
+                value={section ?? cls.section}
+                onChange={(e) => setSection(e.target.value)}
+              />
+              <button disabled={teacher === null && section === null} className="cursor-pointer rounded-full bg-blue px-5 font-extrabold text-white disabled:opacity-40">
+                {t.save}
+              </button>
+            </form>
+          )}
           <ul className="max-h-64 divide-y divide-line overflow-y-auto">
             {learners?.map((l, i) => (
               <li key={l.id} className="flex items-center gap-3 py-2">

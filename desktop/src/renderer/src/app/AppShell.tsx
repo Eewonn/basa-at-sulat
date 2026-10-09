@@ -51,7 +51,7 @@ export function AppShell() {
 
   return (
     <div className="flex h-full">
-      <aside className="flex w-64 shrink-0 flex-col overflow-y-auto bg-side">
+      <aside className="paper flex w-64 shrink-0 flex-col overflow-y-auto bg-side">
         <div className="relative h-28 shrink-0 bg-blue banig">
           {learner && (
             <button onClick={() => navigate('/')} aria-label={t.back} className="absolute top-5 left-5 cursor-pointer text-white">
@@ -72,7 +72,7 @@ export function AppShell() {
         </div>
         <div className="relative mt-20 text-center">
           {cheer ? (
-            <p key={cheer} className="mx-4 animate-pop rounded-tile bg-white px-3 py-2 text-lg font-black text-navy shadow-soft">
+            <p key={cheer} className="mx-4 animate-pop rounded-tile bg-white px-3 py-2 font-hand text-2xl text-navy shadow-soft">
               {cheer}
             </p>
           ) : (
@@ -106,7 +106,7 @@ export function AppShell() {
           <StatusPill />
         </div>
       </aside>
-      <main className="min-w-0 flex-1 overflow-y-auto bg-page">
+      <main className="paper min-w-0 flex-1 overflow-y-auto bg-page">
         <div key={pathname} className="h-full animate-page-in">
           <Outlet />
         </div>

@@ -75,6 +75,7 @@ These support the learner profile and story categories. Until the engine impleme
 - `GET /books` → `[{"id", "title", "language", "category", "text", "reader", "has_recording", "duration_sec"}]`; `GET /books/{id}` adds `words` timings; `POST /books` also takes `category` and `reader`, and its story becomes a passage
 - `GET /storage` → `{"audio_files", "audio_mb", "db_mb", "data_dir"}`; `DELETE /audio` deletes all children's recordings (book readings are kept) → `{"deleted"}`
 - `POST /learners` `{"display_name"}` and `PATCH /learners/{id}` `{"display_name"}` (Settings → Klase)
+- `GET /class/settings` → `{"teacher_name", "section", "grade"}` and `PATCH /class/settings` (greeting, Klase subtitle)
 
 ## Health
 - `GET /health` → `{"ok": true, "models": {"aligner": "loaded", "ollama": "up"}}`
