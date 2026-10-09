@@ -62,7 +62,7 @@ export interface Passage {
   language: string
   grade: number
   text: string
-  category?: Category // proposed; the engine doesn't store one yet
+  category?: Category | null
 }
 
 export interface RecentCheck {

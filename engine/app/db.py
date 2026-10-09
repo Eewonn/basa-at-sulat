@@ -35,6 +35,14 @@ def connect(path: Path | str | None = None) -> sqlite3.Connection:
     return conn
 
 
+def add_missing_columns(conn: sqlite3.Connection) -> None:
+    """Add columns newer than a database's schema. Safe to run on every start."""
+    columns = {row["name"] for row in conn.execute("PRAGMA table_info(passages)")}
+    if columns and "category" not in columns:
+        conn.execute("ALTER TABLE passages ADD COLUMN category TEXT")
+        conn.commit()
+
+
 def init_db(path: Path | str | None = None, reset: bool = False) -> Path:
     """Create a fresh database from schema.sql and return its path.
 

@@ -1,12 +1,13 @@
 import logging
 import os
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, closing
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.assess import router as assess_router
 from app.books import router as books_router
+from app.db import add_missing_columns, connect, get_db_path
 from app.plans import ollama_status
 from app.retention import delete_owed_audio
 from app.routes.assessments import router as assessments_router
@@ -21,6 +22,9 @@ log = logging.getLogger("engine")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if get_db_path().exists():
+        with closing(connect()) as conn:
+            add_missing_columns(conn)
     delete_owed_audio()
     # Opt-in: loading the model takes ~10 s and needs torch plus the weights.
     if os.environ.get("BASA_WARM_UP") == "1":

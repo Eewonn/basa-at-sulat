@@ -10,5 +10,5 @@ router = APIRouter(prefix="/passages", tags=["passages"])
 @router.get("")
 def list_passages(conn=Depends(get_conn)) -> list[dict]:
     """Every passage, by id."""
-    rows = conn.execute("SELECT id, title, language, grade, text FROM passages ORDER BY id").fetchall()
+    rows = conn.execute("SELECT id, title, language, grade, text, category FROM passages ORDER BY id").fetchall()
     return [dict(r) for r in rows]

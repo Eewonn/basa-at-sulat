@@ -83,7 +83,7 @@ A file that is already gone counts as deleted.
 - `GET /learners` → `[{"id", "display_name", "grade", "stars", "streak_days", "level", "latest_wcpm", "last_check", "needs_practice"}]`, by `id` (display names are synthetic or initials only)
   - `stars` and `streak_days` are the same counts as in `/learners/{id}/stats`.
   - The last four come from the learner's latest **confirmed** check (same "latest" as practice and `/class`): its `level`, its `wcpm`, its date (`YYYY-MM-DD`, in the laptop's time zone) and whether it has any `misread` or `skipped` word. They are left out for a learner with no confirmed check.
-- `GET /passages` → `[{"id", "title", "language", "grade", "text"}]`
+- `GET /passages` → `[{"id", "title", "language", "grade", "text", "category"}]`; `category` is one of `bukid`, `pamilya`, `hayop`, `kalikasan`, `paaralan`, or null
 
 ## Sulat: books
 - `GET /books` → `[{"id", "title", "language", "text"}]`, newest first, without word timings (`GET /books/{id}` has them). Every book has its model reading, because `POST /books` requires it.

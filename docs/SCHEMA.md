@@ -28,7 +28,7 @@ python -m pytest                  # runs the tests
 | Table | Key | What it holds |
 |---|---|---|
 | `learners` | `id` | Synthetic names or initials only, plus the grade |
-| `passages` | `id` | Basa reading passages (same shape as `data/passages/passages.json`) |
+| `passages` | `id` | Basa reading passages (same shape as `data/passages/passages.json`), with an optional `category` topic. Older databases get the column on the next engine start or seed |
 | `assessments` | `id` | One Basa check: learner, passage, duration, `wcpm`, `level`, `status`, audio path |
 | `word_results` | `(assessment_id, i)` | Per-word AI label, teacher's final label, score, timings |
 | `pauses` | `(assessment_id, before_word)` | Hesitations before a word |

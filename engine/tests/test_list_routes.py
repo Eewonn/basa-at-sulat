@@ -90,7 +90,7 @@ def test_passages_lists_the_seeded_texts():
     assert r.status_code == 200
     rows = r.json()
     assert {"fil_g2_01", "eng_g2_01"} <= {p["id"] for p in rows}
-    assert set(rows[0]) == {"id", "title", "language", "grade", "text"}
+    assert set(rows[0]) == {"id", "title", "language", "grade", "text", "category"}
 
 
 def test_books_is_empty_then_lists_newest_first(monkeypatch, tmp_path):
