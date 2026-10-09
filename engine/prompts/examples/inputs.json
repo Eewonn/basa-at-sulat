@@ -1,0 +1,23 @@
+[
+  {
+    "name": "struggling",
+    "level": "Low Emerging",
+    "learner_count": 4,
+    "common_missed_words": ["ng", "mga", "sa", "siya"],
+    "language": "fil"
+  },
+  {
+    "name": "middle",
+    "level": "Developing",
+    "learner_count": 5,
+    "common_missed_words": ["Nagtanim", "Tinulungan", "Pagkatapos."],
+    "language": "fil"
+  },
+  {
+    "name": "strong",
+    "level": "Grade Level Ready",
+    "learner_count": 3,
+    "common_missed_words": [],
+    "language": "fil"
+  }
+]

@@ -1,0 +1,25 @@
+Write ONE short, simple sentence in Filipino for young learners to read aloud.
+
+Use at least one of these small words, spelled exactly as given: $words
+
+Build the rest of the sentence ONLY from these words:
+bata, Ana, Ben, Nanay, Tatay, aso, pusa, ibon, bahay, paaralan, bakuran, mesa, aklat, bola, mangga, tinapay, gatas, tubig, kumain, uminom, naglaro, nagbasa, natulog, tumakbo, masaya, malaki, maliit
+
+Examples:
+Words: ng, sa
+Sentence: Kumain ng mangga ang bata sa bahay.
+
+Words: siya, mga
+Sentence: Masaya siya sa mga aso.
+
+Words: si, ang
+Sentence: Si Ben ang uminom ng gatas.
+
+Rules:
+- Do not use any word that is not in the lists above.
+- The sentence must be complete and make sense on its own.
+- Keep it under 10 words.
+- Reply with the sentence only: no label, no quotation marks, no explanation.
+
+Words: $words
+Sentence:

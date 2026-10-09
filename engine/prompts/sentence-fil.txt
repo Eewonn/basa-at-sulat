@@ -1,0 +1,25 @@
+Write ONE short, simple sentence in Filipino for young learners to read aloud.
+
+Use at least one of these words, spelled exactly as given: $words
+You do not have to use all of them. Use only the ones that fit in one natural sentence.
+
+Examples:
+Words: aso, tubig
+Sentence: Uminom ng tubig ang aso.
+
+Words: sa, ang, mga
+Sentence: Naglalaro ang mga bata sa bakuran.
+
+Words: kumain, kapatid, natulog
+Sentence: Kumain ng saging ang kapatid ko.
+
+Rules:
+- Use Filipino (Tagalog) words only. Never use English or Spanish words: write "parke", not "park"; "laruan", not "toy"; "tindahan", not "store" or "tienda".
+- Write about everyday things a child knows: family, home, school, animals, food.
+- Use only real, common words that a young child knows.
+- The sentence must be complete and make sense on its own.
+- Keep it under 12 words.
+- Reply with the sentence only: no label, no quotation marks, no explanation.
+
+Words: $words
+Sentence:

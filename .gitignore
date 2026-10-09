@@ -21,6 +21,7 @@ models/
 *.safetensors
 *.onnx
 eval/recordings/
+eval/out/
 engine/storage/
 *.wav
 *.webm

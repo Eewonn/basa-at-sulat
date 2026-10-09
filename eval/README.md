@@ -3,6 +3,16 @@
 **Owner:** AI engineer (everyone records) · **Tasks:** P0-ALL-1, P0-AI-1, P3-AI-1
 
 ## Recording the test set (P0-ALL-1)
+
+**Easiest: use the recorder.** It shows the passage with word numbers, asks which mistakes you'll plant, shows the exact script to read, records from the mic, and on "keep" saves the WAV in the right place and adds the right rows to `ground_truth.csv`, so nothing is typed by hand:
+
+```bash
+pip install -r eval/requirements-record.txt   # once; small, no torch
+python eval/record.py --reader KM             # your initials; Filipino passage fil_g2_01 by default
+```
+
+Mistakes are typed as `swap 4 pala`, `skip 12` or `insert 13 mabait` (one per line, Enter on an empty line when done; Enter straight away for a clean reading). If it picks the wrong microphone, run `python eval/record.py --list-devices` and add `--device <number>`. Recording by hand still works if you follow the rules below.
+
 - **Adults only.** Never record children.
 - About 10 readings per language: Filipino, English, and one regional language a teammate actually speaks.
 - Use passages from `data/passages/`. In each reading, plant 2–3 mistakes and vary the type:
@@ -28,5 +38,43 @@
 
 Clean readings get one row with `error_type` = `none`.
 
+**How to fill `word_index`:** split the passage text in `data/passages/passages.json` on spaces and count from 0, so in "Nagtanim si Lina ng palay sa bukid." the word `palay` is 4. Punctuation stays attached to its word (`bukid.`). For `swap` and `skip`, it's the passage word that was misread or left out.
+For `insert` (an extra word the reader added), use the index of the passage word the extra word was said *before*.
+`recording_id` must equal the file name (`fil_007` → `fil/fil_007.wav`), and `language` must match the folder. The test rejects a row that breaks these rules and names the row number.
+
+## Running the test (P0-AI-1)
+From the repo root, in the AI environment (`pip install -r ai/requirements-dev.txt`, see `ai/README.md`). The engine's environment alone is missing `soundfile` and torch:
+
+```bash
+python eval/run_eval.py            # scores every recording and writes eval/REPORT.md
+python eval/run_eval.py --reuse    # rebuilds the report from the last run without re-running the model
+python -m pytest eval              # checks the metric code itself
+```
+
+It reports precision, recall and F1 per language three ways: with the labels `score()` gives, with the best score cutoff, and with a cutoff chosen on half the recordings and tested on the other half. The go/no-go call uses the last one, because the best cutoff is tuned on the data it's measured on.
+Inserted words are counted but kept out of F1, since they have no passage word to flag. Recordings listed in the ground truth but missing a `.wav` are skipped and named in the report.
+
 ## The report (P0-AI-1, then P3-AI-1)
 `eval/REPORT.md` must show, per language: precision, recall and F1 for mistake detection, the reading-speed error versus a human scorer, and processing time per minute of audio on our CPU laptops. **Gate: F1 of 0.6 or better = go.**
+
+## Confirmation set (fresh readings, never tuned on)
+The thresholds in `ai/scoring.py` were tuned on the readings in `ground_truth.csv`. To check they hold up, new readings of passages the scoring has never seen (`fil_g2_02`, `fil_g2_03`) go in a **separate** file, `confirm_ground_truth.csv`, and nothing is tuned on them:
+
+```bash
+python eval/record.py --reader KM --passage fil_g2_02 --ground-truth eval/confirm_ground_truth.csv
+python eval/run_eval.py --ground-truth eval/confirm_ground_truth.csv --out eval/CONFIRM_REPORT.md --predictions eval/out/confirm_predictions.json
+```
+
+For this set the number that counts is the **"labels from `score()`" F1** (the thresholds fixed in advance), not the tuned or held-out rows. F1 of 0.6 or better confirms the go.
+
+## Demo seed export (for Backend 2)
+`--export-dir` also writes one JSON per scored recording: `recording_id`, `passage_id`, `duration_sec`, and `score()`'s `words` (i, text, label, score, start, end) and `pauses`. No audio, no reader initials, no machine timings.
+
+```bash
+python eval/run_eval.py --reuse --export-dir eval/out/demo_checks   # from the last run's saved scores
+```
+
+These are adult test readings: fine to display, **not** evidence of accuracy, and adult speed (about 80–155 WCPM) puts every check at the top level unless `duration_sec` is set synthetically.
+
+## Checking word timings by ear (P2-AI-1)
+`python eval/timing_check.py fil_001 fil_016 fil_020` writes one page per recording to `eval/out/timing_check/`. Each plays the reading with every word highlighted as it's spoken, and clicking a word plays only that word's clip. Use clean readings: `word_timings()` is for a fluent speaker's correct reading.

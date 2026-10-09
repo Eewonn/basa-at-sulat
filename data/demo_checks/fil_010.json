@@ -1,0 +1,192 @@
+{
+ "recording_id": "fil_010",
+ "passage_id": "fil_g2_01",
+ "duration_sec": 8.92,
+ "words": [
+  {
+   "i": 0,
+   "text": "Nagtanim",
+   "label": "matched",
+   "score": 1.0,
+   "start": 1.06,
+   "end": 1.46
+  },
+  {
+   "i": 1,
+   "text": "si",
+   "label": "matched",
+   "score": 1.0,
+   "start": 1.5,
+   "end": 1.6
+  },
+  {
+   "i": 2,
+   "text": "Lina",
+   "label": "matched",
+   "score": 1.0,
+   "start": 1.66,
+   "end": 1.88
+  },
+  {
+   "i": 3,
+   "text": "ng",
+   "label": "matched",
+   "score": 1.0,
+   "start": 1.94,
+   "end": 2.06
+  },
+  {
+   "i": 4,
+   "text": "palay",
+   "label": "matched",
+   "score": 1.0,
+   "start": 2.12,
+   "end": 2.36
+  },
+  {
+   "i": 5,
+   "text": "sa",
+   "label": "matched",
+   "score": 1.0,
+   "start": 2.4,
+   "end": 2.49
+  },
+  {
+   "i": 6,
+   "text": "bukid.",
+   "label": "matched",
+   "score": 0.95,
+   "start": 2.57,
+   "end": 2.89
+  },
+  {
+   "i": 7,
+   "text": "Masaya",
+   "label": "matched",
+   "score": 0.96,
+   "start": 3.05,
+   "end": 3.37
+  },
+  {
+   "i": 8,
+   "text": "siya.",
+   "label": "matched",
+   "score": 0.99,
+   "start": 3.47,
+   "end": 3.61
+  },
+  {
+   "i": 9,
+   "text": "Tinulungan",
+   "label": "matched",
+   "score": 0.26,
+   "start": 3.87,
+   "end": 4.49
+  },
+  {
+   "i": 10,
+   "text": "siya",
+   "label": "matched",
+   "score": 0.94,
+   "start": 4.49,
+   "end": 4.59
+  },
+  {
+   "i": 11,
+   "text": "ng",
+   "label": "matched",
+   "score": 1.0,
+   "start": 4.65,
+   "end": 4.77
+  },
+  {
+   "i": 12,
+   "text": "kanyang",
+   "label": "matched",
+   "score": 0.97,
+   "start": 4.81,
+   "end": 5.15
+  },
+  {
+   "i": 13,
+   "text": "lolo.",
+   "label": "matched",
+   "score": 1.0,
+   "start": 5.19,
+   "end": 5.45
+  },
+  {
+   "i": 14,
+   "text": "Pagkatapos,",
+   "label": "matched",
+   "score": 0.97,
+   "start": 5.85,
+   "end": 6.53
+  },
+  {
+   "i": 15,
+   "text": "kumain",
+   "label": "matched",
+   "score": 0.98,
+   "start": 6.71,
+   "end": 7.07
+  },
+  {
+   "i": 16,
+   "text": "sila",
+   "label": "matched",
+   "score": 1.0,
+   "start": 7.09,
+   "end": 7.27
+  },
+  {
+   "i": 17,
+   "text": "ng",
+   "label": "matched",
+   "score": 0.97,
+   "start": 7.35,
+   "end": 7.46
+  },
+  {
+   "i": 18,
+   "text": "mangga",
+   "label": "matched",
+   "score": 0.99,
+   "start": 7.48,
+   "end": 7.74
+  },
+  {
+   "i": 19,
+   "text": "sa",
+   "label": "matched",
+   "score": 1.0,
+   "start": 7.84,
+   "end": 7.92
+  },
+  {
+   "i": 20,
+   "text": "ilalim",
+   "label": "matched",
+   "score": 0.98,
+   "start": 8.0,
+   "end": 8.34
+  },
+  {
+   "i": 21,
+   "text": "ng",
+   "label": "matched",
+   "score": 1.0,
+   "start": 8.38,
+   "end": 8.5
+  },
+  {
+   "i": 22,
+   "text": "puno.",
+   "label": "matched",
+   "score": 1.0,
+   "start": 8.54,
+   "end": 8.82
+  }
+ ],
+ "pauses": []
+}
