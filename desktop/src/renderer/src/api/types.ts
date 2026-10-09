@@ -123,6 +123,33 @@ export interface Health {
 export interface PracticeItem {
   word: string
   sentence: string
+  // Where a fluent reading of this word is, for "Hear it": GET /books/{book_id}/clips/{word_index}. Both null when no book has the word.
+  book_id: string | null
+  word_index: number | null
+}
+
+// GET /learners/{id}/progress: the latest two confirmed checks on the same passage. Empty lists and nulls when there's no pair yet.
+export interface ProgressCheck {
+  assessment_id: string
+  passage_id: string
+  confirmed_at: string
+  wcpm: number | null
+  level: Level | null
+}
+
+export interface ProgressWord {
+  i: number
+  text: string
+  before: WordLabel | null
+  after: WordLabel | null
+}
+
+export interface Progress {
+  checks: ProgressCheck[] // [before, after]
+  words: ProgressWord[]
+  wcpm_before: number | null
+  wcpm_after: number | null
+  wcpm_change: number | null
 }
 
 export interface Api {
@@ -135,6 +162,8 @@ export interface Api {
   confirm(id: string): Promise<Assessment>
   learnerStats(learnerId: string): Promise<LearnerStats>
   practice(learnerId: string): Promise<PracticeItem[]>
+  clipUrl(bookId: string, wordIndex: number): string | null
+  progress(learnerId: string): Promise<Progress>
   checkWord(audio: Blob, word: string, learnerId: string): Promise<{ result: 'match' | 'no_match' }>
   recentChecks(): Promise<RecentCheck[]>
   books(): Promise<Book[]>

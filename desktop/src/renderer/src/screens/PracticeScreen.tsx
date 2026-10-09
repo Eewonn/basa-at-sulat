@@ -55,6 +55,8 @@ function HoldToExit({ onExit, label }: { onExit: () => void; label: string }) {
   )
 }
 
+const SESSION_WORDS = 5
+
 // Progress as stepping stones; a little Taw hops to the next stone after each word.
 function StonePath({ total, at }: { total: number; at: number }) {
   const stones = total + 1 // the words, plus the reread step
@@ -93,7 +95,9 @@ export function PracticeScreen() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const { learnerId = 'l_01' } = useParams()
-  const { data: items } = useQuery({ queryKey: ['practice', learnerId], queryFn: () => api.practice(learnerId), staleTime: 0, gcTime: 0 })
+  const { data: allItems } = useQuery({ queryKey: ['practice', learnerId], queryFn: () => api.practice(learnerId), staleTime: 0, gcTime: 0 })
+  // The engine returns every missed word (up to 18); a short session keeps a young reader going.
+  const items = allItems?.slice(0, SESSION_WORDS)
   const { data: stats } = useQuery({ queryKey: ['stats', learnerId], queryFn: () => api.learnerStats(learnerId) })
   const { data: learners } = useQuery({ queryKey: ['learners'], queryFn: () => api.learners() })
   const name = learners?.find((l) => l.id === learnerId)?.display_name ?? ''
@@ -152,6 +156,21 @@ export function PracticeScreen() {
   }, [step, earned, name, t])
 
   if (!items) return <div className="h-full bg-kid" />
+  // No confirmed check yet, so nothing to practise.
+  if (items.length === 0) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-6 bg-kid banig-light px-10">
+        <Bubble text={t.kidNoWords} />
+        <Tamaraw mood="happy" size={190} />
+        <button
+          onClick={() => navigate(`/learner/${learnerId}`)}
+          className="h-20 cursor-pointer rounded-full bg-blue px-16 text-[28px] font-black text-white shadow-lift transition hover:-translate-y-1"
+        >
+          {t.back}
+        </button>
+      </div>
+    )
+  }
   const item = items[Math.min(index, items.length - 1)]
 
   const flyStar = () => {
@@ -167,11 +186,23 @@ export function PracticeScreen() {
     }, 700)
   }
 
+  // The fluent speaker's reading of this word, cut from a Sulat book. Only offered when a book has the word.
+  const hasClip = item.book_id !== null && item.word_index !== null
   const hear = () => {
-    // Mockup: the real app plays the fluent speaker's clip from the Sulat recording.
-    sfx.pop()
+    if (item.book_id === null || item.word_index === null) return
+    const url = api.clipUrl(item.book_id, item.word_index)
     setPhase('hearing')
-    setTimeout(() => setPhase('ready'), 900)
+    if (!url) {
+      // Sample data has no recordings, so just show the button working.
+      sfx.pop()
+      setTimeout(() => setPhase('ready'), 900)
+      return
+    }
+    const audio = new Audio(url)
+    const done = () => setPhase('ready')
+    audio.onended = done
+    audio.onerror = done
+    audio.play().catch(done)
   }
 
   const say = async () => {
@@ -285,15 +316,17 @@ export function PracticeScreen() {
             </div>
           </div>
           <div className="flex gap-6">
-            <button
-              onClick={hear}
-              disabled={busy}
-              className={`flex h-32 w-64 cursor-pointer flex-col items-center justify-center gap-1 rounded-[28px] bg-blue text-[28px] font-black text-white shadow-lift transition hover:-translate-y-1 disabled:opacity-60 ${
-                phase === 'hearing' ? 'animate-pulse' : ''
-              }`}
-            >
-              <Emoji name="speaker" size={52} /> {t.hearIt}
-            </button>
+            {hasClip && (
+              <button
+                onClick={hear}
+                disabled={busy}
+                className={`flex h-32 w-64 cursor-pointer flex-col items-center justify-center gap-1 rounded-[28px] bg-blue text-[28px] font-black text-white shadow-lift transition hover:-translate-y-1 disabled:opacity-60 ${
+                  phase === 'hearing' ? 'animate-pulse' : ''
+                }`}
+              >
+                <Emoji name="speaker" size={52} /> {t.hearIt}
+              </button>
+            )}
             <button
               onClick={say}
               disabled={busy}

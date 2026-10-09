@@ -74,7 +74,7 @@ const STATS: Record<string, LearnerStats> = {
   l_02: { stars: 20, streak_days: 5, minutes_read: 41, practicing: ['Tinulungan'], wcpm_history: series([55, 60, 63, 66]), days_read: readDays(5, [7, 8, 11]) },
   l_03: { stars: 31, streak_days: 7, minutes_read: 64, practicing: [], wcpm_history: series([70, 74, 79, 82]), days_read: readDays(7, [8, 9, 10, 12, 13]) },
   l_04: { stars: 4, streak_days: 1, minutes_read: 9, practicing: ['Nagtanim', 'bukid', 'mangga'], wcpm_history: series([18, 22, 27]), days_read: readDays(1, [4, 10]) },
-  l_05: { stars: 9, streak_days: 2, minutes_read: 18, practicing: ['palay', 'Pagkatapos'], wcpm_history: series([38, 43, 49]), days_read: readDays(2, [9]) },
+  l_05: { stars: 9, streak_days: 2, minutes_read: 18, practicing: ['palay', 'Binati'], wcpm_history: series([38, 43, 49]), days_read: readDays(2, [9]) },
   l_06: { stars: 0, streak_days: 0, minutes_read: 0, practicing: [], wcpm_history: [], days_read: [] }
 }
 
@@ -156,6 +156,15 @@ function evenTimings(text: string, durationSec: number): BookWord[] {
   const words = text.split(/\s+/)
   const step = durationSec / words.length
   return words.map((w, i) => ({ i, text: w, start: +(i * step).toFixed(2), end: +((i + 0.9) * step).toFixed(2) }))
+}
+
+// Like the engine: the first recorded book that has the word, matched by text.
+function clipRef(word: string): Pick<PracticeItem, 'book_id' | 'word_index'> {
+  for (const b of BOOKS) {
+    const i = b.has_recording ? b.text.split(/\s+/).findIndex((w) => clean(w).toLowerCase() === word.toLowerCase()) : -1
+    if (i >= 0) return { book_id: b.id, word_index: i }
+  }
+  return { book_id: null, word_index: null }
 }
 
 function sampleBook(id: string, passageId: string, reader?: string): Book {
@@ -265,7 +274,37 @@ export const mockApi: Api = {
       : STATS[learnerId]?.practicing.length
         ? STATS[learnerId].practicing
         : buildAssessment(learnerId, PASSAGES[0]).words.filter((w) => w.label !== 'matched').map((w) => clean(w.text))
-    return words.map<PracticeItem>((word) => ({ word, sentence: sentenceFor(word) }))
+    return words.map<PracticeItem>((word) => ({ word, sentence: sentenceFor(word), ...clipRef(word) }))
+  },
+  // Sample books have no real recordings, so "Hear it" only animates in sample mode.
+  clipUrl: () => null,
+  async progress(learnerId) {
+    await sleep(200)
+    const history = STATS[learnerId]?.wcpm_history ?? []
+    // Paolo's two checks were on different stories, so he has no pair to compare yet.
+    if (history.length < 2 || learnerId === 'l_02') return { checks: [], words: [], wcpm_before: null, wcpm_after: null, wcpm_change: null }
+    const passage = PASSAGES[0]
+    const before = history.at(-2)!.wcpm
+    const after = history.at(-1)!.wcpm
+    const missedBefore = new Set(STATS[learnerId].practicing.map((w) => w.toLowerCase()))
+    const words = passage.text.split(/\s+/).map((text, i) => {
+      const w = clean(text).toLowerCase()
+      const firstMiss = missedBefore.delete(w)
+      const was: WordLabel = firstMiss || i === 4 ? 'misread' : i === 8 ? 'skipped' : 'matched'
+      // Most missed words are fixed on the second check; one stays missed, and one new slip shows the other direction.
+      const now: WordLabel = i === 8 ? 'skipped' : i === 14 ? 'misread' : 'matched'
+      return { i, text, before: was, after: now }
+    })
+    return {
+      checks: [
+        { assessment_id: `p_${learnerId}_1`, passage_id: passage.id, confirmed_at: `${daysAgo(12)}T09:10:00`, wcpm: before, level: levelFor(before) },
+        { assessment_id: `p_${learnerId}_2`, passage_id: passage.id, confirmed_at: `${daysAgo(2)}T09:25:00`, wcpm: after, level: levelFor(after) }
+      ],
+      words,
+      wcpm_before: before,
+      wcpm_after: after,
+      wcpm_change: after - before
+    }
   },
   async checkWord(_audio, _word, learnerId) {
     // Scripted for the mockup: the first try of a session misses, everything after matches

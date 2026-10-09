@@ -1,4 +1,4 @@
-import type { Api, Assessment, Book, BookWord } from './types'
+import type { Api, Assessment, Book, BookWord, PracticeItem } from './types'
 
 // The engine stores ISO 639 codes (fil, eng, ilo…), but the book editor takes the language's name.
 const LANGUAGE_CODES: Record<string, string> = {
@@ -56,8 +56,9 @@ export function createHttpApi(port: number): Api {
       }),
     confirm: (id) => json<Assessment>(`/assessments/${id}/confirm`, { method: 'POST' }),
     learnerStats: (learnerId) => json(`/learners/${learnerId}/stats`),
-    practice: async (learnerId) =>
-      (await json<{ items: { word: string; sentence: string }[] }>(`/learners/${learnerId}/practice`)).items,
+    practice: async (learnerId) => (await json<{ items: PracticeItem[] }>(`/learners/${learnerId}/practice`)).items,
+    clipUrl: (bookId, wordIndex) => `${base}/books/${bookId}/clips/${wordIndex}`,
+    progress: (learnerId) => json(`/learners/${learnerId}/progress`),
     checkWord: (audio, word, learnerId) =>
       json('/practice/check', { method: 'POST', body: form({ audio, word, learner_id: learnerId }) }),
     recentChecks: () => json('/assessments/recent'),

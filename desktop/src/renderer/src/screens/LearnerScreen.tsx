@@ -1,15 +1,16 @@
 import type { CSSProperties } from 'react'
+import type { Progress, WordLabel } from '@/api/types'
 import { useQuery } from '@tanstack/react-query'
 import { CountUp } from '@/components/CountUp'
 import { useNavigate, useParams } from 'react-router'
-import { Mic} from 'lucide-react'
+import { ArrowRight, Mic } from 'lucide-react'
 import { api } from '@/api'
 import { Art } from '@/components/Art'
 import { Emoji } from '@/components/Emoji'
 import { Sparkline } from '@/components/Sparkline'
 import { Tamaraw } from '@/components/Tamaraw'
 import { LevelChip, StatCard } from '@/components/ui'
-import { useT } from '@/strings'
+import { daysSince, useT } from '@/strings'
 
 const INK = '#6B3FA0'
 
@@ -56,6 +57,77 @@ function ReadingCard({ name, days, streak }: { name: string; days: string[]; str
   )
 }
 
+// The latest two confirmed checks on the same story, side by side, and the words whose result changed.
+function ProgressCard({ progress, passageTitle }: { progress?: Progress; passageTitle?: string }) {
+  const t = useT()
+  const label = (l: WordLabel | null) => (l === null ? '—' : { matched: t.labelMatched, misread: t.labelMisread, skipped: t.labelSkipped }[l])
+  const [before, after] = progress?.checks ?? []
+  const changed = progress?.words.filter((w) => w.before !== w.after) ?? []
+  const change = progress?.wcpm_change ?? null
+
+  return (
+    <section className="stagger mt-8 rounded-card bg-white p-6 shadow-soft ring-1 ring-line" style={{ '--i': 5 } as CSSProperties}>
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 className="text-xl font-extrabold text-navy">{t.progressTitle}</h2>
+        {before && passageTitle && <p className="text-sm font-bold text-muted">{t.progressStory(passageTitle)}</p>}
+      </div>
+      {!before || !after ? (
+        <p className="mt-3 font-semibold text-body">{t.progressEmpty}</p>
+      ) : (
+        <div className="mt-4 grid grid-cols-5 gap-8">
+          <div className="col-span-2 flex flex-col gap-3">
+            <div className="flex items-center gap-4">
+              {[before, after].map((c, i) => (
+                <div key={c.assessment_id} className="flex items-center gap-4">
+                  {i === 1 && <ArrowRight className="size-6 text-muted" aria-hidden />}
+                  <div>
+                    <p className="text-sm font-bold text-muted">{t.relDay(daysSince(c.confirmed_at.slice(0, 10)), c.confirmed_at.slice(0, 10))}</p>
+                    <p className={`text-[44px] leading-none font-black ${i === 1 ? 'text-navy' : 'text-muted'}`}>{c.wcpm ?? '—'}</p>
+                    <p className="text-xs font-bold text-muted">{t.wpm}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {change !== null && (
+              <span
+                className={`self-start rounded-full px-3 py-1 text-sm font-extrabold ${
+                  change > 0 ? 'bg-teal-soft text-teal-ink' : change < 0 ? 'bg-coral-soft text-coral-ink' : 'bg-side text-navy'
+                }`}
+              >
+                {t.progressDelta(change)}
+              </span>
+            )}
+          </div>
+          <div className="col-span-3">
+            <p className="text-sm font-extrabold tracking-wider text-muted uppercase">{t.progressWords}</p>
+            {changed.length ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {changed.map((w) => {
+                  const better = w.after === 'matched'
+                  const worse = w.before === 'matched'
+                  return (
+                    <span
+                      key={w.i}
+                      className={`flex flex-col rounded-tile px-3 py-2 ${better ? 'bg-teal-soft text-teal-ink' : worse ? 'bg-coral-soft text-coral-ink' : 'bg-side text-navy'}`}
+                    >
+                      <span className="text-lg font-black">{w.text}</span>
+                      <span className="text-xs font-bold">
+                        {label(w.before)} → {label(w.after)}
+                      </span>
+                    </span>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="mt-3 font-semibold text-body">{t.progressNoChange}</p>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
 // Mirrors the BOOKR profile: three color-block stat cards, then progress below.
 export function LearnerScreen() {
   const t = useT()
@@ -63,6 +135,8 @@ export function LearnerScreen() {
   const { learnerId = '' } = useParams()
   const { data: learners } = useQuery({ queryKey: ['learners'], queryFn: () => api.learners() })
   const { data: stats } = useQuery({ queryKey: ['stats', learnerId], queryFn: () => api.learnerStats(learnerId) })
+  const { data: progress } = useQuery({ queryKey: ['progress', learnerId], queryFn: () => api.progress(learnerId) })
+  const { data: passages } = useQuery({ queryKey: ['passages'], queryFn: () => api.passages() })
   const learner = learners?.find((l) => l.id === learnerId)
   const history = stats?.wcpm_history ?? []
   const latest = history.at(-1)?.wcpm
@@ -132,6 +206,8 @@ export function LearnerScreen() {
           </div>
         </section>
       </div>
+
+      <ProgressCard progress={progress} passageTitle={passages?.find((p) => p.id === progress?.checks[0]?.passage_id)?.title} />
     </div>
   )
 }
