@@ -1,7 +1,7 @@
 # Example 2: middle group
 
 ## Input
-- Level: Developing (provisional: names are checked against CRLA in P1-BE2-2)
+- Level: Developing
 - Learners: 5
 - Missed words: Nagtanim, Tinulungan, Pagkatapos
 - Language: fil
