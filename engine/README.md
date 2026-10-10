@@ -37,7 +37,7 @@ engine/
 **Run it**
 ```
 cd engine
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt -r ../ai/requirements.txt
 .venv/bin/pytest                      # needs ffmpeg and ffprobe installed
 .venv/bin/uvicorn app.main:app --port 8000
 ```
@@ -149,11 +149,17 @@ It writes nothing unless every word group gets a model sentence (here, unlike in
 - Clips play once backend-1's `GET /books/{id}/clips/{i}` (P2-BE1-2) lands; the references don't change.
 
 ## Update: one-command offline start (P3-BE1-1)
-Run from the repo root (on Windows use Git Bash or WSL):
+Run from the repo root. Full setup, including the one venv at `engine/.venv`, is in the root README ("Run it").
 ```
-python scripts/download_models.py     # once, with internet: the MMS aligner weights and the Ollama model
+# Linux, or Git Bash / WSL on Windows
+engine/.venv/bin/python scripts/download_models.py     # once, with internet: the MMS aligner weights and the Ollama model
 scripts/start.sh                      # every day, no internet needed
 scripts/start.sh --check              # only report what is ready or missing
+
+# Windows PowerShell (no bash): start.sh just runs check_setup.py, then launch.py
+engine\.venv\Scripts\python.exe scripts\download_models.py
+engine\.venv\Scripts\python.exe scripts\check_setup.py
+engine\.venv\Scripts\python.exe scripts\launch.py      # starts the engine with the Python that runs it
 ```
 - **`start.sh`** runs `scripts/check_setup.py` first. Missing required parts (ffmpeg, npm, Python packages, aligner weights, `desktop/node_modules`) stop the start with a fix command for each. A missing Ollama only warns, because group plans fall back to templates. Then `scripts/launch.py` creates and seeds the database (with the demo checks) if there isn't one, starts Ollama if it is installed and not running, starts the engine on a free port, runs the desktop app with `BASA_ENGINE_PORT`, and stops what it started when the app closes. It uses `engine/.venv` if present, else `python3`; set `BASA_PYTHON` to choose.
 - **`download_models.py`** skips anything already downloaded; `--check` only reports. The aligner needs `pip install -r engine/requirements.txt -r ai/requirements.txt` first. Ollama must be installed and running to pull its model (`qwen2.5:7b`).

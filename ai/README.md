@@ -43,14 +43,16 @@ Run the tests from `ai/`: `python -m pytest`. The model-backed tests skip if the
 **Fallback (P1-AI-2):** Whisper prompted with the passage, for Filipino and English only.
 
 ## Setup
+Use the project's one virtual environment, `engine/.venv`, the one the start script and the app run the engine with (full steps in the root README, "Run it"). From the repo root:
 ```bash
-python -m venv .venv
-.venv/Scripts/activate            # Windows (macOS/Linux: source .venv/bin/activate)
-pip install -r ai/requirements.txt       # to run the scorer (the engine needs this too)
+python -m venv engine/.venv
+engine\.venv\Scripts\activate       # Windows PowerShell (Linux: source engine/.venv/bin/activate)
+pip install -r engine/requirements.txt -r ai/requirements.txt   # the engine and the scorer
 pip install -r ai/requirements-dev.txt   # ...plus pytest, to run the ai/ and eval/ tests
+python scripts/download_models.py        # the MMS aligner weights (about 1.2 GB) into models/torch/ (git-ignored)
 python ai/smoke_test.py path/to/reading.wav "the passage text it reads"
 ```
-The first run downloads the MMS aligner (about 1.2 GB) into `models/torch/` (git-ignored).
+Until the weights are downloaded, `scripts/check_setup.py` reports the laptop as not ready and the start script won't start. Calling `ai` directly (the smoke test, `eval/`) also downloads them on first use.
 The `eval/` tests run in this same environment: they import `ai` and need `soundfile`, which `engine/requirements.txt` doesn't install.
 
 ## Rules

@@ -30,13 +30,13 @@ Sulat enables teachers to turn community stories into interactive read-along boo
 - **Electron** — Desktop interface for recording, reading assessments, class monitoring, practice activities, and read-along books.
 - **FastAPI** — Local backend that starts automatically with the application.
 - **Meta MMS** — CPU-based forced alignment for word-level assessment, audio synchronization, and individual word checks.
-- **Qwen 2.5 7B (Ollama)** — Local AI model for generating group learning activities.
+- **Qwen 2.5 7B (Ollama)** — Local AI model that writes an example sentence for each group's learning activity and drafts short Sulat stories for the teacher to edit.
 - **SQLite** — Local database for learner profiles, reading materials, assessment results, and storybooks.
 - **FFmpeg** — Audio processing and format conversion.
 
 All processing and storage happen on-device. No learner data or audio recordings are sent to external servers.
 
-**What requires internet?** Only the initial setup, which includes downloading the Meta MMS model (1.26 GB, automatically downloaded on first launch), installing Qwen 2.5 7B through Ollama (4.7 GB), and setting up the required Python and Node.js dependencies. Once installed, all features operate entirely offline, with no further internet connection required.
+**What requires internet?** Only the initial setup: installing the Python and Node.js dependencies, then running `scripts/download_models.py` once, which downloads the Meta MMS aligner (1.26 GB) and pulls Qwen 2.5 7B through Ollama (4.7 GB). The start script checks that the aligner is downloaded before it starts anything. Once installed, all features operate entirely offline, with no further internet connection required.
 
 **Hardware tested on:** Windows and Linux laptops, running entirely on the CPU (no GPU required).
 
@@ -50,7 +50,7 @@ All processing and storage happen on-device. No learner data or audio recordings
 
 **Models used:**
 - **Meta MMS forced aligner** (wav2vec 2.0, 315M parameters), loaded through `torchaudio.pipelines.MMS_FA` (torchaudio 2.8.0). It runs with int8 weights for scoring and timings and at full precision for single-word checks. It is not retrained. License: CC-BY-NC 4.0.
-- **Qwen 2.5 7B Instruct**, Ollama `qwen2.5:7b` (Q4_K_M GGUF, 4.7 GB). License: Apache 2.0.
+- **Qwen 2.5 7B Instruct**, Ollama `qwen2.5:7b` (Q4_K_M GGUF, 4.7 GB). It writes one example sentence for each group's draft activity plan (Filipino), and drafts a short Sulat story from a topic the teacher picks (Filipino or English). A story draft only fills the book editor for the teacher to review and edit; it becomes a book only after a fluent speaker records it. License: Apache 2.0.
 - We use no cloud AI models. Whisper and uroman were considered but not used.
 
 **Technologies and frameworks:**
@@ -63,8 +63,8 @@ All processing and storage happen on-device. No learner data or audio recordings
 **Existing code and assets:**
 - Pretrained MMS aligner weights (Meta AI) and Qwen 2.5 weights (Alibaba's Qwen team)
 - Open-source libraries: lucide-react icons, Radix UI primitives, and the Nunito and Patrick Hand fonts (through Fontsource)
-- Passages `fil_g2_01` and `eng_g2_01` were written by the team. `fil_g2_02` and `fil_g2_03` were drafted by Claude and checked by a native Filipino speaker on the team.
+- Passages (12): `fil_g2_01` and `eng_g2_01` were written by the team. `fil_g2_02` and `fil_g2_03` were drafted by Claude and checked by a native Filipino speaker on the team, for the aligner's confirmation test. `fil_g2_04` to `fil_g2_10` and `eng_g2_02` were drafted by Claude for the story library and have not yet been checked by a native speaker; they are not used in any accuracy test.
 - Seed learners are synthetic (made-up first names). Demo checks start from real scores on adult test readings, and some were relabelled by hand to show lower reading levels. They are for display only, not evidence of accuracy.
 - We used no children's recordings. The test audio is 23 Filipino readings by one adult team member with planted mistakes.
 
-**AI development tools:** Claude Code (Anthropic) as a coding assistant. Claude also drafted two of the test passages, which a team member then reviewed.
+**AI development tools:** Claude Code (Anthropic) as a coding assistant. Claude also drafted 10 of the 12 passages: two for the aligner's confirmation test, which a team member reviewed, and eight for the story library, which are still awaiting a native speaker's check.
