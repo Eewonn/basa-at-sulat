@@ -33,9 +33,58 @@ In a reading check **we already know the text**. So we only need to *line up* th
 desktop/ (Electron) ──HTTP──► engine/  (FastAPI, Python, started by the app)
  recorder, review,            ├─ ai/      MMS aligner + word scoring (PyTorch, CPU)
  Sanay, Sulat, class view     ├─ SQLite   learners, passages, results, books
-                              └─ Ollama   qwen2.5:7b for group plans
+                              └─ Ollama   qwen2.5:7b for group plans and story drafts
 Everything runs on one laptop. No internet after setup.
 ```
+
+## Run it
+
+Needs **Python 3.13** (torch 2.8 is pinned and was tested on 3.13, not 3.14), **Node.js 22+**, **ffmpeg** and, optionally, **Ollama**. Internet is needed only for the one-time setup.
+
+All Python packages go in **one virtual environment at `engine/.venv`**. The start script and the desktop app look for it there, and without it they use the system Python, which usually lacks torch. To use a Python somewhere else, set `BASA_PYTHON` to its path.
+
+### One-time setup (with internet)
+
+Install [Ollama](https://ollama.com) first if you want group plans and story drafts. Without it, plans fall back to templates and "draft a story" is unavailable; everything else works.
+
+**Windows (PowerShell),** from the repo root:
+```powershell
+winget install --id Gyan.FFmpeg     # then close and reopen the terminal
+python -m venv engine\.venv
+engine\.venv\Scripts\python.exe -m pip install -r engine\requirements.txt -r ai\requirements.txt
+npm --prefix desktop install
+engine\.venv\Scripts\python.exe scripts\download_models.py
+```
+
+**Linux,** from the repo root:
+```bash
+sudo apt install ffmpeg             # or your distribution's package manager
+python3 -m venv engine/.venv
+engine/.venv/bin/python -m pip install -r engine/requirements.txt -r ai/requirements.txt
+npm --prefix desktop install
+engine/.venv/bin/python scripts/download_models.py
+```
+
+`download_models.py` downloads the MMS aligner weights (1.26 GB, into `models/`) and pulls `qwen2.5:7b` (4.7 GB) if Ollama is running. Run it again any time: it skips what's already there. Until the aligner weights are downloaded, the setup check reports the laptop as not ready and the start script won't start.
+
+### Every day (no internet needed)
+
+**Windows (PowerShell):**
+```powershell
+engine\.venv\Scripts\python.exe scripts\check_setup.py    # report what's ready or missing; starts nothing
+engine\.venv\Scripts\python.exe scripts\launch.py         # start Ollama, the engine and the app
+```
+Run `launch.py` with the venv's Python as shown: it starts the engine with the same Python. (`scripts/start.sh` does both steps, but needs Git Bash or WSL; plain PowerShell has no `bash`.)
+
+**Linux** (or Git Bash on Windows):
+```bash
+scripts/start.sh --check            # report what's ready or missing; starts nothing
+scripts/start.sh                    # start Ollama, the engine and the app
+```
+
+On the first start the database is created with the synthetic learners, passages and demo checks. The aligner takes about 15 s to load, then the app opens. Closing the app stops the engine, and Ollama too if the start script started it. `npm --prefix desktop run dev` on its own also works: the app then starts the engine itself from `engine/.venv`.
+
+**For the tests,** also install `ai/requirements-dev.txt` into the same venv, then run `pytest` in each of `engine/`, `scripts/`, `ai/` and `eval/`.
 
 ## Repo layout
 
@@ -84,17 +133,20 @@ Phase 0 passed: the team chose **go** with the MMS aligner (see [docs/DECISIONS.
 | Model | What it does here | Exact version | License | Source |
 |---|---|---|---|---|
 | **Meta MMS forced aligner** (wav2vec 2.0, 315M parameters, trained on 31K hours in 1,130 languages) | Lines up a reading with the known text: word scores (Basa), word timings (Sulat), single-word checks (Sanay) | `torchaudio.pipelines.MMS_FA` in torchaudio 2.8.0; weights `ctc_alignment_mling_uroman/model.pt` (1.26 GB). We run it with int8 weights for scoring and timings, full precision for single-word checks; nothing is retrained | **CC-BY-NC 4.0 (non-commercial)** | Pratap et al., 2023, *Scaling Speech Technology to 1,000+ Languages* (Meta AI); weights from `dl.fbaipublicfiles.com` via torchaudio |
-| **Qwen 2.5 7B Instruct** (7.6B parameters) | Writes one example sentence for each group's draft activity plan | Ollama `qwen2.5:7b` (= `7b-instruct-q4_K_M`), GGUF Q4_K_M, 4.7 GB, digest `sha256:2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730` | **Apache 2.0** | Alibaba Cloud's Qwen team, via the Ollama library |
+| **Qwen 2.5 7B Instruct** (7.6B parameters) | Writes one example sentence for each group's draft activity plan (Filipino), and drafts a short Sulat story from a topic the teacher picks (Filipino or English). A draft only fills the book editor for the teacher to review and edit; it becomes a book, and a Basa passage, only after a fluent speaker records it | Ollama `qwen2.5:7b` (= `7b-instruct-q4_K_M`), GGUF Q4_K_M, 4.7 GB, digest `sha256:2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730` | **Apache 2.0** | Alibaba Cloud's Qwen team, via the Ollama library |
 
 **Not used:** Whisper (the fallback wasn't needed once the aligner passed the Phase 0 test; see [docs/DECISIONS.md](docs/DECISIONS.md)), uroman (passages are normalised by our own code in `ai/text.py`), and any cloud AI API.
 
 ### Internet
-Needed only once, to download the models: the MMS weights (1.26 GB, fetched on first start) and `qwen2.5:7b` (4.7 GB, `ollama pull qwen2.5:7b`), plus the Python and Node packages. After that, scoring, timings, word checks, group plans and storage all work offline.
+Needed only once, for setup: the MMS weights (1.26 GB) and `qwen2.5:7b` (4.7 GB), both downloaded once by `scripts/download_models.py` before the first start (the setup check refuses to start without the aligner weights), plus the Python and Node packages. After that, scoring, timings, word checks, group plans, story drafts and storage all work offline. See [Run it](#run-it).
 
 ### Tools
 PyTorch 2.8.0 and torchaudio 2.8.0, FastAPI, SQLite, ffmpeg, Ollama, Electron, React, Vite, TypeScript, Tailwind CSS. Development used Claude Code (Anthropic) as a coding assistant.
 
 ### Data
 - **No children's recordings are used.** The test recordings are 23 Filipino readings by one adult team member with planted mistakes (`eval/ground_truth.csv`, `eval/confirm_ground_truth.csv`); the audio stays off GitHub.
-- Passages `fil_g2_01` and `eng_g2_01` were written by the team. `fil_g2_02` and `fil_g2_03` were drafted by Claude (AI) and checked by a native Filipino-speaking team member, for the confirmation test.
+- **Passages** (`data/passages/passages.json`, 12 in all; each AI-drafted one says so in its `credit` field):
+  - `fil_g2_01` and `eng_g2_01` were written by the team.
+  - `fil_g2_02` and `fil_g2_03` were drafted by Claude (AI) and checked by a native Filipino-speaking team member, for the aligner's confirmation test.
+  - `fil_g2_04` to `fil_g2_10` and `eng_g2_02` were drafted by Claude (AI) for the story library and **have not yet been checked by a native speaker**. They are not part of any accuracy test.
 - Learners in the seed data are synthetic (made-up first names). The demo's saved checks start from real `score()` results on those adult test readings, slowed to a child's pace; some have words relabelled **by hand** to show lower levels and are synthetic, not model output (`data/demo_seed.json`). They're for display, never accuracy evidence.

@@ -11,7 +11,7 @@ From `engine/`:
 ```bash
 python -m venv .venv
 .venv/Scripts/activate            # Windows (macOS/Linux: source .venv/bin/activate)
-python -m pip install -r requirements.txt
+python -m pip install -r requirements.txt   # enough for the database; to run the app from this venv, also -r ../ai/requirements.txt (README, "Run it")
 
 python -m app.init_db             # creates engine/storage/basa.db
 python -m app.init_db --reset     # deletes it and starts fresh (all data is lost)
