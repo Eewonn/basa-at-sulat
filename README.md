@@ -3,7 +3,7 @@
 **Offline reading checks in any Philippine language, for teachers in IP schools.**
 Working name. *Pakinig* ("listen") is the leading alternative, see [docs/DECISIONS.md](docs/DECISIONS.md).
 
-Built for the **AppBuildersPH 2026 Local AI hackathon**: meaningful AI runs on the user's device, and the product stays useful when the cloud disappears.
+Built for the **AppBuildersPH 2026 Local AI hackathon**: meaningful AI runs on the user's device, and the product stays useful when the cloud disappears. For more details see the submission documentation: https://github.com/Eewonn/basa-at-sulat/blob/main/docs/SUBMISSION.md.
 
 ## What it does
 
