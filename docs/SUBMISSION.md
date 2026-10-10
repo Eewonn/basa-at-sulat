@@ -6,7 +6,11 @@ Answers for the submission form. Fill in the two video URLs before submitting.
 
 **Project Name:** Basa at Sulat
 
-**Short Description:** An offline reading-check tool for teachers in Indigenous Peoples' schools that works in any Philippine language written in Latin script. A child reads a known story aloud, and the laptop flags misread, skipped and hesitated words. It then gives words correct per minute and a reading level, and builds a practice set from the exact words the child missed. Teachers can also turn their own stories into read-along books, voiced by a fluent speaker from the community.
+**Short Description:** Basa at Sulat is an offline literacy tool that helps teachers in Indigenous Peoples' schools assess reading skills and create culturally relevant learning materials in Philippine languages.
+
+Basa assesses students as they read aloud, identifying misread, skipped, and hesitated words, measuring reading fluency, and generating personalized exercises based on their reading difficulties.
+
+Sulat enables teachers to turn community stories into interactive read-along books narrated by fluent local speakers, supporting literacy while preserving Indigenous languages and cultural heritage.
 
 **Team Members:**
 - Diaz, Mark Eron
@@ -22,17 +26,19 @@ Answers for the submission form. Fill in the two video URLs before submitting.
 
 **X / LinkedIn Video URL:** _TODO_
 
-**What runs locally?** Everything, on a single laptop (Windows or Linux):
-- The Electron desktop app (recorder, review, class view, practice and read-along player)
-- The FastAPI engine, which the app starts itself
-- The Meta MMS forced aligner on the CPU, for word scoring, read-along word timings and single-word checks
-- Qwen 2.5 7B through Ollama, for draft group activity plans
-- SQLite, for learners, passages, results and books
-- ffmpeg, for audio conversion
+**What runs locally?** All components operate offline on a single Windows or Linux laptop:
+- **Electron** — Desktop interface for recording, reading assessments, class monitoring, practice activities, and read-along books.
+- **FastAPI** — Local backend that starts automatically with the application.
+- **Meta MMS** — CPU-based forced alignment for word-level assessment, audio synchronization, and individual word checks.
+- **Qwen 2.5 7B (Ollama)** — Local AI model for generating group learning activities.
+- **SQLite** — Local database for learner profiles, reading materials, assessment results, and storybooks.
+- **FFmpeg** — Audio processing and format conversion.
 
-No recordings or learner data leave the device.
+All processing and storage happen on-device. No learner data or audio recordings are sent to external servers.
 
-**What requires internet?** Only one-time setup: downloading the MMS weights (1.26 GB, fetched automatically on first start), pulling `qwen2.5:7b` through Ollama (4.7 GB), and installing the Python and Node packages. After that, every feature works offline.
+**What requires internet?** Only the initial setup, which includes downloading the Meta MMS model (1.26 GB, automatically downloaded on first launch), installing Qwen 2.5 7B through Ollama (4.7 GB), and setting up the required Python and Node.js dependencies. Once installed, all features operate entirely offline, with no further internet connection required.
+
+**Hardware tested on:** Windows and Linux laptops, running entirely on the CPU (no GPU required).
 
 **Why does this product benefit from running AI locally?**
 1. **Children's voices stay in the classroom.** Every reading check is a recording of a minor. On-device scoring means no child's voice is uploaded, stored by a third party or used to train someone else's model.
